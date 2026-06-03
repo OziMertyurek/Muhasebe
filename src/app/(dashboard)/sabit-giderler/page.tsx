@@ -1,11 +1,5 @@
-import { PlaceholderPage } from "@/components/ui/placeholder-page";
+import { redirect } from "next/navigation";
 
 export default function SabitGiderlerPage() {
-  return (
-    <PlaceholderPage
-      title="Sabit Giderler"
-      description="Kira, abonelik ve düzenli ödemeler için aylık takip alanı."
-      primaryAction="Sabit gider ekle"
-    />
-  );
+  redirect("/recurring-expenses");
 }

@@ -40,7 +40,7 @@ export const navigationItems = [
   },
   {
     label: "Sabit Giderler",
-    href: "/sabit-giderler",
+    href: "/recurring-expenses",
     icon: RefreshCw,
   },
   {
