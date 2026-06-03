@@ -25,7 +25,7 @@ export const navigationItems = [
   },
   {
     label: "Faturalar",
-    href: "/faturalar",
+    href: "/invoices",
     icon: FileText,
   },
   {
