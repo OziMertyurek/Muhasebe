@@ -1,10 +1,11 @@
 import type { LucideIcon } from "lucide-react";
+import type { ReactNode } from "react";
 import { clsx } from "clsx";
 
 type StatCardProps = {
   title: string;
-  value: string;
-  description: string;
+  value: ReactNode;
+  description: ReactNode;
   tone: "positive" | "warning" | "neutral" | "danger";
   icon: LucideIcon;
 };
