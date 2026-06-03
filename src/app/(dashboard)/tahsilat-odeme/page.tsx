@@ -1,11 +1,5 @@
-import { PlaceholderPage } from "@/components/ui/placeholder-page";
+import { redirect } from "next/navigation";
 
 export default function TahsilatOdemePage() {
-  return (
-    <PlaceholderPage
-      title="Tahsilat / Ödeme"
-      description="Para aldım ve para ödedim hareketleri için sade kayıt ekranı."
-      primaryAction="Hareket ekle"
-    />
-  );
+  redirect("/payments");
 }

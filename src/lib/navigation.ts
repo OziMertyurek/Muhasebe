@@ -30,7 +30,7 @@ export const navigationItems = [
   },
   {
     label: "Tahsilat / Ödeme",
-    href: "/tahsilat-odeme",
+    href: "/payments",
     icon: Banknote,
   },
   {

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Prisma } from "@prisma/client";
 import { ArrowLeft, Building2, Pencil, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
+import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
 import { prisma } from "@/lib/prisma";
 
 type InvoiceDetailPageProps = {
@@ -29,6 +31,10 @@ export default async function InvoiceDetailPage({
     where: { id, deletedAt: null, company: { deletedAt: null } },
     include: {
       company: true,
+      payments: {
+        where: { deletedAt: null },
+        orderBy: { paymentDate: "desc" },
+      },
     },
   });
 
@@ -36,12 +42,13 @@ export default async function InvoiceDetailPage({
     notFound();
   }
 
-  const placeholders = [
-    "Fatura kalemleri",
-    "Tahsilat / ödeme hareketleri",
-    "Dosya ekleri",
-    "AI fatura okuma sonucu",
-  ];
+  const paidTotal = invoice.payments.reduce(
+    (total, payment) => total.plus(payment.amount),
+    new Prisma.Decimal(0),
+  );
+  const remainingTotal = invoice.totalAmount.minus(paidTotal);
+  const remainingDisplay = remainingTotal.lessThan(0) ? new Prisma.Decimal(0) : remainingTotal;
+  const placeholders = ["Fatura kalemleri", "Dosya ekleri", "AI fatura okuma sonucu"];
 
   return (
     <div className="space-y-6">
@@ -129,6 +136,11 @@ export default async function InvoiceDetailPage({
               label="Genel toplam"
               value={formatMoney(invoice.totalAmount, invoice.currency)}
             />
+            <InfoItem
+              label="Ödenen / tahsil edilen"
+              value={formatMoney(paidTotal, invoice.currency)}
+            />
+            <InfoItem label="Kalan tutar" value={formatMoney(remainingDisplay, invoice.currency)} />
           </div>
         </div>
 
@@ -140,7 +152,65 @@ export default async function InvoiceDetailPage({
         </div>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-[#16201b]">
+              Tahsilat / ödeme hareketleri
+            </h2>
+            <p className="mt-1 text-sm text-[#647067]">
+              Bu faturaya bağlanan aktif para hareketleri.
+            </p>
+          </div>
+          <Link
+            href="/payments/new"
+            className="inline-flex h-10 w-fit items-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            Hareket ekle
+          </Link>
+        </div>
+
+        {invoice.payments.length === 0 ? (
+          <p className="mt-5 rounded-md border border-dashed border-[#cfd8cf] p-4 text-sm text-[#647067]">
+            Bu faturaya bağlı tahsilat veya ödeme hareketi yok.
+          </p>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-[760px] w-full border-collapse text-left text-sm">
+              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+                <tr>
+                  <th className="px-4 py-3">Tarih</th>
+                  <th className="px-4 py-3">İşlem tipi</th>
+                  <th className="px-4 py-3">Tutar</th>
+                  <th className="px-4 py-3">Yöntem</th>
+                  <th className="px-4 py-3">Açıklama</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.payments.map((payment) => (
+                  <tr key={payment.id} className="border-t border-[#e5e9e5]">
+                    <td className="px-4 py-3 text-[#46534b]">{formatDate(payment.paymentDate)}</td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {paymentTypeLabels[payment.type]}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {formatMoney(payment.amount, payment.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {paymentMethodLabels[payment.method]}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {formatPlainValue(payment.description)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {placeholders.map((title) => (
           <div key={title} className="rounded-lg border border-dashed border-[#cfd8cf] bg-white p-5">
             <h3 className="text-sm font-semibold text-[#223028]">{title}</h3>
