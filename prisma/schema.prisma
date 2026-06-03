@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum ContactType {
+  CUSTOMER
+  SUPPLIER
+  BOTH
+}
+
+enum InvoiceDirection {
+  ISSUED_BY_US
+  RECEIVED_BY_US
+}
+
+enum InvoiceStatus {
+  DRAFT
+  UNPAID
+  PARTIAL
+  PAID
+  CANCELLED
+}
+
+enum PaymentDirection {
+  MONEY_IN
+  MONEY_OUT
+}
+
+enum ExpenseFrequency {
+  ONE_TIME
+  MONTHLY
+}
+
+enum FinancialAccountType {
+  CASH
+  BANK
+  CREDIT_CARD
+}
+
+enum ReminderType {
+  TAX
+  CREDIT_CARD
+  CONTRACT
+  INVOICE
+  OTHER
+}
+
+enum DataSource {
+  MANUAL
+  AI_OCR
+  IMPORT
+}
+
+model Contact {
+  id             String    @id @default(cuid())
+  name           String
+  type           ContactType
+  taxNumber      String?
+  taxOffice      String?
+  email          String?
+  phone          String?
+  address        String?
+  notes          String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  invoices       Invoice[]
+  payments       Payment[]
+}
+
+model Invoice {
+  id             String           @id @default(cuid())
+  direction      InvoiceDirection
+  status         InvoiceStatus    @default(UNPAID)
+  source         DataSource       @default(MANUAL)
+  contactId      String?
+  contact        Contact?         @relation(fields: [contactId], references: [id])
+  invoiceNumber  String?
+  issueDate      DateTime
+  dueDate        DateTime?
+  currency       String           @default("TRY")
+  subtotal       Decimal          @default(0)
+  taxTotal       Decimal          @default(0)
+  total          Decimal
+  paidTotal      Decimal          @default(0)
+  description    String?
+  rawText        String?
+  sourceFilePath String?
+  aiConfidence   Float?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  items          InvoiceItem[]
+  payments       Payment[]
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  quantity    Decimal  @default(1)
+  unitPrice   Decimal  @default(0)
+  taxRate     Decimal  @default(20)
+  total       Decimal
+}
+
+model Payment {
+  id                 String            @id @default(cuid())
+  direction          PaymentDirection
+  source             DataSource        @default(MANUAL)
+  contactId          String?
+  contact            Contact?          @relation(fields: [contactId], references: [id])
+  invoiceId          String?
+  invoice            Invoice?          @relation(fields: [invoiceId], references: [id])
+  financialAccountId String?
+  financialAccount   FinancialAccount? @relation(fields: [financialAccountId], references: [id])
+  date               DateTime
+  amount             Decimal
+  description        String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
+
+model Expense {
+  id          String           @id @default(cuid())
+  source      DataSource       @default(MANUAL)
+  frequency   ExpenseFrequency @default(ONE_TIME)
+  title       String
+  category    String?
+  dueDay      Int?
+  date        DateTime?
+  amount      Decimal
+  isActive    Boolean          @default(true)
+  notes       String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model FinancialAccount {
+  id                 String               @id @default(cuid())
+  type               FinancialAccountType
+  name               String
+  balance            Decimal              @default(0)
+  currency           String               @default("TRY")
+  statementDay       Int?
+  paymentDueDay      Int?
+  notes              String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  payments           Payment[]
+  importantDates     ImportantDate[]
+}
+
+model ImportantDate {
+  id                 String            @id @default(cuid())
+  type               ReminderType
+  title              String
+  date               DateTime
+  isCompleted        Boolean           @default(false)
+  notes              String?
+  financialAccountId String?
+  financialAccount   FinancialAccount? @relation(fields: [financialAccountId], references: [id])
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+}
