@@ -20,7 +20,7 @@ export const navigationItems = [
   },
   {
     label: "Cariler",
-    href: "/cariler",
+    href: "/companies",
     icon: Users,
   },
   {
