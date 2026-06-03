@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Building2, FileText, Landmark, Pencil, Trash2 } from "lucide-react";
 import { deletePaymentAction } from "@/app/(dashboard)/payments/actions";
+import { RelatedFilesCard } from "@/components/files/related-files-card";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
@@ -32,6 +33,17 @@ export default async function PaymentDetailPage({
       company: { select: { id: true, name: true } },
       invoice: { select: { id: true, invoiceNumber: true } },
       financialAccount: { select: { id: true, name: true } },
+      files: {
+        orderBy: { uploadedAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          originalFileName: true,
+          mimeType: true,
+          fileSize: true,
+          uploadedAt: true,
+        },
+      },
     },
   });
 
@@ -166,6 +178,11 @@ export default async function PaymentDetailPage({
           </p>
         </div>
       </section>
+
+      <RelatedFilesCard
+        files={payment.files}
+        addHref={`/files/new?relatedType=PAYMENT&paymentId=${payment.id}`}
+      />
     </div>
   );
 }

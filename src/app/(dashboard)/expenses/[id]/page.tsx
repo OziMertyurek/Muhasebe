@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Building2, Landmark, Pencil, Trash2 } from "lucide-react";
 import { deleteExpenseAction } from "@/app/(dashboard)/expenses/actions";
+import { RelatedFilesCard } from "@/components/files/related-files-card";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { expenseStatusLabels } from "@/lib/expense-utils";
 import { formatMoney } from "@/lib/invoice-utils";
@@ -32,6 +33,17 @@ export default async function ExpenseDetailPage({
       category: { select: { id: true, name: true } },
       company: { select: { id: true, name: true } },
       financialAccount: { select: { id: true, name: true } },
+      files: {
+        orderBy: { uploadedAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          originalFileName: true,
+          mimeType: true,
+          fileSize: true,
+          uploadedAt: true,
+        },
+      },
     },
   });
 
@@ -151,6 +163,11 @@ export default async function ExpenseDetailPage({
           </p>
         </div>
       </section>
+
+      <RelatedFilesCard
+        files={expense.files}
+        addHref={`/files/new?relatedType=EXPENSE&expenseId=${expense.id}`}
+      />
     </div>
   );
 }

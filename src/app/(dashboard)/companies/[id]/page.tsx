@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
+import { RelatedFilesCard } from "@/components/files/related-files-card";
 import {
   companyTypeLabels,
   formatDate,
@@ -16,6 +17,7 @@ import {
 import { expenseStatusLabels } from "@/lib/expense-utils";
 import { invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentTypeLabels } from "@/lib/payment-utils";
+import { prisma } from "@/lib/prisma";
 
 type CompanyDetailPageProps = {
   params: Promise<{ id: string }>;
@@ -69,7 +71,21 @@ export default async function CompanyDetailPage({
   searchParams,
 }: CompanyDetailPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const statement = await getCompanyStatement(id);
+  const [statement, files] = await Promise.all([
+    getCompanyStatement(id),
+    prisma.fileAttachment.findMany({
+      where: { companyId: id },
+      orderBy: { uploadedAt: "desc" },
+      take: 5,
+      select: {
+        id: true,
+        originalFileName: true,
+        mimeType: true,
+        fileSize: true,
+        uploadedAt: true,
+      },
+    }),
+  ]);
   const company = statement.company;
 
   if (!company) {
@@ -360,6 +376,11 @@ export default async function CompanyDetailPage({
           )}
         </div>
       </section>
+
+      <RelatedFilesCard
+        files={files}
+        addHref={`/files/new?relatedType=COMPANY&companyId=${company.id}`}
+      />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import {
   BarChart3,
   CalendarClock,
   CreditCard,
+  FolderArchive,
   FileText,
   Home,
   Landmark,
@@ -57,6 +58,11 @@ export const navigationItems = [
     label: "Önemli Tarihler",
     href: "/important-dates",
     icon: CalendarClock,
+  },
+  {
+    label: "Dosya Arşivi",
+    href: "/files",
+    icon: FolderArchive,
   },
   {
     label: "Raporlar",

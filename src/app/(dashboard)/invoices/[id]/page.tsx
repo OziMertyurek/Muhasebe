@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { ArrowLeft, Building2, Pencil, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
+import { RelatedFilesCard } from "@/components/files/related-files-card";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
@@ -35,6 +36,17 @@ export default async function InvoiceDetailPage({
         where: { deletedAt: null },
         orderBy: { paymentDate: "desc" },
       },
+      files: {
+        orderBy: { uploadedAt: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          originalFileName: true,
+          mimeType: true,
+          fileSize: true,
+          uploadedAt: true,
+        },
+      },
     },
   });
 
@@ -48,7 +60,7 @@ export default async function InvoiceDetailPage({
   );
   const remainingTotal = invoice.totalAmount.minus(paidTotal);
   const remainingDisplay = remainingTotal.lessThan(0) ? new Prisma.Decimal(0) : remainingTotal;
-  const placeholders = ["Fatura kalemleri", "Dosya ekleri", "AI fatura okuma sonucu"];
+  const placeholders = ["Fatura kalemleri", "AI fatura okuma sonucu"];
 
   return (
     <div className="space-y-6">
@@ -209,6 +221,11 @@ export default async function InvoiceDetailPage({
           </div>
         )}
       </section>
+
+      <RelatedFilesCard
+        files={invoice.files}
+        addHref={`/files/new?relatedType=INVOICE&invoiceId=${invoice.id}`}
+      />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {placeholders.map((title) => (
