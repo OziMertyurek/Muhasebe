@@ -6,163 +6,373 @@ datasource db {
   provider = "sqlite"
 }
 
-enum ContactType {
+enum CompanyType {
   CUSTOMER
   SUPPLIER
   BOTH
 }
 
-enum InvoiceDirection {
-  ISSUED_BY_US
-  RECEIVED_BY_US
+enum InvoiceType {
+  SALES
+  PURCHASE
 }
 
 enum InvoiceStatus {
-  DRAFT
   UNPAID
   PARTIAL
   PAID
   CANCELLED
 }
 
-enum PaymentDirection {
-  MONEY_IN
-  MONEY_OUT
+enum PaymentType {
+  COLLECTION
+  PAYMENT
 }
 
-enum ExpenseFrequency {
-  ONE_TIME
-  MONTHLY
+enum PaymentMethod {
+  BANK_TRANSFER
+  CASH
+  CREDIT_CARD
+  POS
+  OTHER
 }
 
 enum FinancialAccountType {
   CASH
   BANK
   CREDIT_CARD
-}
-
-enum ReminderType {
-  TAX
-  CREDIT_CARD
-  CONTRACT
-  INVOICE
+  POS
+  FOREIGN_CURRENCY
   OTHER
 }
 
-enum DataSource {
-  MANUAL
-  AI_OCR
-  IMPORT
+enum ExpenseStatus {
+  UNPAID
+  PAID
+  CANCELLED
 }
 
-model Contact {
-  id             String    @id @default(cuid())
-  name           String
-  type           ContactType
-  taxNumber      String?
-  taxOffice      String?
-  email          String?
-  phone          String?
-  address        String?
-  notes          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-  invoices       Invoice[]
-  payments       Payment[]
+enum ImportantDateCategory {
+  GENERAL
+  CREDIT_CARD
+  TAX
+  CONTRACT
+  VEHICLE
+  INVOICE
+  EXPENSE
+  COMPANY
+  OTHER
+}
+
+enum RepeatType {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum Priority {
+  LOW
+  NORMAL
+  HIGH
+}
+
+enum ReminderStatus {
+  PENDING
+  DONE
+  CANCELLED
+}
+
+enum FileRelatedType {
+  INVOICE
+  EXPENSE
+  COMPANY
+  PAYMENT
+  OTHER
+}
+
+enum AiExtractionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REVIEWED
+}
+
+model Company {
+  id              String          @id @default(cuid())
+  name            String
+  type            CompanyType
+  taxNumber       String?
+  taxOffice       String?
+  email           String?
+  phone           String?
+  country         String?
+  city            String?
+  address         String?
+  defaultCurrency String          @default("TRY")
+  riskLimit       Decimal?
+  paymentTermDays Int?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+  invoices        Invoice[]
+  payments        Payment[]
+  expenses        Expense[]
+  importantDates  ImportantDate[]
+  files           FileAttachment[]
+
+  @@index([name])
+  @@index([type])
+  @@index([deletedAt])
 }
 
 model Invoice {
   id             String           @id @default(cuid())
-  direction      InvoiceDirection
-  status         InvoiceStatus    @default(UNPAID)
-  source         DataSource       @default(MANUAL)
-  contactId      String?
-  contact        Contact?         @relation(fields: [contactId], references: [id])
-  invoiceNumber  String?
-  issueDate      DateTime
+  invoiceNumber  String
+  invoiceDate    DateTime
   dueDate        DateTime?
+  companyId      String
+  company        Company          @relation(fields: [companyId], references: [id])
+  type           InvoiceType
+  subtotal       Decimal
+  vatAmount      Decimal
+  discountAmount Decimal          @default(0)
+  totalAmount    Decimal
   currency       String           @default("TRY")
-  subtotal       Decimal          @default(0)
-  taxTotal       Decimal          @default(0)
-  total          Decimal
-  paidTotal      Decimal          @default(0)
-  description    String?
-  rawText        String?
-  sourceFilePath String?
-  aiConfidence   Float?
+  status         InvoiceStatus    @default(UNPAID)
+  notes          String?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
+  deletedAt      DateTime?
   items          InvoiceItem[]
   payments       Payment[]
+  files          FileAttachment[]
+  importantDates ImportantDate[]
+
+  @@index([companyId])
+  @@index([invoiceDate])
+  @@index([dueDate])
+  @@index([type])
+  @@index([status])
+  @@index([deletedAt])
 }
 
 model InvoiceItem {
-  id          String   @id @default(cuid())
-  invoiceId   String
-  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
-  description String
-  quantity    Decimal  @default(1)
-  unitPrice   Decimal  @default(0)
-  taxRate     Decimal  @default(20)
-  total       Decimal
+  id             String   @id @default(cuid())
+  invoiceId      String
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description    String
+  quantity       Decimal
+  unitPrice      Decimal
+  vatRate        Decimal
+  discountAmount Decimal  @default(0)
+  lineTotal      Decimal
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([invoiceId])
 }
 
 model Payment {
   id                 String            @id @default(cuid())
-  direction          PaymentDirection
-  source             DataSource        @default(MANUAL)
-  contactId          String?
-  contact            Contact?          @relation(fields: [contactId], references: [id])
+  companyId          String?
+  company            Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
   invoiceId          String?
-  invoice            Invoice?          @relation(fields: [invoiceId], references: [id])
+  invoice            Invoice?          @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   financialAccountId String?
-  financialAccount   FinancialAccount? @relation(fields: [financialAccountId], references: [id])
-  date               DateTime
+  financialAccount   FinancialAccount? @relation(fields: [financialAccountId], references: [id], onDelete: SetNull)
+  type               PaymentType
   amount             Decimal
+  currency           String            @default("TRY")
+  paymentDate        DateTime
+  method             PaymentMethod
   description        String?
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
-}
+  deletedAt          DateTime?
+  files              FileAttachment[]
 
-model Expense {
-  id          String           @id @default(cuid())
-  source      DataSource       @default(MANUAL)
-  frequency   ExpenseFrequency @default(ONE_TIME)
-  title       String
-  category    String?
-  dueDay      Int?
-  date        DateTime?
-  amount      Decimal
-  isActive    Boolean          @default(true)
-  notes       String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  @@index([companyId])
+  @@index([invoiceId])
+  @@index([financialAccountId])
+  @@index([paymentDate])
+  @@index([type])
+  @@index([deletedAt])
 }
 
 model FinancialAccount {
-  id                 String               @id @default(cuid())
-  type               FinancialAccountType
-  name               String
-  balance            Decimal              @default(0)
-  currency           String               @default("TRY")
-  statementDay       Int?
-  paymentDueDay      Int?
-  notes              String?
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  payments           Payment[]
+  id             String               @id @default(cuid())
+  name           String
+  type           FinancialAccountType
+  bankName       String?
+  iban           String?
+  currency       String               @default("TRY")
+  openingBalance Decimal              @default(0)
+  currentBalance Decimal              @default(0)
+  creditLimit    Decimal?
+  statementDay   Int?
+  dueDay         Int?
+  isActive       Boolean              @default(true)
+  notes          String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  deletedAt      DateTime?
+  payments       Payment[]
+  expenses       Expense[]
+  importantDates ImportantDate[]
+
+  @@index([type])
+  @@index([isActive])
+  @@index([deletedAt])
+}
+
+model ExpenseCategory {
+  id                String             @id @default(cuid())
+  name              String
+  description       String?
+  isActive          Boolean            @default(true)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  expenses          Expense[]
+  recurringExpenses RecurringExpense[]
+
+  @@unique([name])
+  @@index([isActive])
+}
+
+model Expense {
+  id                 String            @id @default(cuid())
+  title              String
+  categoryId         String?
+  category           ExpenseCategory?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  companyId          String?
+  company            Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  financialAccountId String?
+  financialAccount   FinancialAccount? @relation(fields: [financialAccountId], references: [id], onDelete: SetNull)
+  amount             Decimal
+  currency           String            @default("TRY")
+  expenseDate        DateTime
+  status             ExpenseStatus     @default(UNPAID)
+  paymentDate        DateTime?
+  description        String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  deletedAt          DateTime?
+  files              FileAttachment[]
   importantDates     ImportantDate[]
+
+  @@index([categoryId])
+  @@index([companyId])
+  @@index([financialAccountId])
+  @@index([expenseDate])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model RecurringExpense {
+  id          String           @id @default(cuid())
+  title       String
+  categoryId  String?
+  category    ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  amount      Decimal
+  currency    String           @default("TRY")
+  dayOfMonth  Int
+  startDate   DateTime
+  endDate     DateTime?
+  isActive    Boolean          @default(true)
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  deletedAt   DateTime?
+
+  @@index([categoryId])
+  @@index([dayOfMonth])
+  @@index([isActive])
+  @@index([deletedAt])
 }
 
 model ImportantDate {
-  id                 String            @id @default(cuid())
-  type               ReminderType
+  id                 String                @id @default(cuid())
   title              String
+  description        String?
+  category           ImportantDateCategory @default(GENERAL)
   date               DateTime
-  isCompleted        Boolean           @default(false)
-  notes              String?
+  time               String?
+  repeatType         RepeatType            @default(NONE)
+  reminderDaysBefore Int?
+  priority           Priority              @default(NORMAL)
+  status             ReminderStatus        @default(PENDING)
+  companyId          String?
+  company            Company?              @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  invoiceId          String?
+  invoice            Invoice?              @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  expenseId          String?
+  expense            Expense?              @relation(fields: [expenseId], references: [id], onDelete: SetNull)
   financialAccountId String?
-  financialAccount   FinancialAccount? @relation(fields: [financialAccountId], references: [id])
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  financialAccount   FinancialAccount?     @relation(fields: [financialAccountId], references: [id], onDelete: SetNull)
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  deletedAt          DateTime?
+
+  @@index([date])
+  @@index([category])
+  @@index([status])
+  @@index([companyId])
+  @@index([invoiceId])
+  @@index([expenseId])
+  @@index([financialAccountId])
+  @@index([deletedAt])
+}
+
+model FileAttachment {
+  id               String            @id @default(cuid())
+  originalFileName String
+  storedFileName   String
+  filePath         String
+  mimeType         String?
+  fileSize         Int?
+  relatedType      FileRelatedType
+  invoiceId        String?
+  invoice          Invoice?          @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  expenseId        String?
+  expense          Expense?          @relation(fields: [expenseId], references: [id], onDelete: SetNull)
+  companyId        String?
+  company          Company?          @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  paymentId        String?
+  payment          Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  uploadedAt       DateTime          @default(now())
+  aiExtractionJobs AiExtractionJob[]
+
+  @@index([relatedType])
+  @@index([invoiceId])
+  @@index([expenseId])
+  @@index([companyId])
+  @@index([paymentId])
+}
+
+model AiExtractionJob {
+  id                String             @id @default(cuid())
+  fileAttachmentId  String
+  fileAttachment    FileAttachment     @relation(fields: [fileAttachmentId], references: [id], onDelete: Cascade)
+  status            AiExtractionStatus @default(PENDING)
+  rawExtractedText  String?
+  extractedJson     String?
+  confidence        Float?
+  errorMessage      String?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([fileAttachmentId])
+  @@index([status])
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
