@@ -84,6 +84,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     include: {
       company: { select: { id: true, name: true } },
       invoice: { select: { id: true, invoiceNumber: true } },
+      financialAccount: { select: { id: true, name: true } },
     },
     orderBy: { paymentDate: "desc" },
   });
@@ -174,7 +175,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-[1080px] w-full border-collapse text-left text-sm">
+            <table className="min-w-[1180px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
@@ -184,6 +185,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                   <th className="px-4 py-3">Tutar</th>
                   <th className="px-4 py-3">Para birimi</th>
                   <th className="px-4 py-3">Ödeme yöntemi</th>
+                  <th className="px-4 py-3">Hesap</th>
                   <th className="px-4 py-3">Açıklama</th>
                   <th className="px-4 py-3 text-right">İşlemler</th>
                 </tr>
@@ -205,6 +207,9 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                     <td className="px-4 py-3 text-[#46534b]">{payment.currency}</td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {paymentMethodLabels[payment.method]}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {payment.financialAccount?.name ?? "-"}
                     </td>
                     <td className="max-w-56 truncate px-4 py-3 text-[#46534b]">
                       {formatPlainValue(payment.description)}

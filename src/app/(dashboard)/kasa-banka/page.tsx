@@ -1,11 +1,5 @@
-import { PlaceholderPage } from "@/components/ui/placeholder-page";
+import { redirect } from "next/navigation";
 
 export default function KasaBankaPage() {
-  return (
-    <PlaceholderPage
-      title="Kasa & Banka"
-      description="Kasa, banka ve diğer para hesapları için bakiye özeti."
-      primaryAction="Hesap ekle"
-    />
-  );
+  redirect("/accounts");
 }

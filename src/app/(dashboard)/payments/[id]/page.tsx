@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Building2, FileText, Pencil, Trash2 } from "lucide-react";
+import { ArrowLeft, Building2, FileText, Landmark, Pencil, Trash2 } from "lucide-react";
 import { deletePaymentAction } from "@/app/(dashboard)/payments/actions";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney } from "@/lib/invoice-utils";
@@ -136,6 +136,25 @@ export default async function PaymentDetailPage({
               </Link>
             ) : (
               <p className="text-sm text-[#647067]">İlgili fatura seçilmedi.</p>
+            )}
+
+            {payment.financialAccount ? (
+              <Link
+                href={`/accounts/${payment.financialAccount.id}`}
+                className="flex items-center gap-3 rounded-md border border-[#dce2dc] bg-[#fbfcfa] p-4 transition hover:border-[#aebdae]"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-md bg-[#eef5f1] text-[#1f6f54]">
+                  <Landmark className="h-5 w-5" />
+                </span>
+                <span>
+                  <span className="block text-sm font-semibold text-[#223028]">
+                    {payment.financialAccount.name}
+                  </span>
+                  <span className="mt-1 block text-sm text-[#647067]">Hesap detayına git</span>
+                </span>
+              </Link>
+            ) : (
+              <p className="text-sm text-[#647067]">Finansal hesap seçilmedi.</p>
             )}
           </div>
         </div>

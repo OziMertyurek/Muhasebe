@@ -45,12 +45,12 @@ export const navigationItems = [
   },
   {
     label: "Kasa & Banka",
-    href: "/kasa-banka",
+    href: "/accounts",
     icon: Landmark,
   },
   {
     label: "Kredi Kartları",
-    href: "/kredi-kartlari",
+    href: "/accounts?type=CREDIT_CARD",
     icon: CreditCard,
   },
   {
