@@ -55,7 +55,7 @@ export const navigationItems = [
   },
   {
     label: "Önemli Tarihler",
-    href: "/onemli-tarihler",
+    href: "/important-dates",
     icon: CalendarClock,
   },
   {
