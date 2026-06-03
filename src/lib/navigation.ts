@@ -35,7 +35,7 @@ export const navigationItems = [
   },
   {
     label: "Giderler",
-    href: "/giderler",
+    href: "/expenses",
     icon: Receipt,
   },
   {

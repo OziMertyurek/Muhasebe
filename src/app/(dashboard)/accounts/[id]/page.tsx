@@ -5,6 +5,7 @@ import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { deleteAccountAction } from "@/app/(dashboard)/accounts/actions";
 import { accountTypeLabels } from "@/lib/account-utils";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
+import { expenseStatusLabels } from "@/lib/expense-utils";
 import { formatMoney } from "@/lib/invoice-utils";
 import { paymentTypeLabels } from "@/lib/payment-utils";
 import { prisma } from "@/lib/prisma";
@@ -39,6 +40,14 @@ export default async function AccountDetailPage({
           invoice: { select: { id: true, invoiceNumber: true } },
         },
       },
+      expenses: {
+        where: { deletedAt: null },
+        orderBy: { expenseDate: "desc" },
+        include: {
+          category: { select: { id: true, name: true } },
+          company: { select: { id: true, name: true } },
+        },
+      },
     },
   });
 
@@ -53,6 +62,10 @@ export default async function AccountDetailPage({
     .filter((payment) => payment.type === "PAYMENT")
     .reduce((total, payment) => total.plus(payment.amount), new Prisma.Decimal(0));
   const estimatedBalance = account.openingBalance.plus(collectionTotal).minus(paymentTotal);
+  const expenseTotal = account.expenses.reduce(
+    (total, expense) => total.plus(expense.amount),
+    new Prisma.Decimal(0),
+  );
 
   return (
     <div className="space-y-6">
@@ -154,6 +167,7 @@ export default async function AccountDetailPage({
               label="Tahmini bakiye"
               value={formatMoney(estimatedBalance, account.currency)}
             />
+            <InfoItem label="Gider toplamı" value={formatMoney(expenseTotal, account.currency)} />
           </div>
         </div>
 
@@ -212,6 +226,56 @@ export default async function AccountDetailPage({
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatPlainValue(payment.description)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <h2 className="text-lg font-semibold text-[#16201b]">Bu hesaba bağlı giderler</h2>
+        {account.expenses.length === 0 ? (
+          <p className="mt-5 rounded-md border border-dashed border-[#cfd8cf] p-4 text-sm text-[#647067]">
+            Bu hesaba bağlı gider kaydı yok.
+          </p>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-[920px] w-full border-collapse text-left text-sm">
+              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+                <tr>
+                  <th className="px-4 py-3">Tarih</th>
+                  <th className="px-4 py-3">Gider</th>
+                  <th className="px-4 py-3">Kategori</th>
+                  <th className="px-4 py-3">Cari</th>
+                  <th className="px-4 py-3">Tutar</th>
+                  <th className="px-4 py-3">Durum</th>
+                </tr>
+              </thead>
+              <tbody>
+                {account.expenses.map((expense) => (
+                  <tr key={expense.id} className="border-t border-[#e5e9e5]">
+                    <td className="px-4 py-3 text-[#46534b]">{formatDate(expense.expenseDate)}</td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      <Link href={`/expenses/${expense.id}`}>{expense.title}</Link>
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {expense.category?.name ?? "-"}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {expense.company ? (
+                        <Link href={`/companies/${expense.company.id}`}>{expense.company.name}</Link>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {formatMoney(expense.amount, expense.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {expenseStatusLabels[expense.status]}
                     </td>
                   </tr>
                 ))}
