@@ -66,7 +66,7 @@ export const navigationItems = [
   },
   {
     label: "Raporlar",
-    href: "/raporlar",
+    href: "/reports",
     icon: BarChart3,
   },
   {
