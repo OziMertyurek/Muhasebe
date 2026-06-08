@@ -1,11 +1,5 @@
-import { PlaceholderPage } from "@/components/ui/placeholder-page";
+import { redirect } from "next/navigation";
 
 export default function AyarlarPage() {
-  return (
-    <PlaceholderPage
-      title="Ayarlar"
-      description="Şirket bilgileri, varsayılan para birimi ve yerel sistem tercihleri."
-      primaryAction="Ayar ekle"
-    />
-  );
+  redirect("/settings");
 }

@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink, Plus } from "lucide-react";
+import {
+  aiExtractionStatusLabels,
+  formatConfidence,
+  isAiExtractionSupportedFile,
+} from "@/lib/ai-extraction-utils";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import {
   fileRelatedTypeLabels,
@@ -35,8 +40,7 @@ export default async function FileDetailPage({ params }: FileDetailPageProps) {
       payment: { select: { id: true, description: true, paymentDate: true } },
       aiExtractionJobs: {
         orderBy: { createdAt: "desc" },
-        take: 5,
-        select: { id: true, status: true, createdAt: true },
+        select: { id: true, status: true, confidence: true, createdAt: true },
       },
     },
   });
@@ -48,6 +52,7 @@ export default async function FileDetailPage({ params }: FileDetailPageProps) {
   const relatedHref = getRelatedRecordHref(file);
   const isPreviewable =
     file.mimeType === "application/pdf" || Boolean(file.mimeType?.startsWith("image/"));
+  const supportsAiExtraction = isAiExtractionSupportedFile(file);
 
   return (
     <div className="space-y-6">
@@ -114,13 +119,54 @@ export default async function FileDetailPage({ params }: FileDetailPageProps) {
         </div>
 
         <div className="rounded-lg border border-dashed border-[#cfd8cf] bg-white p-5">
-          <h2 className="text-lg font-semibold text-[#16201b]">AI Analizi</h2>
-          <p className="mt-2 text-sm leading-6 text-[#647067]">
-            Bu alan ileride AI/OCR fatura okuma sistemi için kullanılacak.
-          </p>
-          <p className="mt-4 text-sm text-[#647067]">
-            Mevcut AI iş sayısı: {file.aiExtractionJobs.length}
-          </p>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-[#16201b]">AI Analizi</h2>
+              <p className="mt-2 text-sm leading-6 text-[#647067]">
+                Bu alan ileride AI/OCR fatura okuma sistemi için kullanılacak.
+              </p>
+            </div>
+            {supportsAiExtraction ? (
+              <Link
+                href={`/ai-extraction/new?fileAttachmentId=${file.id}`}
+                className="inline-flex h-10 w-fit shrink-0 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+              >
+                <Plus className="h-4 w-4" />
+                AI Analiz Kaydı Oluştur
+              </Link>
+            ) : null}
+          </div>
+
+          {!supportsAiExtraction ? (
+            <div className="mt-4 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-3 text-sm text-[#647067]">
+              Bu dosya türü veya ilişki tipi AI analiz hazırlığı için uygun değil.
+            </div>
+          ) : null}
+
+          <div className="mt-5 space-y-3">
+            {file.aiExtractionJobs.length === 0 ? (
+              <p className="text-sm text-[#647067]">Bu dosyaya bağlı AI analiz kaydı yok.</p>
+            ) : (
+              file.aiExtractionJobs.map((job) => (
+                <Link
+                  key={job.id}
+                  href={`/ai-extraction/${job.id}`}
+                  className="flex items-center justify-between gap-4 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-3 transition hover:border-[#aebdae]"
+                >
+                  <span>
+                    <span className="block text-sm font-semibold text-[#223028]">
+                      {aiExtractionStatusLabels[job.status]}
+                    </span>
+                    <span className="mt-1 block text-xs text-[#647067]">
+                      Oluşturulma: {formatDate(job.createdAt)} · Güven:{" "}
+                      {formatConfidence(job.confidence)}
+                    </span>
+                  </span>
+                  <ExternalLink className="h-4 w-4 text-[#647067]" />
+                </Link>
+              ))
+            )}
+          </div>
         </div>
       </section>
     </div>

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { PaymentMethod, PaymentType } from "@prisma/client";
-import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deletePaymentAction } from "@/app/(dashboard)/payments/actions";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
+import { buildExportHref } from "@/lib/export-utils";
 import { formatMoney } from "@/lib/invoice-utils";
 import {
   paymentMethodLabels,
@@ -57,6 +58,13 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   const dateToExclusive = dateTo
     ? new Date(dateTo.getFullYear(), dateTo.getMonth(), dateTo.getDate() + 1)
     : undefined;
+  const exportHref = buildExportHref("/exports/payments", {
+    q: query,
+    type,
+    method,
+    dateFrom: params?.dateFrom,
+    dateTo: params?.dateTo,
+  });
 
   const payments = await prisma.payment.findMany({
     where: {
@@ -101,13 +109,22 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             Faturaya bağlı ya da genel cari para hareketlerini takip edin.
           </p>
         </div>
-        <Link
-          href="/payments/new"
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
-        >
-          <Plus className="h-4 w-4" />
-          Yeni Hareket
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={exportHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            CSV Dışa Aktar
+          </Link>
+          <Link
+            href="/payments/new"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+          >
+            <Plus className="h-4 w-4" />
+            Yeni Hareket
+          </Link>
+        </div>
       </section>
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">

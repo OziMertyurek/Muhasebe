@@ -9,6 +9,7 @@ import {
   Landmark,
   Receipt,
   RefreshCw,
+  ScanText,
   Settings,
   Users,
 } from "lucide-react";
@@ -65,13 +66,18 @@ export const navigationItems = [
     icon: FolderArchive,
   },
   {
+    label: "AI Fatura Okuma",
+    href: "/ai-extraction",
+    icon: ScanText,
+  },
+  {
     label: "Raporlar",
     href: "/reports",
     icon: BarChart3,
   },
   {
     label: "Ayarlar",
-    href: "/ayarlar",
+    href: "/settings",
     icon: Settings,
   },
 ];

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { CompanyType } from "@prisma/client";
-import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
 import { companyTypeLabels, companyTypeOptions, formatDate } from "@/lib/company-utils";
+import { buildExportHref } from "@/lib/export-utils";
 import { prisma } from "@/lib/prisma";
 
 type CompaniesPageProps = {
@@ -24,6 +25,10 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
   const params = await searchParams;
   const query = params?.q?.trim() ?? "";
   const type = getCompanyType(params?.type);
+  const exportHref = buildExportHref("/exports/companies", {
+    q: query,
+    type,
+  });
   const companies = await prisma.company.findMany({
     where: {
       deletedAt: null,
@@ -45,13 +50,22 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             Müşteri ve tedarikçi firmaları tek merkezden yönetin.
           </p>
         </div>
-        <Link
-          href="/companies/new"
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
-        >
-          <Plus className="h-4 w-4" />
-          Yeni Cari
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={exportHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            CSV Dışa Aktar
+          </Link>
+          <Link
+            href="/companies/new"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+          >
+            <Plus className="h-4 w-4" />
+            Yeni Cari
+          </Link>
+        </div>
       </section>
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
