@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Search } from "lucide-react";
+import { ArrowLeft, Download, ExternalLink, Search } from "lucide-react";
 import { formatDate } from "@/lib/company-utils";
 import {
   formatStatementMoney,
@@ -10,6 +10,7 @@ import {
   getStatementType,
   parseStatementDateFilter,
 } from "@/lib/company-statement-utils";
+import { buildExportHref } from "@/lib/export-utils";
 
 type CompanyStatementPageProps = {
   params: Promise<{ id: string }>;
@@ -73,6 +74,21 @@ export default async function CompanyStatementPage({
     notFound();
   }
 
+  const exportHref = buildExportHref("/exports/company-statement", {
+    companyId: company.id,
+    dateFrom: query?.dateFrom,
+    dateTo: query?.dateTo,
+    type: movementType,
+    currency,
+  });
+  const pdfHref = buildExportHref("/exports/company-statement-pdf", {
+    companyId: company.id,
+    dateFrom: query?.dateFrom,
+    dateTo: query?.dateTo,
+    type: movementType,
+    currency,
+  });
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6 sm:flex-row sm:items-end sm:justify-between">
@@ -92,6 +108,22 @@ export default async function CompanyStatementPage({
             Fatura, tahsilat, ödeme ve gider hareketleri para birimi bazında ayrı bakiye ile
             listelenir.
           </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={exportHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            CSV Dışa Aktar
+          </Link>
+          <Link
+            href={pdfHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            PDF İndir
+          </Link>
         </div>
       </section>
 

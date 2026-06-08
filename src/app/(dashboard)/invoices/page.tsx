@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { InvoiceStatus, InvoiceType } from "@prisma/client";
-import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { formatDate } from "@/lib/company-utils";
+import { buildExportHref } from "@/lib/export-utils";
 import {
   formatMoney,
   invoiceStatusLabels,
@@ -41,6 +42,16 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
   const query = params?.q?.trim() ?? "";
   const type = getInvoiceType(params?.type);
   const status = getInvoiceStatus(params?.status);
+  const exportHref = buildExportHref("/exports/invoices", {
+    q: query,
+    type,
+    status,
+  });
+  const pdfHref = buildExportHref("/exports/invoices-pdf", {
+    q: query,
+    type,
+    status,
+  });
   const invoices = await prisma.invoice.findMany({
     where: {
       deletedAt: null,
@@ -76,13 +87,29 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
             Kestiğiniz ve size kesilen faturaları cari firmalarla birlikte takip edin.
           </p>
         </div>
-        <Link
-          href="/invoices/new"
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
-        >
-          <Plus className="h-4 w-4" />
-          Yeni Fatura
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={exportHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            CSV Dışa Aktar
+          </Link>
+          <Link
+            href={pdfHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            PDF İndir
+          </Link>
+          <Link
+            href="/invoices/new"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+          >
+            <Plus className="h-4 w-4" />
+            Yeni Fatura
+          </Link>
+        </div>
       </section>
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">

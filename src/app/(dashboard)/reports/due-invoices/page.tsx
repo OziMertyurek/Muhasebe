@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Search } from "lucide-react";
+import { Download, Search } from "lucide-react";
 import { formatDate } from "@/lib/company-utils";
+import { buildExportHref } from "@/lib/export-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { getDueInvoicesReport } from "@/lib/report-utils";
 
@@ -33,6 +34,12 @@ export default async function DueInvoicesPage({ searchParams }: DueInvoicesPageP
     currency: params?.currency,
     q: params?.q,
   });
+  const pdfHref = buildExportHref("/exports/due-invoices-pdf", {
+    view: params?.view,
+    invoiceType: params?.invoiceType,
+    currency: params?.currency,
+    q: params?.q,
+  });
 
   return (
     <div className="space-y-6">
@@ -46,12 +53,21 @@ export default async function DueInvoicesPage({ searchParams }: DueInvoicesPageP
             Geciken veya yakında vadesi gelecek ödenmemiş faturaları takip edin.
           </p>
         </div>
-        <Link
-          href="/reports"
-          className="inline-flex h-10 w-fit items-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-        >
-          Raporlara dön
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={pdfHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            PDF İndir
+          </Link>
+          <Link
+            href="/reports"
+            className="inline-flex h-10 w-fit items-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+          >
+            Raporlara dön
+          </Link>
+        </div>
       </section>
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">

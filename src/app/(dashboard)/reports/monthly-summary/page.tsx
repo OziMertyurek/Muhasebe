@@ -1,8 +1,16 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowDownLeft, ArrowUpRight, Banknote, ReceiptText, Search } from "lucide-react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Banknote,
+  Download,
+  ReceiptText,
+  Search,
+} from "lucide-react";
 import { formatDate } from "@/lib/company-utils";
 import { expenseStatusLabels } from "@/lib/expense-utils";
+import { buildExportHref, formatMonthForFileName } from "@/lib/export-utils";
 import { formatMoney, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
 import {
@@ -60,6 +68,12 @@ export default async function MonthlySummaryPage({
   const report = await getMonthlySummaryReport(params?.month, params?.year);
   const months = getReportMonths();
   const years = getReportYears();
+  const exportHref = buildExportHref("/exports/monthly-summary", {
+    month: formatMonthForFileName(report.range.year, report.range.month),
+  });
+  const pdfHref = buildExportHref("/exports/monthly-summary-pdf", {
+    month: formatMonthForFileName(report.range.year, report.range.month),
+  });
   const cards = [
     {
       title: "Satış faturaları",
@@ -105,12 +119,28 @@ export default async function MonthlySummaryPage({
             Seçilen ay için gelir, gider, tahsilat ve ödeme hareketlerini özetleyin.
           </p>
         </div>
-        <Link
-          href="/reports"
-          className="inline-flex h-10 w-fit items-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-        >
-          Raporlara dön
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href={exportHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            CSV Dışa Aktar
+          </Link>
+          <Link
+            href={pdfHref}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Download className="h-4 w-4" />
+            PDF İndir
+          </Link>
+          <Link
+            href="/reports"
+            className="inline-flex h-10 w-fit items-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+          >
+            Raporlara dön
+          </Link>
+        </div>
       </section>
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
