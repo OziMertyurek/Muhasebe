@@ -1,44 +1,159 @@
-# Muhasebe
+# Local Muhasebe Takip Sistemi
 
-Yerel çalışan şirket içi mini muhasebe, cari hesap ve fatura takip sistemi.
+Bu proje local çalışan, şirket içi kullanım için geliştirilmiş mini muhasebe, cari hesap, fatura, ödeme, gider ve raporlama sistemidir.
 
-## Kurulum
+Uygulama online yayınlanmak için değil, yerel bilgisayarda çalışmak için tasarlanmıştır. Kod private GitHub repository içinde tutulabilir; veritabanı ve yüklenen dosyalar ayrıca yedeklenmelidir.
+
+## Özellikler
+
+- Dashboard gerçek veri özetleri
+- Cari hesap yönetimi
+- Fatura yönetimi
+- Tahsilat / ödeme takibi
+- Kasa & banka / kredi kartı hesapları
+- Gider yönetimi
+- Sabit giderler
+- Önemli tarihler / hatırlatmalar
+- Cari ekstre
+- Dosya arşivi
+- AI/OCR fatura okuma hazırlık ekranı
+- Raporlar
+- CSV dışa aktarma
+- PDF dışa aktarma
+- Ayarlar ve yedekleme
+
+## Teknolojiler
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- Prisma
+- SQLite
+
+## Local Kurulum
+
+Önce bağımlılıkları kurun:
 
 ```bash
 npm install
 ```
 
-PowerShell'de `npm.ps1` çalıştırma kısıtı varsa aynı komutları `npm.cmd` ile çalıştırabilirsiniz.
+Prisma client üretin:
 
 ```bash
-npm.cmd install
+npm run prisma:generate
 ```
 
-## Geliştirme
+Local SQLite veritabanı için migration çalıştırın:
+
+```bash
+npx prisma migrate dev
+```
+
+Geliştirme sunucusunu başlatın:
 
 ```bash
 npm run dev
 ```
 
-PowerShell alternatifi:
+Uygulama varsayılan olarak `http://localhost:3000` adresinde açılır.
+
+PowerShell'de `npm.ps1` çalıştırma kısıtı varsa aynı komutları `npm.cmd` ile çalıştırabilirsiniz:
 
 ```bash
 npm.cmd run dev
 ```
 
-Uygulama varsayılan olarak `http://localhost:3000` adresinde açılır.
+## Ortam Değişkenleri
 
-## Prisma
+`.env.example` dosyasına göre local `.env` dosyası oluşturun.
 
-`.env.example` dosyasını temel alarak local `.env` oluşturun:
+Gerçek `.env` dosyasını GitHub'a göndermeyin. Bu dosya local ayarlar içindir.
+
+Örnek:
 
 ```bash
 DATABASE_URL="file:./prisma/dev.db"
 ```
 
-Ardından geliştirme veritabanı için:
+## Veritabanı
+
+Bu proje SQLite kullanır. Varsayılan local veritabanı dosyası `prisma/dev.db` yolundadır.
+
+- `prisma/dev.db` GitHub'a gönderilmez.
+- `prisma/dev.db-journal` GitHub'a gönderilmez.
+- `prisma/migrations/` klasörü commitlenir; migration geçmişi projede tutulur.
+- Veritabanı dosyasını düzenli olarak ayrıca yedeklemek gerekir.
+
+## Dosya Yüklemeleri
+
+Yüklenen dosyalar `storage/uploads/` klasöründe tutulur.
+
+- `storage/uploads/` GitHub'a gönderilmez.
+- Fatura PDF'leri, görseller ve ek dosyalar bu klasörde saklanır.
+- Bu klasör düzenli olarak ayrıca yedeklenmelidir.
+
+## Yedekleme
+
+GitHub sadece kodu saklar. Local veritabanı ve upload dosyaları GitHub'a gitmez.
+
+Yedeklenmesi gerekenler:
+
+- `prisma/dev.db`
+- `storage/uploads/`
+- Gerekirse `.env` içindeki local ayarlar
+
+Uygulama içinde `Ayarlar > Yedekleme` sayfasından SQLite veritabanı yedeği indirilebilir. Upload klasörü şimdilik manuel olarak kopyalanmalıdır.
+
+## Kullanım Akışı
+
+Önerilen temel kullanım sırası:
+
+1. Cari oluştur
+2. Fatura oluştur
+3. Tahsilat / ödeme gir
+4. Gider ekle
+5. Önemli tarih ekle
+6. Dashboard ve raporları kontrol et
+7. CSV/PDF export al
+8. Düzenli yedek al
+
+Daha detaylı kullanım rehberi için [docs/USAGE.md](docs/USAGE.md) dosyasına bakın.
+
+## AI/OCR Notu
+
+Gerçek AI/OCR entegrasyonu henüz bağlı değildir.
+
+Hazır olan altyapı:
+
+- `AiExtractionJob` modeli
+- AI Fatura Okuma hazırlık ekranı
+- Dosya Arşivi entegrasyonu
+- Dosya seçerek analiz kaydı oluşturma
+- Ham metin, JSON, güven skoru ve hata mesajı alanları
+
+İleride PDF/görsel faturadan veri çıkarma, çıkarılan alanları kullanıcıya onaylatma ve onaydan sonra `Invoice` kaydı oluşturma akışı eklenebilir.
+
+## Güvenlik Notları
+
+- Proje local kullanım içindir.
+- `.env`, `prisma/dev.db`, `storage/uploads/` GitHub'a gönderilmez.
+- Upload dosyaları ve DB yedekleri dikkatli saklanmalıdır.
+- DB yedeği indirilebilir; bu dosyayı güvenli bir yerde tutmak kullanıcının sorumluluğundadır.
+- Yüklenen dosyaların orijinal adları doğrudan dosya yolu olarak kullanılmaz.
+
+## Dokümanlar
+
+- [Kullanım Rehberi](docs/USAGE.md)
+- [Manuel Test Planı](docs/TEST_PLAN.md)
+- [Roadmap](docs/ROADMAP.md)
+
+## Sık Kullanılan Komutlar
 
 ```bash
+npm run dev
+npm run build
+npm run lint
 npm run prisma:generate
-npm run prisma:migrate -- --name init
+npx prisma migrate dev
 ```
