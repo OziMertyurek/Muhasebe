@@ -39,12 +39,15 @@ const activeModules = [
   "Önemli Tarihler",
   "Raporlar",
   "Dosya Arşivi",
+  "AI/OCR Fatura Okuma Hazırlık",
   "CSV Export",
+  "PDF Çıktı",
+  "Ayarlar / Yedekleme",
+  "Cari Ekstre",
 ];
 
 const plannedModules = [
-  "AI/OCR Fatura Okuma",
-  "PDF çıktı",
+  "Gerçek AI/OCR entegrasyonu",
   "Gelişmiş yedek geri yükleme",
 ];
 

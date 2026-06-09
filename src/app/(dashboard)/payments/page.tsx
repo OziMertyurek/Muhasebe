@@ -184,7 +184,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
         {payments.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-sm font-semibold text-[#223028]">
-              Henüz tahsilat veya ödeme eklenmedi
+              Henüz ödeme/tahsilat hareketi yok
             </p>
             <p className="mt-2 text-sm text-[#647067]">
               İlk para hareketinizi Yeni Hareket butonuyla ekleyebilirsiniz.

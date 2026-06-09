@@ -1,13 +1,46 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { clsx } from "clsx";
 import { navigationItems } from "@/lib/navigation";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  function isItemActive(href: string) {
+    const [path, queryString] = href.split("?");
+
+    if (path === "/") {
+      return pathname === "/";
+    }
+
+    const pathMatches = pathname === path || pathname.startsWith(`${path}/`);
+
+    if (!pathMatches) {
+      return false;
+    }
+
+    if (queryString) {
+      const expectedParams = new URLSearchParams(queryString);
+
+      for (const [key, value] of expectedParams.entries()) {
+        if (searchParams.get(key) !== value) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    if (path === "/accounts" && searchParams.get("type") === "CREDIT_CARD") {
+      return false;
+    }
+
+    return true;
+  }
 
   return (
     <aside className="border-b border-[#dce2dc] bg-white md:fixed md:inset-y-0 md:left-0 md:w-64 md:border-b-0 md:border-r">
@@ -22,11 +55,13 @@ export function Sidebar() {
           </div>
         </div>
 
-        <nav className="flex gap-1 overflow-x-auto px-3 py-3 md:flex-1 md:flex-col md:overflow-y-auto">
+        <nav
+          aria-label="Ana menü"
+          className="flex gap-1 overflow-x-auto px-3 py-3 md:flex-1 md:flex-col md:overflow-y-auto"
+        >
           {navigationItems.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            const isActive = isItemActive(item.href);
 
             return (
               <Link
@@ -41,6 +76,11 @@ export function Sidebar() {
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span className="whitespace-nowrap">{item.label}</span>
+                {"badge" in item ? (
+                  <span className="ml-auto rounded-sm border border-[#cfd8cf] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-normal text-[#607167]">
+                    {item.badge}
+                  </span>
+                ) : null}
               </Link>
             );
           })}

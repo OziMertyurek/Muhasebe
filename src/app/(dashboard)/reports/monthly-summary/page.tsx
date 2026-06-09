@@ -206,7 +206,7 @@ export default async function MonthlySummaryPage({
       <section className="grid gap-5 xl:grid-cols-2">
         <ReportList title="Son satış faturaları">
           {report.lists.salesInvoices.length === 0 ? (
-            <EmptyState text="Kayıt yok" />
+            <EmptyState text="Bu ay için satış faturası bulunamadı." />
           ) : (
             report.lists.salesInvoices.map((invoice) => (
               <Link
@@ -233,7 +233,7 @@ export default async function MonthlySummaryPage({
 
         <ReportList title="Son alış faturaları">
           {report.lists.purchaseInvoices.length === 0 ? (
-            <EmptyState text="Kayıt yok" />
+            <EmptyState text="Bu ay için alış faturası bulunamadı." />
           ) : (
             report.lists.purchaseInvoices.map((invoice) => (
               <Link
@@ -260,7 +260,7 @@ export default async function MonthlySummaryPage({
 
         <ReportList title="Son tahsilat / ödeme hareketleri">
           {report.lists.payments.length === 0 ? (
-            <EmptyState text="Kayıt yok" />
+            <EmptyState text="Bu ay için tahsilat / ödeme hareketi bulunamadı." />
           ) : (
             report.lists.payments.map((payment) => (
               <Link
@@ -291,7 +291,7 @@ export default async function MonthlySummaryPage({
 
         <ReportList title="Son giderler">
           {report.lists.expenses.length === 0 ? (
-            <EmptyState text="Kayıt yok" />
+            <EmptyState text="Bu ay için gider kaydı bulunamadı." />
           ) : (
             report.lists.expenses.map((expense) => (
               <Link
