@@ -13,6 +13,7 @@ import {
   getDatabaseBackupInfo,
   getUploadsBackupInfo,
 } from "@/lib/backup-utils";
+import { RestoreValidationForm } from "@/components/settings/restore-validation-form";
 
 const checklist = [
   "Tam yedeği indir",
@@ -179,16 +180,18 @@ export default function BackupSettingsPage() {
         </article>
       </section>
 
+      <RestoreValidationForm />
+
       <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fff4dc] text-[#765116]">
             <Archive className="h-5 w-5" />
           </span>
           <div>
-            <h2 className="text-lg font-semibold text-[#16201b]">Geri yükleme</h2>
+            <h2 className="text-lg font-semibold text-[#16201b]">Geri yükleme sonrası not</h2>
             <p className="mt-2 text-sm leading-6 text-[#647067]">
-              Geri yükleme özelliği sonraki aşamada eklenecek. Yanlış kullanım veri kaybına yol
-              açabileceği için dikkatli tasarlanacaktır.
+              İşlem sonrası server&apos;ı Ctrl+C ile durdurup `npm run dev` ile yeniden başlatın.
+              Böylece SQLite bağlantısı yeni veritabanı dosyasını temiz şekilde okur.
             </p>
           </div>
         </div>
