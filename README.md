@@ -4,6 +4,16 @@ Bu proje local çalışan, şirket içi kullanım için geliştirilmiş mini muh
 
 Uygulama online yayınlanmak için değil, yerel bilgisayarda çalışmak için tasarlanmıştır. Kod private GitHub repository içinde tutulabilir; veritabanı ve yüklenen dosyalar ayrıca yedeklenmelidir.
 
+## v1.0.0 Durumu
+
+Bu sürüm local kullanım için ilk stabil sürümdür.
+
+- Gerçek AI/OCR entegrasyonu henüz bağlı değildir.
+- Veriler local SQLite veritabanında saklanır.
+- Upload dosyaları `storage/uploads/` içinde saklanır.
+- GitHub sadece kodu saklar; veritabanı ve upload dosyalarını saklamaz.
+- Veritabanı ve upload dosyaları için düzenli yedek alınmalıdır.
+
 ## Özellikler
 
 - Dashboard gerçek veri özetleri
@@ -147,6 +157,8 @@ Hazır olan altyapı:
 - [Kullanım Rehberi](docs/USAGE.md)
 - [Manuel Test Planı](docs/TEST_PLAN.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Release Notes](docs/RELEASE_NOTES.md)
+- [İlk Kullanım](docs/FIRST_RUN.md)
 
 ## Sık Kullanılan Komutlar
 

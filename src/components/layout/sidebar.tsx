@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { clsx } from "clsx";
 import { navigationItems } from "@/lib/navigation";
+import { appInfo } from "@/lib/app-info";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -85,6 +86,11 @@ export function Sidebar() {
             );
           })}
         </nav>
+
+        <div className="hidden border-t border-[#dce2dc] px-5 py-4 text-xs text-[#647067] md:block">
+          <p className="font-semibold text-[#16201b]">v{appInfo.version}</p>
+          <p>{appInfo.mode} kullanım</p>
+        </div>
       </div>
     </aside>
   );

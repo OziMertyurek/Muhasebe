@@ -7,6 +7,7 @@ import {
   Info,
   Monitor,
 } from "lucide-react";
+import { appInfo } from "@/lib/app-info";
 
 const settingCards = [
   {
@@ -104,10 +105,11 @@ export default function SettingsPage() {
           </span>
           <div>
             <h2 className="text-lg font-semibold text-[#16201b]">Uygulama bilgileri</h2>
-            <div className="mt-4 grid gap-3 text-sm text-[#46534b] md:grid-cols-3">
-              <InfoLine label="Uygulama adı" value="Muhasebe" />
-              <InfoLine label="Çalışma modu" value="Local bilgisayar" />
-              <InfoLine label="Veritabanı tipi" value="SQLite" />
+            <div className="mt-4 grid gap-3 text-sm text-[#46534b] md:grid-cols-4">
+              <InfoLine label="Uygulama adı" value={appInfo.appName} />
+              <InfoLine label="Sürüm" value={`v${appInfo.version}`} />
+              <InfoLine label="Çalışma modu" value={`${appInfo.mode} kullanım`} />
+              <InfoLine label="Veritabanı tipi" value={appInfo.database} />
             </div>
           </div>
         </div>
