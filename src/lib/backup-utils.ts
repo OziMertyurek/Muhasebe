@@ -1,5 +1,6 @@
 import { existsSync, statSync } from "node:fs";
 import { basename, join } from "node:path";
+import { appInfo } from "@/lib/app-info";
 
 export function getDatabaseBackupInfo() {
   const databasePath = join(process.cwd(), "prisma", "dev.db");
@@ -33,14 +34,40 @@ export function getUploadsBackupInfo() {
   };
 }
 
-export function formatBackupFileName(date = new Date()) {
+function formatDatePart(date: Date) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   const hours = String(date.getHours()).padStart(2, "0");
   const minutes = String(date.getMinutes()).padStart(2, "0");
 
+  return { year, month, day, hours, minutes };
+}
+
+export function formatBackupFileName(date = new Date()) {
+  const { year, month, day, hours, minutes } = formatDatePart(date);
+
   return `accounting-backup-${year}-${month}-${day}-${hours}-${minutes}.db`;
+}
+
+export function formatFullBackupFileName(date = new Date()) {
+  const { year, month, day, hours, minutes } = formatDatePart(date);
+
+  return `muhasebe-yedek-${year}-${month}-${day}-${hours}-${minutes}.zip`;
+}
+
+export function createBackupMetadata(date = new Date(), uploadsExists = false) {
+  return {
+    appName: appInfo.appName,
+    version: appInfo.version,
+    mode: appInfo.mode.toLocaleLowerCase("tr-TR"),
+    database: appInfo.database,
+    backupDate: date.toISOString(),
+    includes: ["database", "uploads"],
+    note: uploadsExists
+      ? "Bu yedek local veritabanı ve upload dosyalarını içerir."
+      : "Bu yedek local veritabanını içerir. Upload klasörü bulunamadığı için boş olarak eklenmiştir.",
+  };
 }
 
 export function formatFileSize(bytes: number | null) {
