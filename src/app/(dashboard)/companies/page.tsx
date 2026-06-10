@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CompanyType } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
+import { EmptyState } from "@/components/ui/empty-state";
 import { companyTypeLabels, companyTypeOptions, formatDate } from "@/lib/company-utils";
 import { buildExportHref } from "@/lib/export-utils";
 import { prisma } from "@/lib/prisma";
@@ -99,12 +100,12 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {companies.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">Henüz cari eklenmedi</p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk müşteri veya tedarikçi kaydınızı Yeni Cari butonuyla ekleyebilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz cari eklenmedi"
+            description="İlk müşteri veya tedarikçi kaydınızı Yeni Cari butonuyla ekleyebilirsiniz."
+            actionHref="/companies/new"
+            actionLabel="Yeni Cari"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">

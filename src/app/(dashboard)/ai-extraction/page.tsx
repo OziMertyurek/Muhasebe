@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { AiExtractionStatus, FileRelatedType } from "@prisma/client";
 import { Eye, FileSearch, Pencil, Plus, Search } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import {
   aiExtractionRelatedTypeLabels,
   aiExtractionRelatedTypeOptions,
@@ -34,6 +36,22 @@ function getRelatedType(value?: string) {
   }
 
   return undefined;
+}
+
+function getAiStatusTone(status: AiExtractionStatus) {
+  if (status === "COMPLETED" || status === "REVIEWED") {
+    return "positive" as const;
+  }
+
+  if (status === "FAILED") {
+    return "danger" as const;
+  }
+
+  if (status === "PROCESSING") {
+    return "warning" as const;
+  }
+
+  return "neutral" as const;
 }
 
 export default async function AiExtractionPage({ searchParams }: AiExtractionPageProps) {
@@ -126,15 +144,13 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {jobs.length === 0 ? (
-          <div className="p-8 text-center">
-            <FileSearch className="mx-auto h-10 w-10 text-[#9aa69d]" />
-            <p className="mt-3 text-sm font-semibold text-[#223028]">
-              Henüz AI analiz kaydı yok
-            </p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk kaydı Yeni Analiz Kaydı butonuyla oluşturabilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz AI analiz kaydı yok"
+            description="İlk kaydı Yeni Analiz Kaydı butonuyla oluşturabilirsiniz."
+            actionHref="/ai-extraction/new"
+            actionLabel="Yeni Analiz Kaydı"
+            icon={FileSearch}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">
@@ -159,8 +175,10 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
                     <td className="px-4 py-3 text-[#46534b]">
                       {aiExtractionRelatedTypeLabels[job.fileAttachment.relatedType]}
                     </td>
-                    <td className="px-4 py-3 text-[#46534b]">
-                      {aiExtractionStatusLabels[job.status]}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={getAiStatusTone(job.status)}>
+                        {aiExtractionStatusLabels[job.status]}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatConfidence(job.confidence)}

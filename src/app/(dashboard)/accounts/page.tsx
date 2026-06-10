@@ -2,6 +2,8 @@ import Link from "next/link";
 import { FinancialAccountType } from "@prisma/client";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteAccountAction } from "@/app/(dashboard)/accounts/actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { accountTypeLabels, accountTypeOptions } from "@/lib/account-utils";
 import { formatMoney } from "@/lib/invoice-utils";
 import { prisma } from "@/lib/prisma";
@@ -114,12 +116,12 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {accounts.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">Henüz hesap eklenmedi</p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk kasa, banka veya kredi kartı hesabınızı Yeni Hesap butonuyla ekleyebilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz hesap eklenmedi"
+            description="İlk kasa, banka veya kredi kartı hesabınızı Yeni Hesap butonuyla ekleyebilirsiniz."
+            actionHref="/accounts/new"
+            actionLabel="Yeni Hesap"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">
@@ -150,8 +152,10 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatMoney(account.currentBalance, account.currency)}
                     </td>
-                    <td className="px-4 py-3 text-[#46534b]">
-                      {account.isActive ? "Aktif" : "Pasif"}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={account.isActive ? "positive" : "neutral"}>
+                        {account.isActive ? "Aktif" : "Pasif"}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">

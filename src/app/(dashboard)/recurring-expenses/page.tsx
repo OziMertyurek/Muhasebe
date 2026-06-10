@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Prisma } from "@prisma/client";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteRecurringExpenseAction } from "@/app/(dashboard)/recurring-expenses/actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
 import { getActiveExpenseCategories } from "@/lib/expense-categories";
 import { formatMoney } from "@/lib/invoice-utils";
@@ -168,12 +170,12 @@ export default async function RecurringExpensesPage({
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {recurringExpenses.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">Henüz sabit gider eklenmedi</p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk sabit gider tanımınızı Yeni Sabit Gider butonuyla ekleyebilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz sabit gider eklenmedi"
+            description="İlk sabit gider tanımınızı Yeni Sabit Gider butonuyla ekleyebilirsiniz."
+            actionHref="/recurring-expenses/new"
+            actionLabel="Yeni Sabit Gider"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] w-full border-collapse text-left text-sm">
@@ -214,8 +216,10 @@ export default async function RecurringExpensesPage({
                     <td className="px-4 py-3 text-[#46534b]">
                       {recurringExpense.endDate ? formatDate(recurringExpense.endDate) : "-"}
                     </td>
-                    <td className="px-4 py-3 text-[#46534b]">
-                      {recurringExpense.isActive ? "Aktif" : "Pasif"}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={recurringExpense.isActive ? "positive" : "neutral"}>
+                        {recurringExpense.isActive ? "Aktif" : "Pasif"}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">

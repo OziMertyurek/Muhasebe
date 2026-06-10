@@ -2,6 +2,8 @@ import Link from "next/link";
 import { PaymentMethod, PaymentType } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deletePaymentAction } from "@/app/(dashboard)/payments/actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { buildExportHref } from "@/lib/export-utils";
 import { formatMoney } from "@/lib/invoice-utils";
@@ -37,6 +39,10 @@ function getPaymentMethod(value?: string) {
   }
 
   return undefined;
+}
+
+function getPaymentTypeTone(type: PaymentType) {
+  return type === "COLLECTION" ? "positive" as const : "danger" as const;
 }
 
 function parseDateFilter(value?: string) {
@@ -182,14 +188,12 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {payments.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">
-              Henüz ödeme/tahsilat hareketi yok
-            </p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk para hareketinizi Yeni Hareket butonuyla ekleyebilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz ödeme/tahsilat hareketi yok"
+            description="İlk para hareketinizi Yeni Hareket butonuyla ekleyebilirsiniz."
+            actionHref="/payments/new"
+            actionLabel="Yeni Hareket"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1180px] w-full border-collapse text-left text-sm">
@@ -211,8 +215,10 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                 {payments.map((payment) => (
                   <tr key={payment.id} className="border-t border-[#e5e9e5]">
                     <td className="px-4 py-3 text-[#46534b]">{formatDate(payment.paymentDate)}</td>
-                    <td className="px-4 py-3 font-semibold text-[#16201b]">
-                      {paymentTypeLabels[payment.type]}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={getPaymentTypeTone(payment.type)}>
+                        {paymentTypeLabels[payment.type]}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">{payment.company?.name ?? "-"}</td>
                     <td className="px-4 py-3 text-[#46534b]">

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ExpenseStatus } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteExpenseAction } from "@/app/(dashboard)/expenses/actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
 import { buildExportHref } from "@/lib/export-utils";
 import { getActiveExpenseCategories } from "@/lib/expense-categories";
@@ -25,6 +27,18 @@ function getExpenseStatus(value?: string) {
   }
 
   return undefined;
+}
+
+function getExpenseStatusTone(status: ExpenseStatus) {
+  if (status === "PAID") {
+    return "positive" as const;
+  }
+
+  if (status === "CANCELLED") {
+    return "danger" as const;
+  }
+
+  return "warning" as const;
 }
 
 function parseDateFilter(value?: string) {
@@ -184,12 +198,12 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {expenses.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">Henüz gider eklenmedi</p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk gider kaydınızı Yeni Gider butonuyla ekleyebilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz gider eklenmedi"
+            description="İlk gider kaydınızı Yeni Gider butonuyla ekleyebilirsiniz."
+            actionHref="/expenses/new"
+            actionLabel="Yeni Gider"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] w-full border-collapse text-left text-sm">
@@ -219,8 +233,10 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                       {formatMoney(expense.amount, expense.currency)}
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">{expense.currency}</td>
-                    <td className="px-4 py-3 text-[#46534b]">
-                      {expenseStatusLabels[expense.status]}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={getExpenseStatusTone(expense.status)}>
+                        {expenseStatusLabels[expense.status]}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {expense.financialAccount?.name ?? "-"}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FilePlus2, Search } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/company-utils";
 import {
   fileRelatedTypeLabels,
@@ -118,12 +119,12 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {files.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">Henüz dosya eklenmedi</p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk dosyanızı Dosya Ekle butonuyla yükleyebilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz dosya eklenmedi"
+            description="İlk dosyanızı Dosya Ekle butonuyla yükleyebilirsiniz."
+            actionHref="/files/new"
+            actionLabel="Dosya Ekle"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">

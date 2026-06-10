@@ -2,6 +2,8 @@ import Link from "next/link";
 import { InvoiceStatus, InvoiceType } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
 import { buildExportHref } from "@/lib/export-utils";
 import {
@@ -35,6 +37,22 @@ function getInvoiceStatus(value?: string) {
   }
 
   return undefined;
+}
+
+function getInvoiceStatusTone(status: InvoiceStatus) {
+  if (status === "PAID") {
+    return "positive" as const;
+  }
+
+  if (status === "PARTIAL") {
+    return "warning" as const;
+  }
+
+  if (status === "CANCELLED") {
+    return "danger" as const;
+  }
+
+  return "neutral" as const;
 }
 
 export default async function InvoicesPage({ searchParams }: InvoicesPageProps) {
@@ -155,12 +173,12 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {invoices.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">Henüz fatura eklenmedi</p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk satış veya alış faturanızı Yeni Fatura butonuyla ekleyebilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz fatura eklenmedi"
+            description="İlk satış veya alış faturanızı Yeni Fatura butonuyla ekleyebilirsiniz."
+            actionHref="/invoices/new"
+            actionLabel="Yeni Fatura"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1040px] w-full border-collapse text-left text-sm">
@@ -197,8 +215,10 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                       {formatMoney(invoice.totalAmount, invoice.currency)}
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">{invoice.currency}</td>
-                    <td className="px-4 py-3 text-[#46534b]">
-                      {invoiceStatusLabels[invoice.status]}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={getInvoiceStatusTone(invoice.status)}>
+                        {invoiceStatusLabels[invoice.status]}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">

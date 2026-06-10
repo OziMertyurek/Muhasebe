@@ -11,6 +11,8 @@ import {
   markImportantDateDoneAction,
   markImportantDatePendingAction,
 } from "@/app/(dashboard)/important-dates/actions";
+import { EmptyState } from "@/components/ui/empty-state";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
 import {
   addDays,
@@ -68,6 +70,18 @@ function getUpcomingWhere(value: string | undefined, today: Date, tomorrow: Date
   }
 
   return undefined;
+}
+
+function getReminderStatusTone(status: ReminderStatus) {
+  if (status === "DONE") {
+    return "positive" as const;
+  }
+
+  if (status === "CANCELLED") {
+    return "danger" as const;
+  }
+
+  return "warning" as const;
 }
 
 export default async function ImportantDatesPage({ searchParams }: ImportantDatesPageProps) {
@@ -227,14 +241,12 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {importantDates.length === 0 ? (
-          <div className="p-8 text-center">
-            <p className="text-sm font-semibold text-[#223028]">
-              Henüz önemli tarih eklenmedi
-            </p>
-            <p className="mt-2 text-sm text-[#647067]">
-              İlk hatırlatmanızı Hatırlatma Ekle butonuyla oluşturabilirsiniz.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz önemli tarih eklenmedi"
+            description="İlk hatırlatmanızı Hatırlatma Ekle butonuyla oluşturabilirsiniz."
+            actionHref="/important-dates/new"
+            actionLabel="Hatırlatma Ekle"
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] w-full border-collapse text-left text-sm">
@@ -264,14 +276,18 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
                     <td className="px-4 py-3 text-[#46534b]">
                       {importantDateCategoryLabels[importantDate.category]}
                     </td>
-                    <td className="px-4 py-3 text-[#46534b]">
-                      {priorityLabels[importantDate.priority]}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={importantDate.priority === "HIGH" ? "warning" : "neutral"}>
+                        {priorityLabels[importantDate.priority]}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {repeatTypeLabels[importantDate.repeatType]}
                     </td>
-                    <td className="px-4 py-3 text-[#46534b]">
-                      {reminderStatusLabels[importantDate.status]}
+                    <td className="px-4 py-3">
+                      <StatusBadge tone={getReminderStatusTone(importantDate.status)}>
+                        {reminderStatusLabels[importantDate.status]}
+                      </StatusBadge>
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {getRelatedRecordLabel(importantDate)}
