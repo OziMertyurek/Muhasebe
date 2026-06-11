@@ -141,12 +141,47 @@ CSV veya PDF destekleyen sayfalarda üst bölümde dışa aktarma butonları bul
 
 İndirilen dosyalar bilgisayarınızın indirme klasörüne gider. Bu dosyalar GitHub'a otomatik olarak eklenmez.
 
-## Yedek Nasıl Alınır?
+## Yedek Alma
+
+GitHub kodu saklar; veritabanı ve yüklenen dosyaları saklamaz. Bu yüzden düzenli yedek almak önemlidir.
+
+### Sadece Veritabanı Yedeği Alma
 
 1. Sol menüden `Ayarlar` sayfasına gidin.
 2. `Yedekleme` kartını açın.
-3. `Veritabanı Yedeğini İndir` butonuyla SQLite DB yedeğini indirin.
-4. `storage/uploads/` klasörünü ayrıca manuel olarak kopyalayın.
-5. Yedekleri harici disk veya güvenli bir bulut depolama alanında saklayın.
+3. `Veritabanı Yedeğini İndir` butonuna basın.
 
-GitHub kodu saklar; veritabanı ve yüklenen dosyaları saklamaz.
+Bu yedek sadece SQLite veritabanını içerir. Upload edilen dosyaları içermez.
+
+### Tam Yedek Alma
+
+1. Sol menüden `Ayarlar` sayfasına gidin.
+2. `Yedekleme` kartını açın.
+3. `Tam Yedek İndir` butonuna basın.
+4. İnen ZIP dosyasını harici disk veya güvenli bir bulut depolama alanında saklayın.
+
+Önerilen yöntem tam yedek almaktır.
+
+### Tam Yedek Dosyasının İçinde Neler Var?
+
+- `database/dev.db`
+- `uploads/`
+- `backup-info.json`
+
+`backup-info.json`, yedeğin uygulama adı, sürüm, yedek tarihi ve içerik bilgisini tutar.
+
+## Başka Bilgisayara Taşıma
+
+1. Eski bilgisayarda `Ayarlar > Yedekleme > Tam Yedek İndir` ile ZIP yedeği alın.
+2. Yeni bilgisayarda projeyi GitHub'dan çekin.
+3. `.env` dosyasını `.env.example` dosyasına göre oluşturun.
+4. `npm install` çalıştırın.
+5. `npm run prisma:generate` çalıştırın.
+6. `npx prisma migrate dev` çalıştırın.
+7. `npm run dev` ile uygulamayı açın.
+8. `Ayarlar > Yedekleme` sayfasında `Yedeği İçeri Aktar / Geri Yükle` alanına gidin.
+9. ZIP dosyasını seçin ve `Yedeği Kontrol Et` butonuna basın.
+10. Yedek geçerliyse onay kutusunu işaretleyin ve `Geri Yükle` butonuna basın.
+11. Restore tamamlandıktan sonra server'ı Ctrl+C ile durdurup `npm run dev` ile yeniden başlatın.
+
+Restore işleminden önce mevcut sistem otomatik olarak `storage/restore-backups/` içine güvenlik yedeği alır. Yine de önemli bir işlemden önce ayrıca manuel tam yedek almak önerilir.

@@ -24,15 +24,27 @@ Bu dosya, Local Muhasebe Takip Sistemi için planlanan geliştirme başlıkları
 
 ## Gelişmiş Restore
 
-- DB yedeğinden geri yükleme akışı tasarlamak.
-- Yanlış geri yüklemeyi önlemek için uyarı ve onay adımları eklemek.
-- Restore öncesi mevcut DB yedeğini otomatik almak.
+Temel seviye tamamlandı:
+
+- Tam yedek ZIP doğrulama.
+- Yanlış geri yüklemeyi önlemek için uyarı ve onay adımları.
+- Restore öncesi otomatik güvenlik yedeği.
+- `database/dev.db` ve `uploads/` içeriğini güvenli şekilde geri yükleme.
+
+Gelecek geliştirmeler:
+
+- Restore geçmişi ekranı.
+- Otomatik zamanlanmış yedekleme.
+- Şifreli yedek dosyası.
+- Bulut yedek entegrasyonu.
 
 ## Upload Klasörünü Zip Yedekleme
 
-- `storage/uploads/` klasörünü zip olarak indirme.
-- DB yedeği ile upload yedeğini aynı ekranda yönetmek.
-- Büyük dosyalarda kullanıcıya süre ve boyut uyarısı göstermek.
+Temel seviye tamamlandı:
+
+- `storage/uploads/` klasörü tam yedek ZIP dosyasına dahil edilir.
+- DB yedeği ile upload yedeği aynı ekranda yönetilir.
+- Büyük ZIP dosyaları için boyut limiti ve kullanıcı uyarısı vardır.
 
 ## Stok Takibi
 

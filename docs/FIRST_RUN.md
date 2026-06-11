@@ -30,6 +30,8 @@ npm run dev
 
 Tarayıcıdan `http://localhost:3000` adresini açın.
 
+Daha önce alınmış bir tam yedek ZIP dosyanız varsa, ilk kurulumdan sonra `Ayarlar > Yedekleme` sayfasından bu yedeği içeri aktarabilirsiniz.
+
 ## .env Oluşturma
 
 `.env.example` dosyasını temel alarak local `.env` dosyanızı oluşturun.
@@ -64,7 +66,7 @@ http://localhost:3000
 6. `Giderler` sayfasından gerçekleşmiş giderleri ekleyin.
 7. `Önemli Tarihler` sayfasından vergi günü, sözleşme bitişi veya kart son ödeme tarihi gibi hatırlatmaları ekleyin.
 8. `Dashboard` ve `Raporlar` sayfalarından genel durumu kontrol edin.
-9. `Ayarlar > Yedekleme` sayfasından düzenli veritabanı yedeği alın.
+9. `Ayarlar > Yedekleme` sayfasından düzenli tam yedek alın.
 
 ## Yedekleme Notu
 
@@ -72,4 +74,5 @@ GitHub sadece kodu saklar. Aşağıdaki veriler ayrıca yedeklenmelidir:
 
 - `prisma/dev.db`
 - `storage/uploads/`
+- `storage/restore-backups/` içinde oluşan otomatik güvenlik yedekleri
 - Gerekirse local `.env` ayarları

@@ -20,11 +20,15 @@ Bu sürüm, Local Muhasebe Takip Sistemi'nin şirket içi ve local kullanım iç
 - CSV export
 - PDF export
 - Ayarlar ve yedekleme
+- Tam yedek indirme
+- Restore doğrulama
+- Güvenli restore / içeri aktarma
+- Restore öncesi otomatik güvenlik yedeği
 - Cari ekstre
 
 ### Bilinen Notlar
 
 - Gerçek AI/OCR entegrasyonu henüz yok.
-- Restore özelliği placeholder seviyesinde.
-- Upload klasörü manuel yedeklenmeli.
+- Restore temel seviyede tamamlandı; işlem sonrası local server'ın yeniden başlatılması önerilir.
+- Otomatik güvenlik yedekleri `storage/restore-backups/` altında tutulur.
 - Sistem local kullanım içindir.

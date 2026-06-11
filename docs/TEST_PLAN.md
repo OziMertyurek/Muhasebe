@@ -156,13 +156,26 @@ Bu test planı, uygulamanın temel modüllerinin manuel olarak kontrol edilmesi 
 | Cari ekstre PDF indir. | Cari hareketleri PDF içinde görünür. |
 | Vadesi gelen faturalar PDF indir. | Kalan tutarlar ve gün bilgisi görünür. |
 
-## Backup Testi
+## Backup / Restore Testleri
 
 | Adım | Beklenen sonuç |
 | --- | --- |
 | Ayarlar > Yedekleme sayfasını aç. | DB ve upload yedekleme bilgileri görünür. |
 | Veritabanı yedeğini indir. | `.db` uzantılı yedek dosyası iner. |
-| Upload klasör bilgisini kontrol et. | `storage/uploads` yolu gösterilir. |
+| Tam yedek indir. | ZIP dosyası iner. |
+| Tam yedek ZIP dosyasını aç. | ZIP içinde `database/dev.db`, `uploads/` ve `backup-info.json` bulunur. |
+| `backup-info.json` dosyasını kontrol et. | Uygulama adı, sürüm, yedek tarihi ve içerik bilgisi görünür. |
+| Geçerli ZIP dosyasını doğrula. | Yedek geçerli mesajı ve metadata bilgileri görünür. |
+| Geçersiz ZIP dosyasını doğrula. | Türkçe hata mesajı görünür ve restore butonu aktif olmaz. |
+| ZIP olmayan dosya seç. | Dosya reddedilir. |
+| Path traversal içeren ZIP dene. | Güvenlik uyarısı veya hata görünür; dosya restore edilmez. |
+| Restore için onay kutusunu işaretleme. | `Geri Yükle` butonu pasif kalır. |
+| Geçerli ZIP ile restore yap. | Restore tamamlanır ve sonuç raporu görünür. |
+| Restore öncesi otomatik güvenlik yedeğini kontrol et. | `storage/restore-backups/` altında `before-restore-...` klasörü oluşur. |
+| Restore sonrası DB içeriğini kontrol et. | `prisma/dev.db` seçilen yedekten gelen veriyle değişir. |
+| Restore sonrası upload dosyalarını kontrol et. | `storage/uploads/` seçilen yedekten gelen dosyalarla güncellenir. |
+| Restore sonrası restart uyarısını kontrol et. | Server'ı Ctrl+C ile durdurup `npm run dev` ile yeniden başlatma notu görünür. |
+| Git durumunu kontrol et. | `storage/uploads/`, `storage/restore-backups/`, `.db`, `.zip`, `.env` dosyaları commit adayı olmaz. |
 
 ## Soft Delete Testi
 

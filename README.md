@@ -105,15 +105,34 @@ Yüklenen dosyalar `storage/uploads/` klasöründe tutulur.
 
 ## Yedekleme
 
-GitHub sadece kodu saklar. Local veritabanı ve upload dosyaları GitHub'a gitmez.
+GitHub sadece kodu saklar. SQLite veritabanı ve upload dosyaları GitHub'a gitmez.
 
-Yedeklenmesi gerekenler:
+`Ayarlar > Yedekleme` sayfasından iki tür yedek alınabilir:
 
-- `prisma/dev.db`
-- `storage/uploads/`
-- Gerekirse `.env` içindeki local ayarlar
+1. `Sadece Veritabanı Yedeği`: Yalnızca `prisma/dev.db` dosyasını indirir. Upload dosyalarını içermez.
+2. `Tam Yedek`: `database/dev.db`, `uploads/` ve `backup-info.json` dosyalarını tek ZIP içinde indirir.
 
-Uygulama içinde `Ayarlar > Yedekleme` sayfasından SQLite veritabanı yedeği indirilebilir. Upload klasörü şimdilik manuel olarak kopyalanmalıdır.
+Önerilen yedekleme yöntemi `Tam Yedek İndir` butonudur. Bu dosya hem kayıtları hem de yüklenen dosyaları birlikte saklar.
+
+Restore işleminden önce sistem mevcut verileri otomatik olarak `storage/restore-backups/` içine güvenlik yedeği olarak alır. Yine de önemli işlemlerden önce ayrıca manuel tam yedek almak önerilir.
+
+## Geri Yükleme / İçeri Aktarma
+
+Eski bilgisayardaki verileri yeni bilgisayara taşımak için:
+
+1. Eski bilgisayarda `Ayarlar > Yedekleme > Tam Yedek İndir` ile ZIP yedeği alın.
+2. Yeni bilgisayarda projeyi GitHub'dan çekin.
+3. `npm install` çalıştırın.
+4. `npm run prisma:generate` çalıştırın.
+5. `npm run dev` ile projeyi açın.
+6. `Ayarlar > Yedekleme` sayfasına gidin.
+7. Yedek ZIP dosyasını seçin.
+8. `Yedeği Kontrol Et` ile dosyayı doğrulayın.
+9. Onay kutusunu işaretleyin.
+10. `Geri Yükle` butonuna basın.
+11. Restore tamamlandıktan sonra server'ı Ctrl+C ile durdurup `npm run dev` ile yeniden başlatın.
+
+Geri yükleme sırasında yalnızca beklenen yedek içeriği kullanılır: `database/dev.db`, `uploads/` ve `backup-info.json`. `.env`, `.env.local`, `.next`, `node_modules` ve Git dosyaları restore edilmez.
 
 ## Kullanım Akışı
 
