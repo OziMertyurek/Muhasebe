@@ -6,6 +6,7 @@ import {
   DatabaseBackup,
   Info,
   Monitor,
+  Trash2,
 } from "lucide-react";
 import { appInfo } from "@/lib/app-info";
 
@@ -21,6 +22,12 @@ const settingCards = [
     description: "SQLite veritabanı yedeğini indirin ve upload dosyaları için kontrol listesini izleyin.",
     href: "/settings/backup",
     icon: DatabaseBackup,
+  },
+  {
+    title: "Silinen Kayıtlar",
+    description: "Çöp kutusuna taşınan kayıtları inceleyin ve gerektiğinde geri yükleyin.",
+    href: "/trash",
+    icon: Trash2,
   },
   {
     title: "Uygulama Bilgileri",
@@ -65,7 +72,7 @@ export default function SettingsPage() {
         </p>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {settingCards.map((card) => {
           const Icon = card.icon;
 

@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { ArrowLeft, Building2, Pencil, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { RelatedFilesCard } from "@/components/files/related-files-card";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
@@ -87,10 +88,13 @@ export default async function InvoiceDetailPage({
             Düzenle
           </Link>
           <form action={deleteInvoiceAction.bind(null, invoice.id)}>
-            <button className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]">
+            <ConfirmSubmitButton
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              message="Bu faturayı silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı ödeme durumu etkilenebilir."
+            >
               <Trash2 className="h-4 w-4" />
               Sil
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </div>
       </section>

@@ -17,6 +17,7 @@ import {
   markImportantDateDoneAction,
   markImportantDatePendingAction,
 } from "@/app/(dashboard)/important-dates/actions";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import {
   formatOptionalTime,
@@ -128,10 +129,13 @@ export default async function ImportantDateDetailPage({
             Düzenle
           </Link>
           <form action={deleteImportantDateAction.bind(null, importantDate.id)}>
-            <button className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]">
+            <ConfirmSubmitButton
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              message="Bu önemli tarih / hatırlatma kaydını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
+            >
               <Trash2 className="h-4 w-4" />
               Sil
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </div>
       </section>

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
 import { RelatedFilesCard } from "@/components/files/related-files-card";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import {
   companyTypeLabels,
   formatDate,
@@ -117,10 +118,13 @@ export default async function CompanyDetailPage({
             Düzenle
           </Link>
           <form action={deleteCompanyAction.bind(null, company.id)}>
-            <button className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]">
+            <ConfirmSubmitButton
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              message="Bu cariyi silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı faturalar, ödemeler ve giderler geçmiş kayıtlarda etkilenebilir."
+            >
               <Trash2 className="h-4 w-4" />
               Sil
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </div>
       </section>

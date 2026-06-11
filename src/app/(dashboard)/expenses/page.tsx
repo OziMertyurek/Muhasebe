@@ -3,6 +3,7 @@ import { ExpenseStatus } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteExpenseAction } from "@/app/(dashboard)/expenses/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
 import { buildExportHref } from "@/lib/export-utils";
@@ -258,12 +259,13 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteExpenseAction.bind(null, expense.id)}>
-                          <button
+                          <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] text-[#8b2f28] transition hover:border-[#c79a92]"
+                            message="Bu gider kaydını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </ConfirmSubmitButton>
                         </form>
                       </div>
                     </td>

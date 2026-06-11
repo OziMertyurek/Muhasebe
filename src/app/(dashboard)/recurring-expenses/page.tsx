@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteRecurringExpenseAction } from "@/app/(dashboard)/recurring-expenses/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
 import { getActiveExpenseCategories } from "@/lib/expense-categories";
@@ -238,12 +239,13 @@ export default async function RecurringExpensesPage({
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteRecurringExpenseAction.bind(null, recurringExpense.id)}>
-                          <button
+                          <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] text-[#8b2f28] transition hover:border-[#c79a92]"
+                            message="Bu sabit gider tanımını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </ConfirmSubmitButton>
                         </form>
                       </div>
                     </td>

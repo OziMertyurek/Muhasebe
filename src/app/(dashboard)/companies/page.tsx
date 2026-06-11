@@ -3,6 +3,7 @@ import { CompanyType } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { companyTypeLabels, companyTypeOptions, formatDate } from "@/lib/company-utils";
 import { buildExportHref } from "@/lib/export-utils";
 import { prisma } from "@/lib/prisma";
@@ -150,12 +151,13 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteCompanyAction.bind(null, company.id)}>
-                          <button
+                          <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] text-[#8b2f28] transition hover:border-[#c79a92]"
+                            message="Bu cariyi silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı faturalar, ödemeler ve giderler geçmiş kayıtlarda etkilenebilir."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />
-                          </button>
+                          </ConfirmSubmitButton>
                         </form>
                       </div>
                     </td>

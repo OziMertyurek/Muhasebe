@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Building2, Landmark, Pencil, Trash2 } from "lucide-react";
 import { deleteExpenseAction } from "@/app/(dashboard)/expenses/actions";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { RelatedFilesCard } from "@/components/files/related-files-card";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { expenseStatusLabels } from "@/lib/expense-utils";
@@ -76,10 +77,13 @@ export default async function ExpenseDetailPage({
             Düzenle
           </Link>
           <form action={deleteExpenseAction.bind(null, expense.id)}>
-            <button className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]">
+            <ConfirmSubmitButton
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              message="Bu gider kaydını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
+            >
               <Trash2 className="h-4 w-4" />
               Sil
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </div>
       </section>

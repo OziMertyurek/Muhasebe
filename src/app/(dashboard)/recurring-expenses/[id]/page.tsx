@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { deleteRecurringExpenseAction } from "@/app/(dashboard)/recurring-expenses/actions";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney } from "@/lib/invoice-utils";
 import { prisma } from "@/lib/prisma";
@@ -69,10 +70,13 @@ export default async function RecurringExpenseDetailPage({
             Düzenle
           </Link>
           <form action={deleteRecurringExpenseAction.bind(null, recurringExpense.id)}>
-            <button className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]">
+            <ConfirmSubmitButton
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              message="Bu sabit gider tanımını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
+            >
               <Trash2 className="h-4 w-4" />
               Sil
-            </button>
+            </ConfirmSubmitButton>
           </form>
         </div>
       </section>
