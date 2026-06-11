@@ -3,6 +3,7 @@
 import { PaymentMethod, PaymentType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { updateInvoicePaymentStatus } from "@/lib/payment-status";
 import { prisma } from "@/lib/prisma";
 
@@ -179,6 +180,14 @@ export async function createPaymentAction(
       select: { id: true },
     });
     paymentId = payment.id;
+    await createAuditLog({
+      entityType: "PAYMENT",
+      entityId: paymentId,
+      action: "CREATE",
+      title: `Para hareketi eklendi: ${parsed.data.amount.toString()} ${parsed.data.currency}`,
+      description: parsed.data.description ?? "Tahsilat / ödeme hareketi oluşturuldu.",
+      after: parsed.data,
+    });
     await updateInvoicePaymentStatus(parsed.data.invoiceId);
   } catch {
     return { message: "Para hareketi kaydedilirken bir hata oluştu." };
@@ -208,7 +217,6 @@ export async function updatePaymentAction(
   try {
     const existingPayment = await prisma.payment.findFirst({
       where: { id: paymentId, deletedAt: null },
-      select: { invoiceId: true },
     });
 
     if (!existingPayment) {
@@ -221,6 +229,15 @@ export async function updatePaymentAction(
       where: { id: paymentId, deletedAt: null },
       data: parsed.data,
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "PAYMENT",
+      entityId: paymentId,
+      action: "UPDATE",
+      title: `Para hareketi güncellendi: ${parsed.data.amount.toString()} ${parsed.data.currency}`,
+      description: parsed.data.description ?? "Tahsilat / ödeme hareketi güncellendi.",
+      before: existingPayment,
+      after: parsed.data,
     });
 
     await updateInvoicePaymentStatus(previousInvoiceId);
@@ -250,9 +267,24 @@ export async function deletePaymentAction(paymentId: string) {
     const payment = await prisma.payment.update({
       where: { id: paymentId, deletedAt: null },
       data: { deletedAt: new Date() },
-      select: { invoiceId: true },
+      select: {
+        id: true,
+        invoiceId: true,
+        type: true,
+        amount: true,
+        currency: true,
+        description: true,
+      },
     });
     invoiceId = payment.invoiceId;
+    await createAuditLog({
+      entityType: "PAYMENT",
+      entityId: payment.id,
+      action: "SOFT_DELETE",
+      title: `Para hareketi silindi: ${payment.amount.toString()} ${payment.currency}`,
+      description: "Kayıt çöp kutusuna taşındı.",
+      before: payment,
+    });
     await updateInvoicePaymentStatus(invoiceId);
   } catch {
     redirect(`/payments/${paymentId}?error=delete`);

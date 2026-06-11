@@ -3,6 +3,7 @@
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { ensureDefaultExpenseCategories } from "@/lib/expense-categories";
 import { prisma } from "@/lib/prisma";
 
@@ -160,6 +161,14 @@ export async function createRecurringExpenseAction(
       select: { id: true },
     });
     recurringExpenseId = recurringExpense.id;
+    await createAuditLog({
+      entityType: "RECURRING_EXPENSE",
+      entityId: recurringExpenseId,
+      action: "CREATE",
+      title: `Sabit gider oluşturuldu: ${parsed.data.title}`,
+      description: `${parsed.data.amount.toString()} ${parsed.data.currency} tutarlı sabit gider oluşturuldu.`,
+      after: parsed.data,
+    });
   } catch {
     return { message: "Sabit gider kaydı oluşturulurken bir hata oluştu." };
   }
@@ -180,10 +189,23 @@ export async function updateRecurringExpenseAction(
   }
 
   try {
+    const before = await prisma.recurringExpense.findFirst({
+      where: { id: recurringExpenseId, deletedAt: null },
+    });
+
     await prisma.recurringExpense.update({
       where: { id: recurringExpenseId, deletedAt: null },
       data: parsed.data,
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "RECURRING_EXPENSE",
+      entityId: recurringExpenseId,
+      action: "UPDATE",
+      title: `Sabit gider güncellendi: ${parsed.data.title}`,
+      description: "Sabit gider bilgilerinde değişiklik yapıldı.",
+      before,
+      after: parsed.data,
     });
   } catch {
     return { message: "Sabit gider kaydı güncellenirken bir hata oluştu." };
@@ -196,10 +218,18 @@ export async function updateRecurringExpenseAction(
 
 export async function deleteRecurringExpenseAction(recurringExpenseId: string) {
   try {
-    await prisma.recurringExpense.update({
+    const recurringExpense = await prisma.recurringExpense.update({
       where: { id: recurringExpenseId, deletedAt: null },
       data: { deletedAt: new Date(), isActive: false },
-      select: { id: true },
+      select: { id: true, title: true, amount: true, currency: true, dayOfMonth: true },
+    });
+    await createAuditLog({
+      entityType: "RECURRING_EXPENSE",
+      entityId: recurringExpense.id,
+      action: "SOFT_DELETE",
+      title: `Sabit gider silindi: ${recurringExpense.title}`,
+      description: "Kayıt çöp kutusuna taşındı.",
+      before: recurringExpense,
     });
   } catch {
     redirect(`/recurring-expenses/${recurringExpenseId}?error=delete`);

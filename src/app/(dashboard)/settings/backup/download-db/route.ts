@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { getDatabaseBackupInfo, formatBackupFileName } from "@/lib/backup-utils";
 
 export const runtime = "nodejs";
@@ -16,11 +17,20 @@ export async function GET() {
   }
 
   const file = await readFile(database.databasePath);
+  const fileName = formatBackupFileName();
+
+  await createAuditLog({
+    entityType: "BACKUP",
+    action: "BACKUP_DOWNLOAD",
+    title: "Veritabanı yedeği indirildi",
+    description: "Sadece SQLite veritabanı yedeği indirildi.",
+    metadata: { fileName, size: file.byteLength },
+  });
 
   return new Response(file, {
     headers: {
       "Content-Type": "application/octet-stream",
-      "Content-Disposition": `attachment; filename="${formatBackupFileName()}"`,
+      "Content-Disposition": `attachment; filename="${fileName}"`,
       "Cache-Control": "no-store",
     },
   });

@@ -1,4 +1,5 @@
 import { accountTypeLabels } from "@/lib/account-utils";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { companyTypeLabels, formatDate } from "@/lib/company-utils";
 import { expenseStatusLabels } from "@/lib/expense-utils";
 import { importantDateCategoryLabels } from "@/lib/important-date-utils";
@@ -271,54 +272,110 @@ async function getDeletedRecordsByType(): Promise<Record<TrashRecordType, Delete
 export async function restoreRecord(type: TrashRecordType, id: string) {
   switch (type) {
     case "companies":
-      await prisma.company.update({
+      const company = await prisma.company.update({
         where: { id },
         data: { deletedAt: null },
-        select: { id: true },
+        select: { id: true, name: true, type: true },
+      });
+      await createAuditLog({
+        entityType: "COMPANY",
+        entityId: company.id,
+        action: "RESTORE",
+        title: `Kayıt geri yüklendi: ${company.name}`,
+        description: "Cari çöp kutusundan geri yüklendi.",
+        after: company,
       });
       return;
     case "invoices":
-      await prisma.invoice.update({
+      const invoice = await prisma.invoice.update({
         where: { id },
         data: { deletedAt: null },
-        select: { id: true },
+        select: { id: true, invoiceNumber: true, status: true },
+      });
+      await createAuditLog({
+        entityType: "INVOICE",
+        entityId: invoice.id,
+        action: "RESTORE",
+        title: `Kayıt geri yüklendi: ${invoice.invoiceNumber}`,
+        description: "Fatura çöp kutusundan geri yüklendi.",
+        after: invoice,
       });
       return;
     case "payments": {
       const payment = await prisma.payment.update({
         where: { id },
         data: { deletedAt: null },
-        select: { id: true, invoiceId: true },
+        select: { id: true, invoiceId: true, amount: true, currency: true, type: true },
+      });
+      await createAuditLog({
+        entityType: "PAYMENT",
+        entityId: payment.id,
+        action: "RESTORE",
+        title: `Kayıt geri yüklendi: ${payment.amount.toString()} ${payment.currency}`,
+        description: "Tahsilat / ödeme hareketi çöp kutusundan geri yüklendi.",
+        after: payment,
       });
       await updateInvoicePaymentStatus(payment.invoiceId);
       return;
     }
     case "accounts":
-      await prisma.financialAccount.update({
+      const account = await prisma.financialAccount.update({
         where: { id },
         data: { deletedAt: null, isActive: true },
-        select: { id: true },
+        select: { id: true, name: true, type: true },
+      });
+      await createAuditLog({
+        entityType: "FINANCIAL_ACCOUNT",
+        entityId: account.id,
+        action: "RESTORE",
+        title: `Kayıt geri yüklendi: ${account.name}`,
+        description: "Finansal hesap çöp kutusundan geri yüklendi.",
+        after: account,
       });
       return;
     case "expenses":
-      await prisma.expense.update({
+      const expense = await prisma.expense.update({
         where: { id },
         data: { deletedAt: null },
-        select: { id: true },
+        select: { id: true, title: true, amount: true, currency: true },
+      });
+      await createAuditLog({
+        entityType: "EXPENSE",
+        entityId: expense.id,
+        action: "RESTORE",
+        title: `Kayıt geri yüklendi: ${expense.title}`,
+        description: "Gider çöp kutusundan geri yüklendi.",
+        after: expense,
       });
       return;
     case "recurring-expenses":
-      await prisma.recurringExpense.update({
+      const recurringExpense = await prisma.recurringExpense.update({
         where: { id },
         data: { deletedAt: null, isActive: true },
-        select: { id: true },
+        select: { id: true, title: true, amount: true, currency: true },
+      });
+      await createAuditLog({
+        entityType: "RECURRING_EXPENSE",
+        entityId: recurringExpense.id,
+        action: "RESTORE",
+        title: `Kayıt geri yüklendi: ${recurringExpense.title}`,
+        description: "Sabit gider çöp kutusundan geri yüklendi.",
+        after: recurringExpense,
       });
       return;
     case "important-dates":
-      await prisma.importantDate.update({
+      const importantDate = await prisma.importantDate.update({
         where: { id },
         data: { deletedAt: null },
-        select: { id: true },
+        select: { id: true, title: true, status: true },
+      });
+      await createAuditLog({
+        entityType: "IMPORTANT_DATE",
+        entityId: importantDate.id,
+        action: "RESTORE",
+        title: `Kayıt geri yüklendi: ${importantDate.title}`,
+        description: "Önemli tarih çöp kutusundan geri yüklendi.",
+        after: importantDate,
       });
       return;
     default:

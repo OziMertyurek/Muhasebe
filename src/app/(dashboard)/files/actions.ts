@@ -10,6 +10,7 @@ import {
   isAllowedUploadType,
   maxUploadSize,
 } from "@/lib/file-utils";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
 export type FileUploadFormState = {
@@ -183,6 +184,20 @@ export async function uploadFileAction(
       select: { id: true },
     });
     fileId = file.id;
+    await createAuditLog({
+      entityType: "FILE_ATTACHMENT",
+      entityId: fileId,
+      action: "CREATE",
+      title: `Dosya yüklendi: ${fileValue.name}`,
+      description: "Dosya arşivine yeni ek yüklendi.",
+      after: {
+        originalFileName: fileValue.name,
+        mimeType: fileValue.type || null,
+        fileSize: fileValue.size,
+        relatedType,
+        ...relation,
+      },
+    });
   } catch {
     return { message: "Dosya yüklenirken bir hata oluştu." };
   }

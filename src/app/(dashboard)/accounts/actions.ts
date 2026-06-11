@@ -3,6 +3,7 @@
 import { FinancialAccountType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
 export type AccountFormState = {
@@ -183,6 +184,14 @@ export async function createAccountAction(
       select: { id: true },
     });
     accountId = account.id;
+    await createAuditLog({
+      entityType: "FINANCIAL_ACCOUNT",
+      entityId: accountId,
+      action: "CREATE",
+      title: `Finansal hesap oluşturuldu: ${parsed.data.name}`,
+      description: `${parsed.data.currency} para birimli hesap oluşturuldu.`,
+      after: parsed.data,
+    });
   } catch {
     return { message: "Hesap kaydı oluşturulurken bir hata oluştu." };
   }
@@ -203,10 +212,23 @@ export async function updateAccountAction(
   }
 
   try {
+    const before = await prisma.financialAccount.findFirst({
+      where: { id: accountId, deletedAt: null },
+    });
+
     await prisma.financialAccount.update({
       where: { id: accountId, deletedAt: null },
       data: parsed.data,
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "FINANCIAL_ACCOUNT",
+      entityId: accountId,
+      action: "UPDATE",
+      title: `Finansal hesap güncellendi: ${parsed.data.name}`,
+      description: "Finansal hesap bilgilerinde değişiklik yapıldı.",
+      before,
+      after: parsed.data,
     });
   } catch {
     return { message: "Hesap kaydı güncellenirken bir hata oluştu." };
@@ -219,10 +241,18 @@ export async function updateAccountAction(
 
 export async function deleteAccountAction(accountId: string) {
   try {
-    await prisma.financialAccount.update({
+    const account = await prisma.financialAccount.update({
       where: { id: accountId, deletedAt: null },
       data: { deletedAt: new Date(), isActive: false },
-      select: { id: true },
+      select: { id: true, name: true, type: true, currency: true },
+    });
+    await createAuditLog({
+      entityType: "FINANCIAL_ACCOUNT",
+      entityId: account.id,
+      action: "SOFT_DELETE",
+      title: `Finansal hesap silindi: ${account.name}`,
+      description: "Kayıt çöp kutusuna taşındı.",
+      before: account,
     });
   } catch {
     redirect(`/accounts/${accountId}?error=delete`);

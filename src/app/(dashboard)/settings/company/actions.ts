@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import {
   defaultCompanySettings,
+  getCompanySettings,
   type CompanySettings,
   upsertCompanySettings,
 } from "@/lib/settings-utils";
@@ -97,7 +99,16 @@ export async function updateCompanySettingsAction(
   }
 
   try {
+    const before = await getCompanySettings();
     await upsertCompanySettings(parsed.data);
+    await createAuditLog({
+      entityType: "SETTINGS",
+      action: "UPDATE",
+      title: "Şirket ayarları güncellendi",
+      description: "Ayarlar > Şirket bilgileri kaydedildi.",
+      before,
+      after: parsed.data,
+    });
   } catch {
     return { message: "Şirket ayarları kaydedilirken bir hata oluştu." };
   }

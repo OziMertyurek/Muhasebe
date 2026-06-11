@@ -7,6 +7,7 @@ import {
   getAiExtractionFileWhere,
   validateJsonText,
 } from "@/lib/ai-extraction-utils";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
 export type AiExtractionFormField =
@@ -125,6 +126,18 @@ export async function createAiExtractionAction(
       select: { id: true },
     });
     jobId = job.id;
+    await createAuditLog({
+      entityType: "AI_EXTRACTION",
+      entityId: jobId,
+      action: "CREATE",
+      title: "AI analiz kaydı oluşturuldu",
+      description: "Gerçek OCR çalışmadan analiz hazırlık kaydı oluşturuldu.",
+      after: {
+        fileAttachmentId: parsed.data.fileAttachmentId,
+        status: parsed.data.status,
+        confidence: parsed.data.confidence,
+      },
+    });
   } catch {
     return { message: "AI analiz kaydı oluşturulurken bir hata oluştu." };
   }
@@ -146,6 +159,17 @@ export async function updateAiExtractionAction(
   }
 
   try {
+    const before = await prisma.aiExtractionJob.findUnique({
+      where: { id: jobId },
+      select: {
+        id: true,
+        fileAttachmentId: true,
+        status: true,
+        confidence: true,
+        errorMessage: true,
+      },
+    });
+
     await prisma.aiExtractionJob.update({
       where: { id: jobId },
       data: {
@@ -156,6 +180,20 @@ export async function updateAiExtractionAction(
         errorMessage: parsed.data.errorMessage,
       },
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "AI_EXTRACTION",
+      entityId: jobId,
+      action: before?.status !== parsed.data.status ? "STATUS_CHANGE" : "UPDATE",
+      title: "AI analiz kaydı güncellendi",
+      description: "AI analiz hazırlık kaydında değişiklik yapıldı.",
+      before,
+      after: {
+        fileAttachmentId: parsed.data.fileAttachmentId,
+        status: parsed.data.status,
+        confidence: parsed.data.confidence,
+        errorMessage: parsed.data.errorMessage,
+      },
     });
   } catch {
     return { message: "AI analiz kaydı güncellenirken bir hata oluştu." };
@@ -171,10 +209,23 @@ export async function updateAiExtractionStatusAction(
   status: AiExtractionStatus,
 ) {
   try {
-    await prisma.aiExtractionJob.update({
+    const before = await prisma.aiExtractionJob.findUnique({
+      where: { id: jobId },
+      select: { id: true, status: true },
+    });
+    const job = await prisma.aiExtractionJob.update({
       where: { id: jobId },
       data: { status },
-      select: { id: true },
+      select: { id: true, status: true },
+    });
+    await createAuditLog({
+      entityType: "AI_EXTRACTION",
+      entityId: job.id,
+      action: "STATUS_CHANGE",
+      title: "AI analiz durumu değişti",
+      description: `${before?.status ?? "-"} -> ${job.status}`,
+      before,
+      after: job,
     });
   } catch {
     redirect(`/ai-extraction/${jobId}?error=status`);

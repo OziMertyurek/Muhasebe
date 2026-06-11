@@ -1,3 +1,4 @@
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { maxBackupZipSize, validateBackupZip } from "@/lib/backup-utils";
 
 export const runtime = "nodejs";
@@ -31,6 +32,22 @@ export async function POST(request: Request) {
   }
 
   const result = await validateBackupZip(file);
+  await createAuditLog({
+    entityType: "RESTORE",
+    action: "BACKUP_VALIDATE",
+    title: result.isValid ? "Yedek ZIP doğrulandı" : "Yedek ZIP doğrulama hatası",
+    description: result.isValid
+      ? "Seçilen tam yedek ZIP dosyası geçerli görünüyor."
+      : "Seçilen ZIP dosyasında eksik veya hatalı alanlar var.",
+    metadata: {
+      fileName: file.name,
+      size: file.size,
+      isValid: result.isValid,
+      warnings: result.warnings,
+      errors: result.errors,
+      metadata: result.metadata,
+    },
+  });
 
   return Response.json(result, {
     status: result.errors.length > 0 ? 422 : 200,

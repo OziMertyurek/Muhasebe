@@ -1,4 +1,5 @@
 import { InvoiceStatus, Prisma } from "@prisma/client";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
 export async function updateInvoicePaymentStatus(invoiceId: string | null | undefined) {
@@ -10,6 +11,7 @@ export async function updateInvoicePaymentStatus(invoiceId: string | null | unde
     where: { id: invoiceId, deletedAt: null },
     select: {
       id: true,
+      invoiceNumber: true,
       status: true,
       totalAmount: true,
     },
@@ -43,6 +45,16 @@ export async function updateInvoicePaymentStatus(invoiceId: string | null | unde
       where: { id: invoice.id },
       data: { status: nextStatus },
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "INVOICE",
+      entityId: invoice.id,
+      action: "STATUS_CHANGE",
+      title: `Fatura durumu değişti: ${invoice.invoiceNumber}`,
+      description: `${invoice.status} -> ${nextStatus}`,
+      before: { status: invoice.status },
+      after: { status: nextStatus },
+      metadata: { paidTotal, totalAmount: invoice.totalAmount },
     });
   }
 }

@@ -4,6 +4,7 @@ import {
   Building2,
   CheckCircle2,
   DatabaseBackup,
+  History,
   Info,
   Monitor,
   Trash2,
@@ -28,6 +29,12 @@ const settingCards = [
     description: "Çöp kutusuna taşınan kayıtları inceleyin ve gerektiğinde geri yükleyin.",
     href: "/trash",
     icon: Trash2,
+  },
+  {
+    title: "İşlem Geçmişi",
+    description: "Sistemde yapılan önemli işlemleri görüntüleyin.",
+    href: "/audit-logs",
+    icon: History,
   },
   {
     title: "Uygulama Bilgileri",
@@ -72,7 +79,7 @@ export default function SettingsPage() {
         </p>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {settingCards.map((card) => {
           const Icon = card.icon;
 

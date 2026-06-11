@@ -8,6 +8,7 @@ import {
 } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
 export type ImportantDateFormState = {
@@ -217,6 +218,14 @@ export async function createImportantDateAction(
       select: { id: true },
     });
     importantDateId = importantDate.id;
+    await createAuditLog({
+      entityType: "IMPORTANT_DATE",
+      entityId: importantDateId,
+      action: "CREATE",
+      title: `Önemli tarih oluşturuldu: ${parsed.data.title}`,
+      description: "Hatırlatma kaydı oluşturuldu.",
+      after: parsed.data,
+    });
   } catch {
     return { message: "Önemli tarih kaydı oluşturulurken bir hata oluştu." };
   }
@@ -237,10 +246,23 @@ export async function updateImportantDateAction(
   }
 
   try {
+    const before = await prisma.importantDate.findFirst({
+      where: { id: importantDateId, deletedAt: null },
+    });
+
     await prisma.importantDate.update({
       where: { id: importantDateId, deletedAt: null },
       data: parsed.data,
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "IMPORTANT_DATE",
+      entityId: importantDateId,
+      action: "UPDATE",
+      title: `Önemli tarih güncellendi: ${parsed.data.title}`,
+      description: "Hatırlatma bilgilerinde değişiklik yapıldı.",
+      before,
+      after: parsed.data,
     });
   } catch {
     return { message: "Önemli tarih kaydı güncellenirken bir hata oluştu." };
@@ -253,10 +275,18 @@ export async function updateImportantDateAction(
 
 export async function deleteImportantDateAction(importantDateId: string) {
   try {
-    await prisma.importantDate.update({
+    const importantDate = await prisma.importantDate.update({
       where: { id: importantDateId, deletedAt: null },
       data: { deletedAt: new Date() },
-      select: { id: true },
+      select: { id: true, title: true, category: true, status: true, date: true },
+    });
+    await createAuditLog({
+      entityType: "IMPORTANT_DATE",
+      entityId: importantDate.id,
+      action: "SOFT_DELETE",
+      title: `Önemli tarih silindi: ${importantDate.title}`,
+      description: "Kayıt çöp kutusuna taşındı.",
+      before: importantDate,
     });
   } catch {
     redirect(`/important-dates/${importantDateId}?error=delete`);
@@ -268,10 +298,18 @@ export async function deleteImportantDateAction(importantDateId: string) {
 
 export async function markImportantDateDoneAction(importantDateId: string) {
   try {
-    await prisma.importantDate.update({
+    const importantDate = await prisma.importantDate.update({
       where: { id: importantDateId, deletedAt: null },
       data: { status: "DONE" },
-      select: { id: true },
+      select: { id: true, title: true, status: true },
+    });
+    await createAuditLog({
+      entityType: "IMPORTANT_DATE",
+      entityId: importantDate.id,
+      action: "STATUS_CHANGE",
+      title: `Önemli tarih tamamlandı: ${importantDate.title}`,
+      description: "Hatırlatma durumu Tamamlandı olarak değiştirildi.",
+      after: importantDate,
     });
   } catch {
     redirect(`/important-dates/${importantDateId}?error=status`);
@@ -283,10 +321,18 @@ export async function markImportantDateDoneAction(importantDateId: string) {
 
 export async function markImportantDatePendingAction(importantDateId: string) {
   try {
-    await prisma.importantDate.update({
+    const importantDate = await prisma.importantDate.update({
       where: { id: importantDateId, deletedAt: null },
       data: { status: "PENDING" },
-      select: { id: true },
+      select: { id: true, title: true, status: true },
+    });
+    await createAuditLog({
+      entityType: "IMPORTANT_DATE",
+      entityId: importantDate.id,
+      action: "STATUS_CHANGE",
+      title: `Önemli tarih bekliyor yapıldı: ${importantDate.title}`,
+      description: "Hatırlatma durumu Bekliyor olarak değiştirildi.",
+      after: importantDate,
     });
   } catch {
     redirect(`/important-dates/${importantDateId}?error=status`);

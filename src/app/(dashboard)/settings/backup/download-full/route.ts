@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import JSZip from "jszip";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import {
   createBackupMetadata,
   formatFullBackupFileName,
@@ -110,11 +111,24 @@ export async function GET() {
       compression: "DEFLATE",
       compressionOptions: { level: 6 },
     });
+    const fileName = formatFullBackupFileName(backupDate);
+
+    await createAuditLog({
+      entityType: "BACKUP",
+      action: "FULL_BACKUP_DOWNLOAD",
+      title: "Tam yedek indirildi",
+      description: "Veritabanı ve upload metadata paketi ZIP olarak indirildi.",
+      metadata: {
+        fileName,
+        size: archive.byteLength,
+        uploadsIncluded: uploads.exists,
+      },
+    });
 
     return new Response(archive, {
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="${formatFullBackupFileName(backupDate)}"`,
+        "Content-Disposition": `attachment; filename="${fileName}"`,
         "Cache-Control": "no-store",
       },
     });

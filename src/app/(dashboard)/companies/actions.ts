@@ -3,6 +3,7 @@
 import { CompanyType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
 export type CompanyFormState = {
@@ -146,6 +147,14 @@ export async function createCompanyAction(
       select: { id: true },
     });
     companyId = company.id;
+    await createAuditLog({
+      entityType: "COMPANY",
+      entityId: companyId,
+      action: "CREATE",
+      title: `Cari oluşturuldu: ${parsed.data.name}`,
+      description: `${parsed.data.defaultCurrency} para birimli cari kaydı oluşturuldu.`,
+      after: parsed.data,
+    });
   } catch {
     return { message: "Cari kaydı oluşturulurken bir hata oluştu." };
   }
@@ -166,10 +175,23 @@ export async function updateCompanyAction(
   }
 
   try {
+    const before = await prisma.company.findFirst({
+      where: { id: companyId, deletedAt: null },
+    });
+
     await prisma.company.update({
       where: { id: companyId, deletedAt: null },
       data: parsed.data,
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "COMPANY",
+      entityId: companyId,
+      action: "UPDATE",
+      title: `Cari güncellendi: ${parsed.data.name}`,
+      description: "Cari bilgilerinde değişiklik yapıldı.",
+      before,
+      after: parsed.data,
     });
   } catch {
     return { message: "Cari kaydı güncellenirken bir hata oluştu." };
@@ -182,10 +204,18 @@ export async function updateCompanyAction(
 
 export async function deleteCompanyAction(companyId: string) {
   try {
-    await prisma.company.update({
+    const company = await prisma.company.update({
       where: { id: companyId, deletedAt: null },
       data: { deletedAt: new Date() },
-      select: { id: true },
+      select: { id: true, name: true, type: true, defaultCurrency: true },
+    });
+    await createAuditLog({
+      entityType: "COMPANY",
+      entityId: company.id,
+      action: "SOFT_DELETE",
+      title: `Cari silindi: ${company.name}`,
+      description: "Kayıt çöp kutusuna taşındı.",
+      before: company,
     });
   } catch {
     redirect(`/companies/${companyId}?error=delete`);

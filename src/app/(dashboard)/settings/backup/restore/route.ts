@@ -1,3 +1,4 @@
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { maxBackupZipSize, restoreFromBackupZip } from "@/lib/backup-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -49,6 +50,19 @@ export async function POST(request: Request) {
   try {
     await prisma.$disconnect();
     const result = await restoreFromBackupZip(file);
+    await createAuditLog({
+      entityType: "RESTORE",
+      action: "BACKUP_RESTORE",
+      title: "Yedek geri yüklendi",
+      description: "Tam yedek ZIP dosyası içeri aktarıldı. Server yeniden başlatılmalı.",
+      metadata: {
+        fileName: file.name,
+        size: file.size,
+        restoredUploadFileCount: result.restoredUploadFileCount,
+        restoredDatabase: result.restoredDatabase,
+        safetyBackupPath: result.safetyBackupPath ? "storage/restore-backups" : null,
+      },
+    });
 
     return Response.json(result);
   } catch (error) {
@@ -61,6 +75,18 @@ export async function POST(request: Request) {
       message.includes("geri alma işlemi tamamlanamadı")
         ? 500
         : 400;
+
+    await createAuditLog({
+      entityType: "RESTORE",
+      action: "BACKUP_RESTORE",
+      title: "Yedek geri yükleme başarısız",
+      description: message,
+      metadata: {
+        fileName: file.name,
+        size: file.size,
+        status,
+      },
+    });
 
     return Response.json(
       {

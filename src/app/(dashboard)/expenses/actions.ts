@@ -3,6 +3,7 @@
 import { ExpenseStatus, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { ensureDefaultExpenseCategories } from "@/lib/expense-categories";
 import { prisma } from "@/lib/prisma";
 
@@ -181,6 +182,14 @@ export async function createExpenseAction(
       select: { id: true },
     });
     expenseId = expense.id;
+    await createAuditLog({
+      entityType: "EXPENSE",
+      entityId: expenseId,
+      action: "CREATE",
+      title: `Gider oluşturuldu: ${parsed.data.title}`,
+      description: `${parsed.data.amount.toString()} ${parsed.data.currency} tutarlı gider oluşturuldu.`,
+      after: parsed.data,
+    });
   } catch {
     return { message: "Gider kaydı oluşturulurken bir hata oluştu." };
   }
@@ -208,7 +217,6 @@ export async function updateExpenseAction(
   try {
     const existingExpense = await prisma.expense.findFirst({
       where: { id: expenseId, deletedAt: null },
-      select: { financialAccountId: true },
     });
 
     if (!existingExpense) {
@@ -221,6 +229,15 @@ export async function updateExpenseAction(
       where: { id: expenseId, deletedAt: null },
       data: parsed.data,
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "EXPENSE",
+      entityId: expenseId,
+      action: "UPDATE",
+      title: `Gider güncellendi: ${parsed.data.title}`,
+      description: "Gider bilgilerinde değişiklik yapıldı.",
+      before: existingExpense,
+      after: parsed.data,
     });
   } catch {
     return { message: "Gider kaydı güncellenirken bir hata oluştu." };
@@ -244,9 +261,24 @@ export async function deleteExpenseAction(expenseId: string) {
     const expense = await prisma.expense.update({
       where: { id: expenseId, deletedAt: null },
       data: { deletedAt: new Date() },
-      select: { financialAccountId: true },
+      select: {
+        id: true,
+        title: true,
+        financialAccountId: true,
+        amount: true,
+        currency: true,
+        status: true,
+      },
     });
     financialAccountId = expense.financialAccountId;
+    await createAuditLog({
+      entityType: "EXPENSE",
+      entityId: expense.id,
+      action: "SOFT_DELETE",
+      title: `Gider silindi: ${expense.title}`,
+      description: "Kayıt çöp kutusuna taşındı.",
+      before: expense,
+    });
   } catch {
     redirect(`/expenses/${expenseId}?error=delete`);
   }

@@ -3,6 +3,7 @@
 import { InvoiceStatus, InvoiceType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 import { getManualInvoiceStatus } from "@/lib/invoice-utils";
 
@@ -204,6 +205,14 @@ export async function createInvoiceAction(
       select: { id: true },
     });
     invoiceId = invoice.id;
+    await createAuditLog({
+      entityType: "INVOICE",
+      entityId: invoiceId,
+      action: "CREATE",
+      title: `Fatura oluşturuldu: ${parsed.data.invoiceNumber}`,
+      description: `${parsed.data.currency} ${parsed.data.totalAmount.toString()} tutarlı fatura oluşturuldu.`,
+      after: parsed.data,
+    });
   } catch {
     return { message: "Fatura kaydı oluşturulurken bir hata oluştu." };
   }
@@ -224,10 +233,23 @@ export async function updateInvoiceAction(
   }
 
   try {
+    const before = await prisma.invoice.findFirst({
+      where: { id: invoiceId, deletedAt: null },
+    });
+
     await prisma.invoice.update({
       where: { id: invoiceId, deletedAt: null },
       data: parsed.data,
       select: { id: true },
+    });
+    await createAuditLog({
+      entityType: "INVOICE",
+      entityId: invoiceId,
+      action: "UPDATE",
+      title: `Fatura güncellendi: ${parsed.data.invoiceNumber}`,
+      description: "Fatura bilgilerinde değişiklik yapıldı.",
+      before,
+      after: parsed.data,
     });
   } catch {
     return { message: "Fatura kaydı güncellenirken bir hata oluştu." };
@@ -240,10 +262,18 @@ export async function updateInvoiceAction(
 
 export async function deleteInvoiceAction(invoiceId: string) {
   try {
-    await prisma.invoice.update({
+    const invoice = await prisma.invoice.update({
       where: { id: invoiceId, deletedAt: null },
       data: { deletedAt: new Date() },
-      select: { id: true },
+      select: { id: true, invoiceNumber: true, totalAmount: true, currency: true, status: true },
+    });
+    await createAuditLog({
+      entityType: "INVOICE",
+      entityId: invoice.id,
+      action: "SOFT_DELETE",
+      title: `Fatura silindi: ${invoice.invoiceNumber}`,
+      description: "Kayıt çöp kutusuna taşındı.",
+      before: invoice,
     });
   } catch {
     redirect(`/invoices/${invoiceId}?error=delete`);
