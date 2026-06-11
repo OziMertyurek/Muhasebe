@@ -74,6 +74,20 @@ PowerShell'de `npm.ps1` çalıştırma kısıtı varsa aynı komutları `npm.cmd
 npm.cmd run dev
 ```
 
+## Antigravity Olmadan Çalıştırma
+
+Antigravity şart değildir. Bu proje Windows üzerinde normal bir local web uygulaması olarak çalışır. Bilgisayarda Node.js yüklü olmalıdır.
+
+Windows'ta hızlı kullanım:
+
+1. İlk kurulum için proje klasöründeki `setup.bat` dosyasını çalıştırın.
+2. Günlük kullanım için `start-dev.bat` dosyasını çalıştırın.
+3. Tarayıcıdan `http://localhost:3000` adresini açın.
+
+Alternatif olarak production modda çalıştırmak için `start-prod.bat` dosyasını kullanabilirsiniz. Bu dosya önce build alır, sonra `npm run start` ile uygulamayı başlatır.
+
+Kayıtlar `prisma/dev.db` dosyasında saklanır. Upload dosyaları `storage/uploads/` içinde tutulur. Bu dosyalar GitHub'a gitmez; düzenli olarak `Ayarlar > Yedekleme > Tam Yedek İndir` ile tam yedek alınmalıdır.
+
 ## Ortam Değişkenleri
 
 `.env.example` dosyasına göre local `.env` dosyası oluşturun.

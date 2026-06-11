@@ -32,6 +32,34 @@ Tarayıcıdan `http://localhost:3000` adresini açın.
 
 Daha önce alınmış bir tam yedek ZIP dosyanız varsa, ilk kurulumdan sonra `Ayarlar > Yedekleme` sayfasından bu yedeği içeri aktarabilirsiniz.
 
+## Windows Hızlı Başlatma
+
+Antigravity olmadan Windows bilgisayarda çalıştırmak için proje kökündeki `.bat` dosyalarını kullanabilirsiniz.
+
+İlk kurulum:
+
+```text
+setup.bat
+```
+
+Bu dosya sırasıyla `npm install`, `npm run prisma:generate` ve `npx prisma migrate dev` komutlarını çalıştırır.
+
+Günlük kullanım:
+
+```text
+start-dev.bat
+```
+
+Bu dosya Prisma client kontrolünü yapar, tarayıcıda `http://localhost:3000` adresini açar ve `npm run dev` komutuyla local server'ı başlatır.
+
+Production modda çalıştırmak için:
+
+```text
+start-prod.bat
+```
+
+Bu dosya `npm run build` çalıştırır ve ardından `npm run start` ile uygulamayı başlatır.
+
 ## .env Oluşturma
 
 `.env.example` dosyasını temel alarak local `.env` dosyanızı oluşturun.
