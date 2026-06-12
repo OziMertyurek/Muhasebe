@@ -143,7 +143,7 @@ export async function uploadFileAction(
   ) {
     errors.file =
       relatedType === "INVOICE"
-        ? "Bu dosya türü desteklenmiyor. Fatura dosyaları için PDF, PNG, JPG veya WebP yükleyebilirsiniz."
+        ? "Bu dosya türü desteklenmiyor. Fatura dosyaları için PDF, PNG, JPG, WebP veya HTML yükleyebilirsiniz."
         : "Bu dosya türü desteklenmiyor. PDF, PNG, JPG, WebP, DOC/DOCX veya XLS/XLSX yükleyebilirsiniz.";
   }
 

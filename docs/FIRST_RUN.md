@@ -32,6 +32,19 @@ Tarayıcıdan `http://localhost:3000` adresini açın.
 
 Daha önce alınmış bir tam yedek ZIP dosyanız varsa, ilk kurulumdan sonra `Ayarlar > Yedekleme` sayfasından bu yedeği içeri aktarabilirsiniz.
 
+## MarkItDown Metin Çıkarma Kurulumu
+
+AI Fatura Okuma ekranındaki `MarkItDown ile Metin Çıkar` butonunu kullanmak için bilgisayarda Python kurulu olmalıdır.
+
+Python worker bağımlılığını kurun:
+
+```bash
+cd python-worker
+pip install -r requirements.txt
+```
+
+Bu özellik PDF, görsel veya HTML fatura dosyalarından ham metin çıkarır. Henüz otomatik fatura alanı çıkarmaz ve fatura kaydı oluşturmaz.
+
 ## Windows Hızlı Başlatma
 
 Antigravity olmadan Windows bilgisayarda çalıştırmak için proje kökündeki `.bat` dosyalarını kullanabilirsiniz.

@@ -16,6 +16,8 @@ const supportedMimeByExtension = new Map([
   [".jpg", "image/jpeg"],
   [".jpeg", "image/jpeg"],
   [".webp", "image/webp"],
+  [".html", "text/html"],
+  [".htm", "text/html"],
 ]);
 
 export function isAiExtractionSupportedFile(file: {
@@ -42,11 +44,14 @@ export function getAiExtractionFileWhere() {
       { mimeType: "image/png" },
       { mimeType: "image/jpeg" },
       { mimeType: "image/webp" },
+      { mimeType: "text/html" },
       { originalFileName: { endsWith: ".pdf" } },
       { originalFileName: { endsWith: ".png" } },
       { originalFileName: { endsWith: ".jpg" } },
       { originalFileName: { endsWith: ".jpeg" } },
       { originalFileName: { endsWith: ".webp" } },
+      { originalFileName: { endsWith: ".html" } },
+      { originalFileName: { endsWith: ".htm" } },
     ],
   };
 }

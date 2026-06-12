@@ -20,10 +20,16 @@ const invoiceFileMimeByExtension = new Map([
   [".jpg", "image/jpeg"],
   [".jpeg", "image/jpeg"],
   [".webp", "image/webp"],
+  [".html", "text/html"],
+  [".htm", "text/html"],
 ]);
 
 const archiveFileMimeByExtension = new Map([
-  ...invoiceFileMimeByExtension,
+  [".pdf", "application/pdf"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"],
   [".doc", "application/msword"],
   [".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
   [".xls", "application/vnd.ms-excel"],
@@ -31,8 +37,6 @@ const archiveFileMimeByExtension = new Map([
 ]);
 
 const blockedExtensions = new Set([
-  ".html",
-  ".htm",
   ".js",
   ".exe",
   ".bat",

@@ -62,7 +62,8 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
       <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-[#16201b]">Dosya bilgileri</h2>
         <p className="mt-2 text-sm leading-6 text-[#647067]">
-          Fatura ve AI analiz dosyaları için sadece PDF, PNG, JPG veya WebP desteklenir.
+          Fatura ve AI analiz dosyaları için PDF, PNG, JPG, WebP veya HTML desteklenir.
+          HTML dosyaları tarayıcıda gösterilmez, sadece metin çıkarma için işlenir.
         </p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-medium text-[#46534b]">
@@ -70,7 +71,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
             <input
               name="file"
               type="file"
-              accept=".pdf,.png,.jpg,.jpeg,.webp,.doc,.docx,.xls,.xlsx,application/pdf,image/png,image/jpeg,image/webp"
+              accept=".pdf,.png,.jpg,.jpeg,.webp,.html,.htm,.doc,.docx,.xls,.xlsx,application/pdf,image/png,image/jpeg,image/webp,text/html"
               className="mt-2 block w-full rounded-md border border-[#cfd8cf] bg-white px-3 py-2 text-sm text-[#16201b] outline-none transition file:mr-3 file:rounded-md file:border-0 file:bg-[#e8f2ed] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-[#14543f] focus:border-[#1f6f54]"
               required
             />

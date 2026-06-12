@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AiExtractionStatus } from "@prisma/client";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Pencil } from "lucide-react";
+import { ArrowLeft, ExternalLink, FileText, Pencil } from "lucide-react";
 import {
   updateAiExtractionStatusAction,
 } from "@/app/(dashboard)/ai-extraction/actions";
@@ -18,6 +18,7 @@ type AiExtractionDetailPageProps = {
   params: Promise<{ id: string }>;
   searchParams?: Promise<{
     error?: string;
+    extracted?: string;
   }>;
 };
 
@@ -30,7 +31,15 @@ function InfoItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-function TextBlock({ title, value }: { title: string; value: string | null }) {
+function TextBlock({
+  title,
+  value,
+  emptyMessage = "Henüz veri yok.",
+}: {
+  title: string;
+  value: string | null;
+  emptyMessage?: string;
+}) {
   return (
     <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
       <h2 className="text-lg font-semibold text-[#16201b]">{title}</h2>
@@ -39,7 +48,7 @@ function TextBlock({ title, value }: { title: string; value: string | null }) {
           {value}
         </pre>
       ) : (
-        <p className="mt-4 text-sm text-[#647067]">Henüz veri yok.</p>
+        <p className="mt-4 text-sm text-[#647067]">{emptyMessage}</p>
       )}
     </div>
   );
@@ -103,18 +112,38 @@ export default async function AiExtractionDetailPage({
             Bu kayıt sadece AI/OCR entegrasyonu için hazırlık ve manuel simülasyon amaçlıdır.
           </p>
         </div>
-        <Link
-          href={`/ai-extraction/${job.id}/edit`}
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
-        >
-          <Pencil className="h-4 w-4" />
-          Düzenle
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <form action={`/ai-extraction/${job.id}/extract`} method="post">
+            <button className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]">
+              <FileText className="h-4 w-4" />
+              MarkItDown ile Metin Çıkar
+            </button>
+          </form>
+          <Link
+            href={`/ai-extraction/${job.id}/edit`}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            <Pencil className="h-4 w-4" />
+            Düzenle
+          </Link>
+        </div>
       </section>
 
       {query?.error === "status" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
           Durum güncellenirken bir hata oluştu.
+        </div>
+      ) : null}
+
+      {query?.error === "markitdown" ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          MarkItDown çalıştırılamadı. Python ve markitdown paketinin kurulu olduğundan emin olun.
+        </div>
+      ) : null}
+
+      {query?.extracted === "1" ? (
+        <div className="rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
+          Dosyadan metin başarıyla çıkarıldı ve ham metin alanına kaydedildi.
         </div>
       ) : null}
 
@@ -198,7 +227,11 @@ export default async function AiExtractionDetailPage({
       </section>
 
       <section className="grid gap-5 lg:grid-cols-3">
-        <TextBlock title="Ham çıkarılan metin" value={job.rawExtractedText} />
+        <TextBlock
+          title="Ham çıkarılan metin"
+          value={job.rawExtractedText}
+          emptyMessage="Henüz metin çıkarılmadı."
+        />
         <TextBlock title="Çıkarılan JSON" value={job.extractedJson} />
         <TextBlock title="Hata mesajı" value={job.errorMessage} />
       </section>

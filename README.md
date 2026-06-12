@@ -74,6 +74,19 @@ PowerShell'de `npm.ps1` çalıştırma kısıtı varsa aynı komutları `npm.cmd
 npm.cmd run dev
 ```
 
+## MarkItDown Metin Çıkarma Kurulumu
+
+AI Fatura Okuma hazırlık ekranındaki `MarkItDown ile Metin Çıkar` özelliği için bilgisayarda Python kurulu olmalıdır.
+
+Python worker bağımlılığını kurmak için:
+
+```bash
+cd python-worker
+pip install -r requirements.txt
+```
+
+Bu özellik PDF, görsel veya HTML fatura dosyasından Markdown/metin çıkarmak için kullanılır. Henüz fatura alanlarını otomatik doldurmaz ve `Invoice` kaydı oluşturmaz.
+
 ## Antigravity Olmadan Çalıştırma
 
 Antigravity şart değildir. Bu proje Windows üzerinde normal bir local web uygulaması olarak çalışır. Bilgisayarda Node.js yüklü olmalıdır.
@@ -173,9 +186,10 @@ Hazır olan altyapı:
 - AI Fatura Okuma hazırlık ekranı
 - Dosya Arşivi entegrasyonu
 - Dosya seçerek analiz kaydı oluşturma
+- MarkItDown ile local dosyadan ham metin çıkarma
 - Ham metin, JSON, güven skoru ve hata mesajı alanları
 
-İleride PDF/görsel faturadan veri çıkarma, çıkarılan alanları kullanıcıya onaylatma ve onaydan sonra `Invoice` kaydı oluşturma akışı eklenebilir.
+MarkItDown entegrasyonu sadece dosyadan metin çıkarır. OpenAI, LLM veya otomatik fatura oluşturma entegrasyonu henüz yoktur. İleride çıkarılan metni fatura alanlarına dönüştürme, kullanıcıya onaylatma ve onaydan sonra `Invoice` kaydı oluşturma akışı eklenebilir.
 
 ## Güvenlik Notları
 
