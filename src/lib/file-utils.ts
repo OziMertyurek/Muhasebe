@@ -14,32 +14,51 @@ export const fileRelatedTypeOptions = Object.entries(fileRelatedTypeLabels).map(
   ([value, label]) => ({ value: value as FileRelatedType, label }),
 );
 
-const allowedMimeTypes = new Set([
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-  "image/webp",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "application/vnd.ms-excel",
-  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+const invoiceFileMimeByExtension = new Map([
+  [".pdf", "application/pdf"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"],
 ]);
 
-const allowedExtensions = new Set([
-  ".pdf",
-  ".png",
-  ".jpg",
-  ".jpeg",
-  ".webp",
-  ".doc",
-  ".docx",
-  ".xls",
-  ".xlsx",
+const archiveFileMimeByExtension = new Map([
+  ...invoiceFileMimeByExtension,
+  [".doc", "application/msword"],
+  [".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  [".xls", "application/vnd.ms-excel"],
+  [".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"],
 ]);
 
-export function isAllowedUploadType(fileName: string, mimeType: string) {
+const blockedExtensions = new Set([
+  ".html",
+  ".htm",
+  ".js",
+  ".exe",
+  ".bat",
+  ".cmd",
+  ".ps1",
+  ".sh",
+  ".php",
+  ".svg",
+]);
+
+export function isAllowedUploadType(
+  fileName: string,
+  mimeType: string,
+  relatedType?: FileRelatedType,
+) {
   const extension = getFileExtension(fileName);
-  return allowedMimeTypes.has(mimeType) || allowedExtensions.has(extension);
+
+  if (!mimeType || blockedExtensions.has(extension)) {
+    return false;
+  }
+
+  const allowedMap = relatedType === "INVOICE"
+    ? invoiceFileMimeByExtension
+    : archiveFileMimeByExtension;
+
+  return allowedMap.get(extension) === mimeType;
 }
 
 export function getFileExtension(fileName: string) {
@@ -53,27 +72,18 @@ export function getFileExtension(fileName: string) {
   return cleanName.slice(dotIndex);
 }
 
-export function getSafeFileExtension(fileName: string, mimeType: string) {
+export function getSafeFileExtension(
+  fileName: string,
+  mimeType: string,
+  relatedType?: FileRelatedType,
+) {
   const extension = getFileExtension(fileName);
+  const allowedMap = relatedType === "INVOICE"
+    ? invoiceFileMimeByExtension
+    : archiveFileMimeByExtension;
 
-  if (allowedExtensions.has(extension)) {
+  if (allowedMap.get(extension) === mimeType) {
     return extension;
-  }
-
-  if (mimeType === "application/pdf") {
-    return ".pdf";
-  }
-
-  if (mimeType === "image/png") {
-    return ".png";
-  }
-
-  if (mimeType === "image/jpeg") {
-    return ".jpg";
-  }
-
-  if (mimeType === "image/webp") {
-    return ".webp";
   }
 
   return "";

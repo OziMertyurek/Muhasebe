@@ -139,9 +139,12 @@ export async function uploadFileAction(
   if (
     fileValue instanceof File &&
     fileValue.size > 0 &&
-    !isAllowedUploadType(fileValue.name, fileValue.type)
+    !isAllowedUploadType(fileValue.name, fileValue.type, relatedType ?? undefined)
   ) {
-    errors.file = "Sadece PDF, PNG, JPG/JPEG, WebP, DOC/DOCX ve XLS/XLSX dosyaları yüklenebilir.";
+    errors.file =
+      relatedType === "INVOICE"
+        ? "Bu dosya türü desteklenmiyor. Fatura dosyaları için PDF, PNG, JPG veya WebP yükleyebilirsiniz."
+        : "Bu dosya türü desteklenmiyor. PDF, PNG, JPG, WebP, DOC/DOCX veya XLS/XLSX yükleyebilirsiniz.";
   }
 
   if (!relatedType || !(fileValue instanceof File) || Object.keys(errors).length > 0) {
@@ -158,7 +161,7 @@ export async function uploadFileAction(
     };
   }
 
-  const extension = getSafeFileExtension(fileValue.name, fileValue.type);
+  const extension = getSafeFileExtension(fileValue.name, fileValue.type, relatedType);
   const storedFileName = `${randomUUID()}${extension}`;
   const uploadDirectory = join(process.cwd(), "storage", "uploads");
   const absolutePath = join(uploadDirectory, storedFileName);

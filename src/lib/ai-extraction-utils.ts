@@ -10,14 +10,13 @@ export {
   validateJsonText,
 } from "@/lib/ai-extraction-labels";
 
-const supportedMimeTypes = new Set([
-  "application/pdf",
-  "image/png",
-  "image/jpeg",
-  "image/webp",
+const supportedMimeByExtension = new Map([
+  [".pdf", "application/pdf"],
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"],
 ]);
-
-const supportedExtensions = [".pdf", ".png", ".jpg", ".jpeg", ".webp"];
 
 export function isAiExtractionSupportedFile(file: {
   relatedType: FileRelatedType;
@@ -28,12 +27,11 @@ export function isAiExtractionSupportedFile(file: {
     return false;
   }
 
-  if (file.mimeType && supportedMimeTypes.has(file.mimeType)) {
-    return true;
-  }
-
   const lowerName = file.originalFileName.toLowerCase();
-  return supportedExtensions.some((extension) => lowerName.endsWith(extension));
+  const dotIndex = lowerName.lastIndexOf(".");
+  const extension = dotIndex === -1 ? "" : lowerName.slice(dotIndex);
+
+  return Boolean(file.mimeType) && supportedMimeByExtension.get(extension) === file.mimeType;
 }
 
 export function getAiExtractionFileWhere() {

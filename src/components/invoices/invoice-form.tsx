@@ -72,6 +72,9 @@ export function InvoiceForm({
 
       <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-[#16201b]">Fatura bilgileri</h2>
+        <p className="mt-2 text-sm leading-6 text-[#647067]">
+          Vade tarihi girerseniz sistem otomatik hatırlatma oluşturur.
+        </p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-medium text-[#46534b]">
             Cari firma

@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { syncRecurringExpenseReminder } from "@/lib/auto-reminder-utils";
 import { ensureDefaultExpenseCategories } from "@/lib/expense-categories";
 import { prisma } from "@/lib/prisma";
 
@@ -158,7 +159,7 @@ export async function createRecurringExpenseAction(
   try {
     const recurringExpense = await prisma.recurringExpense.create({
       data: parsed.data,
-      select: { id: true },
+      select: { id: true, title: true, dayOfMonth: true, isActive: true, deletedAt: true },
     });
     recurringExpenseId = recurringExpense.id;
     await createAuditLog({
@@ -169,11 +170,13 @@ export async function createRecurringExpenseAction(
       description: `${parsed.data.amount.toString()} ${parsed.data.currency} tutarlı sabit gider oluşturuldu.`,
       after: parsed.data,
     });
+    await syncRecurringExpenseReminder(recurringExpense);
   } catch {
     return { message: "Sabit gider kaydı oluşturulurken bir hata oluştu." };
   }
 
   revalidatePath("/recurring-expenses");
+  revalidatePath("/important-dates");
   redirect(`/recurring-expenses/${recurringExpenseId}`);
 }
 
@@ -193,11 +196,12 @@ export async function updateRecurringExpenseAction(
       where: { id: recurringExpenseId, deletedAt: null },
     });
 
-    await prisma.recurringExpense.update({
+    const recurringExpense = await prisma.recurringExpense.update({
       where: { id: recurringExpenseId, deletedAt: null },
       data: parsed.data,
-      select: { id: true },
+      select: { id: true, title: true, dayOfMonth: true, isActive: true, deletedAt: true },
     });
+    await syncRecurringExpenseReminder(recurringExpense);
     await createAuditLog({
       entityType: "RECURRING_EXPENSE",
       entityId: recurringExpenseId,
@@ -213,6 +217,7 @@ export async function updateRecurringExpenseAction(
 
   revalidatePath("/recurring-expenses");
   revalidatePath(`/recurring-expenses/${recurringExpenseId}`);
+  revalidatePath("/important-dates");
   redirect(`/recurring-expenses/${recurringExpenseId}`);
 }
 
@@ -221,8 +226,17 @@ export async function deleteRecurringExpenseAction(recurringExpenseId: string) {
     const recurringExpense = await prisma.recurringExpense.update({
       where: { id: recurringExpenseId, deletedAt: null },
       data: { deletedAt: new Date(), isActive: false },
-      select: { id: true, title: true, amount: true, currency: true, dayOfMonth: true },
+      select: {
+        id: true,
+        title: true,
+        amount: true,
+        currency: true,
+        dayOfMonth: true,
+        isActive: true,
+        deletedAt: true,
+      },
     });
+    await syncRecurringExpenseReminder(recurringExpense);
     await createAuditLog({
       entityType: "RECURRING_EXPENSE",
       entityId: recurringExpense.id,
@@ -236,5 +250,6 @@ export async function deleteRecurringExpenseAction(recurringExpenseId: string) {
   }
 
   revalidatePath("/recurring-expenses");
+  revalidatePath("/important-dates");
   redirect("/recurring-expenses");
 }

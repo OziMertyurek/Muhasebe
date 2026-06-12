@@ -73,6 +73,9 @@ export function RecurringExpenseForm({
 
       <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-[#16201b]">Sabit gider bilgileri</h2>
+        <p className="mt-2 text-sm leading-6 text-[#647067]">
+          Aktif sabit giderler için aylık hatırlatma oluşturulur.
+        </p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-medium text-[#46534b]">
             Gider adı

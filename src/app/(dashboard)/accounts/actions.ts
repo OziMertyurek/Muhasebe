@@ -4,6 +4,7 @@ import { FinancialAccountType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { cancelCreditCardReminders, syncCreditCardReminders } from "@/lib/auto-reminder-utils";
 import { prisma } from "@/lib/prisma";
 
 export type AccountFormState = {
@@ -181,7 +182,7 @@ export async function createAccountAction(
   try {
     const account = await prisma.financialAccount.create({
       data: parsed.data,
-      select: { id: true },
+      select: { id: true, name: true, type: true, statementDay: true, dueDay: true },
     });
     accountId = account.id;
     await createAuditLog({
@@ -192,11 +193,13 @@ export async function createAccountAction(
       description: `${parsed.data.currency} para birimli hesap oluşturuldu.`,
       after: parsed.data,
     });
+    await syncCreditCardReminders(account);
   } catch {
     return { message: "Hesap kaydı oluşturulurken bir hata oluştu." };
   }
 
   revalidatePath("/accounts");
+  revalidatePath("/important-dates");
   redirect(`/accounts/${accountId}`);
 }
 
@@ -221,6 +224,13 @@ export async function updateAccountAction(
       data: parsed.data,
       select: { id: true },
     });
+    await syncCreditCardReminders({
+      id: accountId,
+      name: parsed.data.name,
+      type: parsed.data.type,
+      statementDay: parsed.data.statementDay,
+      dueDay: parsed.data.dueDay,
+    });
     await createAuditLog({
       entityType: "FINANCIAL_ACCOUNT",
       entityId: accountId,
@@ -236,6 +246,7 @@ export async function updateAccountAction(
 
   revalidatePath("/accounts");
   revalidatePath(`/accounts/${accountId}`);
+  revalidatePath("/important-dates");
   redirect(`/accounts/${accountId}`);
 }
 
@@ -254,10 +265,12 @@ export async function deleteAccountAction(accountId: string) {
       description: "Kayıt çöp kutusuna taşındı.",
       before: account,
     });
+    await cancelCreditCardReminders(account.id, "Finansal hesap silindiği için kredi kartı hatırlatmaları iptal edildi.");
   } catch {
     redirect(`/accounts/${accountId}?error=delete`);
   }
 
   revalidatePath("/accounts");
+  revalidatePath("/important-dates");
   redirect("/accounts");
 }

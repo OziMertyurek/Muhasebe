@@ -1,5 +1,10 @@
 import { accountTypeLabels } from "@/lib/account-utils";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import {
+  syncCreditCardReminders,
+  syncInvoiceDueReminder,
+  syncRecurringExpenseReminder,
+} from "@/lib/auto-reminder-utils";
 import { companyTypeLabels, formatDate } from "@/lib/company-utils";
 import { expenseStatusLabels } from "@/lib/expense-utils";
 import { importantDateCategoryLabels } from "@/lib/important-date-utils";
@@ -290,8 +295,17 @@ export async function restoreRecord(type: TrashRecordType, id: string) {
       const invoice = await prisma.invoice.update({
         where: { id },
         data: { deletedAt: null },
-        select: { id: true, invoiceNumber: true, status: true },
+        select: {
+          id: true,
+          invoiceNumber: true,
+          type: true,
+          dueDate: true,
+          status: true,
+          companyId: true,
+          deletedAt: true,
+        },
       });
+      await syncInvoiceDueReminder(invoice);
       await createAuditLog({
         entityType: "INVOICE",
         entityId: invoice.id,
@@ -322,8 +336,9 @@ export async function restoreRecord(type: TrashRecordType, id: string) {
       const account = await prisma.financialAccount.update({
         where: { id },
         data: { deletedAt: null, isActive: true },
-        select: { id: true, name: true, type: true },
+        select: { id: true, name: true, type: true, statementDay: true, dueDay: true },
       });
+      await syncCreditCardReminders(account);
       await createAuditLog({
         entityType: "FINANCIAL_ACCOUNT",
         entityId: account.id,
@@ -352,8 +367,17 @@ export async function restoreRecord(type: TrashRecordType, id: string) {
       const recurringExpense = await prisma.recurringExpense.update({
         where: { id },
         data: { deletedAt: null, isActive: true },
-        select: { id: true, title: true, amount: true, currency: true },
+        select: {
+          id: true,
+          title: true,
+          amount: true,
+          currency: true,
+          dayOfMonth: true,
+          isActive: true,
+          deletedAt: true,
+        },
       });
+      await syncRecurringExpenseReminder(recurringExpense);
       await createAuditLog({
         entityType: "RECURRING_EXPENSE",
         entityId: recurringExpense.id,

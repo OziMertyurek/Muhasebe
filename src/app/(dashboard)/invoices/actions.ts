@@ -4,6 +4,7 @@ import { InvoiceStatus, InvoiceType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { syncInvoiceDueReminder } from "@/lib/auto-reminder-utils";
 import { prisma } from "@/lib/prisma";
 import { getManualInvoiceStatus } from "@/lib/invoice-utils";
 
@@ -202,7 +203,15 @@ export async function createInvoiceAction(
   try {
     const invoice = await prisma.invoice.create({
       data: parsed.data,
-      select: { id: true },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        type: true,
+        dueDate: true,
+        status: true,
+        companyId: true,
+        deletedAt: true,
+      },
     });
     invoiceId = invoice.id;
     await createAuditLog({
@@ -213,11 +222,13 @@ export async function createInvoiceAction(
       description: `${parsed.data.currency} ${parsed.data.totalAmount.toString()} tutarlı fatura oluşturuldu.`,
       after: parsed.data,
     });
+    await syncInvoiceDueReminder(invoice);
   } catch {
     return { message: "Fatura kaydı oluşturulurken bir hata oluştu." };
   }
 
   revalidatePath("/invoices");
+  revalidatePath("/important-dates");
   redirect(`/invoices/${invoiceId}`);
 }
 
@@ -237,11 +248,20 @@ export async function updateInvoiceAction(
       where: { id: invoiceId, deletedAt: null },
     });
 
-    await prisma.invoice.update({
+    const invoice = await prisma.invoice.update({
       where: { id: invoiceId, deletedAt: null },
       data: parsed.data,
-      select: { id: true },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        type: true,
+        dueDate: true,
+        status: true,
+        companyId: true,
+        deletedAt: true,
+      },
     });
+    await syncInvoiceDueReminder(invoice);
     await createAuditLog({
       entityType: "INVOICE",
       entityId: invoiceId,
@@ -257,6 +277,7 @@ export async function updateInvoiceAction(
 
   revalidatePath("/invoices");
   revalidatePath(`/invoices/${invoiceId}`);
+  revalidatePath("/important-dates");
   redirect(`/invoices/${invoiceId}`);
 }
 
@@ -265,8 +286,19 @@ export async function deleteInvoiceAction(invoiceId: string) {
     const invoice = await prisma.invoice.update({
       where: { id: invoiceId, deletedAt: null },
       data: { deletedAt: new Date() },
-      select: { id: true, invoiceNumber: true, totalAmount: true, currency: true, status: true },
+      select: {
+        id: true,
+        invoiceNumber: true,
+        type: true,
+        dueDate: true,
+        status: true,
+        companyId: true,
+        deletedAt: true,
+        totalAmount: true,
+        currency: true,
+      },
     });
+    await syncInvoiceDueReminder(invoice);
     await createAuditLog({
       entityType: "INVOICE",
       entityId: invoice.id,
@@ -280,5 +312,6 @@ export async function deleteInvoiceAction(invoiceId: string) {
   }
 
   revalidatePath("/invoices");
+  revalidatePath("/important-dates");
   redirect("/invoices");
 }

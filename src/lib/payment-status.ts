@@ -1,5 +1,6 @@
 import { InvoiceStatus, Prisma } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { syncInvoiceDueReminder } from "@/lib/auto-reminder-utils";
 import { prisma } from "@/lib/prisma";
 
 export async function updateInvoicePaymentStatus(invoiceId: string | null | undefined) {
@@ -14,6 +15,10 @@ export async function updateInvoicePaymentStatus(invoiceId: string | null | unde
       invoiceNumber: true,
       status: true,
       totalAmount: true,
+      type: true,
+      dueDate: true,
+      companyId: true,
+      deletedAt: true,
     },
   });
 
@@ -56,5 +61,6 @@ export async function updateInvoicePaymentStatus(invoiceId: string | null | unde
       after: { status: nextStatus },
       metadata: { paidTotal, totalAmount: invoice.totalAmount },
     });
+    await syncInvoiceDueReminder({ ...invoice, status: nextStatus });
   }
 }
