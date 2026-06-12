@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AiExtractionStatus } from "@prisma/client";
+import { AiExtractionStatus, type CompanyType } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, FileText, Pencil } from "lucide-react";
 import {
@@ -10,7 +10,8 @@ import {
   aiExtractionStatusOptions,
   formatConfidence,
 } from "@/lib/ai-extraction-utils";
-import { formatDate } from "@/lib/company-utils";
+import type { CompanyMatchResult } from "@/lib/company-matcher";
+import { companyTypeLabels, formatDate } from "@/lib/company-utils";
 import { fileRelatedTypeLabels, formatFileSize, getFileKind } from "@/lib/file-utils";
 import type { ParsedInvoiceData } from "@/lib/invoice-parser";
 import { prisma } from "@/lib/prisma";
@@ -21,6 +22,7 @@ type AiExtractionDetailPageProps = {
     error?: string;
     extracted?: string;
     parsed?: string;
+    companyMatched?: string;
   }>;
 };
 
@@ -128,6 +130,89 @@ function InvoicePreviewCard({ data }: { data: ParsedInvoiceData | null }) {
   );
 }
 
+function CompanyMatchCard({ data }: { data: CompanyMatchResult | null }) {
+  return (
+    <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-[#16201b]">Cari Eşleştirme</h2>
+          <p className="mt-2 text-sm leading-6 text-[#647067]">
+            Parser sonucundaki vergi no veya firma adına göre mevcut cariler önerilir. Bu aşamada
+            yeni cari veya fatura oluşturulmaz.
+          </p>
+        </div>
+        {data ? (
+          <span className="inline-flex w-fit rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-3 py-1 text-xs font-semibold text-[#46534b]">
+            {formatCompanyMatchType(data.matchType)} · %{Math.round(data.confidence * 100)}
+          </span>
+        ) : null}
+      </div>
+
+      {data ? (
+        <div className="mt-5 space-y-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <PreviewValue label="Eşleşme Tipi" value={formatCompanyMatchType(data.matchType)} />
+            <PreviewValue label="Güven" value={`%${Math.round(data.confidence * 100)}`} />
+            <PreviewValue label="Çıkan Vergi No" value={data.extracted.taxNumber} />
+            <PreviewValue label="Çıkan Firma" value={data.extracted.companyName} />
+          </div>
+
+          {data.matchedCompany ? (
+            <Link
+              href={`/companies/${data.matchedCompany.id}`}
+              className="block rounded-md border border-[#dce2dc] bg-[#fbfcfa] p-4 transition hover:border-[#aebdae]"
+            >
+              <p className="text-sm font-semibold text-[#16201b]">{data.matchedCompany.name}</p>
+              <p className="mt-1 text-sm text-[#647067]">
+                {companyTypeLabels[data.matchedCompany.type]} · VKN:{" "}
+                {data.matchedCompany.taxNumber || "-"} · Skor: %
+                {Math.round(data.matchedCompany.score * 100)}
+              </p>
+            </Link>
+          ) : (
+            <div className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-3 text-sm text-[#647067]">
+              Eşleşen cari bulunamadı.
+            </div>
+          )}
+
+          {data.candidates.length > 1 ? (
+            <div className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-4">
+              <p className="text-sm font-semibold text-[#223028]">Diğer adaylar</p>
+              <div className="mt-3 space-y-2">
+                {data.candidates.slice(1).map((candidate) => (
+                  <Link
+                    key={candidate.id}
+                    href={`/companies/${candidate.id}`}
+                    className="block text-sm text-[#46534b] hover:text-[#1f6f54]"
+                  >
+                    {candidate.name} · %{Math.round(candidate.score * 100)}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          ) : null}
+
+          {data.warnings.length > 0 ? (
+            <div className="rounded-md border border-[#ead7a4] bg-[#fffaf0] p-4">
+              <p className="text-sm font-semibold text-[#6f5220]">Uyarılar</p>
+              <ul className="mt-3 space-y-2 text-sm text-[#6f5220]">
+                {data.warnings.map((warning) => (
+                  <li key={warning}>- {warning}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : (
+        <p className="mt-4 text-sm leading-6 text-[#647067]">
+          Henüz cari eşleştirme yapılmadı. Önce fatura bilgilerini çıkarın, sonra Cari Eşleştir
+          butonunu kullanın.
+        </p>
+      )}
+    </section>
+  );
+}
+
 function parseExtractedInvoiceJson(value: string | null) {
   if (!value) {
     return null;
@@ -156,6 +241,24 @@ function parseExtractedInvoiceJson(value: string | null) {
       confidenceScore: getNumber(parsed, "confidenceScore") ?? 0,
       warnings: getStringArray(parsed, "warnings"),
     } satisfies ParsedInvoiceData;
+  } catch {
+    return null;
+  }
+}
+
+function parseCompanyMatchJson(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+
+    if (!isRecord(parsed) || !isRecord(parsed.companyMatch)) {
+      return null;
+    }
+
+    return normalizeCompanyMatch(parsed.companyMatch);
   } catch {
     return null;
   }
@@ -221,6 +324,71 @@ function formatInvoiceTypeSuggestion(value: ParsedInvoiceData["invoiceTypeSugges
   return "Belirlenemedi";
 }
 
+function normalizeCompanyMatch(value: Record<string, unknown>): CompanyMatchResult | null {
+  const matchType = value.matchType;
+
+  if (matchType !== "TAX_NUMBER" && matchType !== "NAME" && matchType !== "NONE") {
+    return null;
+  }
+
+  return {
+    matchType,
+    confidence: getNumber(value, "confidence") ?? 0,
+    extracted: {
+      taxNumber: isRecord(value.extracted) ? getNullableString(value.extracted, "taxNumber") : null,
+      companyName: isRecord(value.extracted)
+        ? getNullableString(value.extracted, "companyName")
+        : null,
+    },
+    matchedCompany: isRecord(value.matchedCompany)
+      ? normalizeMatchedCompany(value.matchedCompany)
+      : null,
+    candidates: Array.isArray(value.candidates)
+      ? value.candidates
+          .filter(isRecord)
+          .map(normalizeMatchedCompany)
+          .filter((company): company is NonNullable<CompanyMatchResult["matchedCompany"]> =>
+            Boolean(company),
+          )
+      : [],
+    warnings: getStringArray(value, "warnings"),
+  };
+}
+
+function normalizeMatchedCompany(value: Record<string, unknown>) {
+  const id = getNullableString(value, "id");
+  const name = getNullableString(value, "name");
+  const type = getCompanyType(value.type);
+
+  if (!id || !name || !type) {
+    return null;
+  }
+
+  return {
+    id,
+    name,
+    type,
+    taxNumber: getNullableString(value, "taxNumber"),
+    city: getNullableString(value, "city"),
+    country: getNullableString(value, "country"),
+    score: getNumber(value, "score") ?? 0,
+  };
+}
+
+function getCompanyType(value: unknown): CompanyType | null {
+  if (value === "CUSTOMER" || value === "SUPPLIER" || value === "BOTH") {
+    return value;
+  }
+
+  return null;
+}
+
+function formatCompanyMatchType(value: CompanyMatchResult["matchType"]) {
+  if (value === "TAX_NUMBER") return "Vergi no eşleşmesi";
+  if (value === "NAME") return "Firma adı eşleşmesi";
+  return "Eşleşme yok";
+}
+
 export default async function AiExtractionDetailPage({
   params,
   searchParams,
@@ -249,6 +417,7 @@ export default async function AiExtractionDetailPage({
   }
 
   const parsedInvoiceData = parseExtractedInvoiceJson(job.extractedJson);
+  const companyMatchData = parseCompanyMatchJson(job.extractedJson);
 
   return (
     <div className="space-y-6">
@@ -280,6 +449,12 @@ export default async function AiExtractionDetailPage({
             <button className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#274c77] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#203f64]">
               <FileText className="h-4 w-4" />
               Fatura Bilgilerini Çıkar
+            </button>
+          </form>
+          <form action={`/ai-extraction/${job.id}/match-company`} method="post">
+            <button className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#6f4e37] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#5d422f]">
+              <FileText className="h-4 w-4" />
+              Cari Eşleştir
             </button>
           </form>
           <Link
@@ -316,6 +491,18 @@ export default async function AiExtractionDetailPage({
         </div>
       ) : null}
 
+      {query?.error === "company-match-empty" ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          Önce fatura bilgileri çıkarılmalıdır.
+        </div>
+      ) : null}
+
+      {query?.error === "company-match-json" ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          Çıkarılan JSON okunamadı. Lütfen fatura bilgilerini tekrar çıkarın.
+        </div>
+      ) : null}
+
       {query?.extracted === "1" ? (
         <div className="rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
           Dosyadan metin başarıyla çıkarıldı ve ham metin alanına kaydedildi.
@@ -325,6 +512,12 @@ export default async function AiExtractionDetailPage({
       {query?.parsed === "1" ? (
         <div className="rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
           Fatura bilgileri ham metinden çıkarıldı ve JSON alanına kaydedildi.
+        </div>
+      ) : null}
+
+      {query?.companyMatched === "1" ? (
+        <div className="rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
+          Cari eşleştirme tamamlandı ve analiz sonucuna kaydedildi.
         </div>
       ) : null}
 
@@ -390,6 +583,7 @@ export default async function AiExtractionDetailPage({
       </section>
 
       <InvoicePreviewCard data={parsedInvoiceData} />
+      <CompanyMatchCard data={companyMatchData} />
 
       <section className="grid gap-5 lg:grid-cols-3">
         <TextBlock
