@@ -12,6 +12,7 @@ import {
 } from "@/lib/ai-extraction-utils";
 import { formatDate } from "@/lib/company-utils";
 import { fileRelatedTypeLabels, formatFileSize, getFileKind } from "@/lib/file-utils";
+import type { ParsedInvoiceData } from "@/lib/invoice-parser";
 import { prisma } from "@/lib/prisma";
 
 type AiExtractionDetailPageProps = {
@@ -19,6 +20,7 @@ type AiExtractionDetailPageProps = {
   searchParams?: Promise<{
     error?: string;
     extracted?: string;
+    parsed?: string;
   }>;
 };
 
@@ -54,17 +56,170 @@ function TextBlock({
   );
 }
 
-const previewFields = [
-  "Fatura no",
-  "Cari firma",
-  "Fatura tarihi",
-  "Vade tarihi",
-  "Ara toplam",
-  "KDV",
-  "Genel toplam",
-  "Para birimi",
-  "Fatura tipi",
-];
+function PreviewValue({ label, value }: { label: string; value: string | null }) {
+  return (
+    <div className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-3">
+      <p className="text-xs font-semibold uppercase text-[#607167]">{label}</p>
+      <p className="mt-2 break-words text-sm font-semibold text-[#223028]">
+        {value || "Bulunamadı"}
+      </p>
+    </div>
+  );
+}
+
+function InvoicePreviewCard({ data }: { data: ParsedInvoiceData | null }) {
+  const currency = data?.currency || "TRY";
+
+  return (
+    <section className="rounded-lg border border-dashed border-[#cfd8cf] bg-white p-5 shadow-sm">
+      <h2 className="text-lg font-semibold text-[#16201b]">Çıkarılan Fatura Bilgileri</h2>
+      {data ? (
+        <>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <PreviewValue label="Fatura No" value={data.invoiceNumber} />
+            <PreviewValue label="Fatura Tarihi" value={data.invoiceDate} />
+            <PreviewValue label="Vade Tarihi" value={data.dueDate} />
+            <PreviewValue label="Firma Adı" value={data.companyName} />
+            <PreviewValue label="Vergi No" value={data.taxNumber} />
+            <PreviewValue label="Vergi Dairesi" value={data.taxOffice} />
+            <PreviewValue label="Ara Toplam" value={formatParsedAmount(data.subtotal, currency)} />
+            <PreviewValue label="KDV" value={formatParsedAmount(data.vatAmount, currency)} />
+            <PreviewValue
+              label="İskonto"
+              value={formatParsedAmount(data.discountAmount, currency)}
+            />
+            <PreviewValue
+              label="Genel Toplam"
+              value={formatParsedAmount(data.totalAmount, currency)}
+            />
+            <PreviewValue label="Para Birimi" value={data.currency} />
+            <PreviewValue
+              label="Tahmini Fatura Tipi"
+              value={formatInvoiceTypeSuggestion(data.invoiceTypeSuggestion)}
+            />
+            <PreviewValue
+              label="Güven Skoru"
+              value={typeof data.confidenceScore === "number" ? `%${Math.round(data.confidenceScore * 100)}` : null}
+            />
+          </div>
+          <div className="mt-5 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-4">
+            <p className="text-sm font-semibold text-[#223028]">Uyarılar</p>
+            {data.warnings.length > 0 ? (
+              <ul className="mt-3 space-y-2 text-sm text-[#647067]">
+                {data.warnings.map((warning) => (
+                  <li key={warning}>- {warning}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-3 text-sm text-[#647067]">Uyarı yok.</p>
+            )}
+          </div>
+        </>
+      ) : (
+        <p className="mt-4 text-sm leading-6 text-[#647067]">
+          Henüz çıkarılmış fatura bilgisi yok. Ham metin oluştuktan sonra Fatura Bilgilerini Çıkar
+          butonunu kullanabilirsiniz.
+        </p>
+      )}
+      <p className="mt-5 text-sm leading-6 text-[#647067]">
+        Bu önizleme local regex parser ile oluşturulur. Henüz otomatik Invoice kaydı oluşturmaz.
+      </p>
+    </section>
+  );
+}
+
+function parseExtractedInvoiceJson(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+
+    if (!isRecord(parsed)) {
+      return null;
+    }
+
+    return {
+      invoiceNumber: getNullableString(parsed, "invoiceNumber"),
+      invoiceDate: getNullableString(parsed, "invoiceDate"),
+      dueDate: getNullableString(parsed, "dueDate"),
+      companyName: getNullableString(parsed, "companyName"),
+      taxNumber: getNullableString(parsed, "taxNumber"),
+      taxOffice: getNullableString(parsed, "taxOffice"),
+      subtotal: getNullableNumber(parsed, "subtotal"),
+      vatAmount: getNullableNumber(parsed, "vatAmount"),
+      discountAmount: getNumber(parsed, "discountAmount") ?? 0,
+      totalAmount: getNullableNumber(parsed, "totalAmount"),
+      currency: getString(parsed, "currency") || "TRY",
+      invoiceTypeSuggestion: getInvoiceTypeSuggestion(parsed),
+      confidenceScore: getNumber(parsed, "confidenceScore") ?? 0,
+      warnings: getStringArray(parsed, "warnings"),
+    } satisfies ParsedInvoiceData;
+  } catch {
+    return null;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function getString(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return typeof value === "string" ? value : null;
+}
+
+function getNullableString(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function getNumber(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function getNullableNumber(record: Record<string, unknown>, key: string) {
+  return getNumber(record, key);
+}
+
+function getStringArray(record: Record<string, unknown>, key: string) {
+  const value = record[key];
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function getInvoiceTypeSuggestion(record: Record<string, unknown>) {
+  const value = record.invoiceTypeSuggestion;
+
+  if (value === "SALES" || value === "PURCHASE" || value === "UNKNOWN") {
+    return value;
+  }
+
+  return "UNKNOWN";
+}
+
+function formatParsedAmount(value: number | null, currency: string) {
+  if (value === null) {
+    return null;
+  }
+
+  try {
+    return new Intl.NumberFormat("tr-TR", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return `${value.toLocaleString("tr-TR")} ${currency}`;
+  }
+}
+
+function formatInvoiceTypeSuggestion(value: ParsedInvoiceData["invoiceTypeSuggestion"]) {
+  if (value === "SALES") return "Ben fatura kestim";
+  if (value === "PURCHASE") return "Bana fatura kesildi";
+  return "Belirlenemedi";
+}
 
 export default async function AiExtractionDetailPage({
   params,
@@ -93,6 +248,8 @@ export default async function AiExtractionDetailPage({
     notFound();
   }
 
+  const parsedInvoiceData = parseExtractedInvoiceJson(job.extractedJson);
+
   return (
     <div className="space-y-6">
       <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6 lg:flex-row lg:items-end lg:justify-between">
@@ -119,6 +276,12 @@ export default async function AiExtractionDetailPage({
               MarkItDown ile Metin Çıkar
             </button>
           </form>
+          <form action={`/ai-extraction/${job.id}/parse`} method="post">
+            <button className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#274c77] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#203f64]">
+              <FileText className="h-4 w-4" />
+              Fatura Bilgilerini Çıkar
+            </button>
+          </form>
           <Link
             href={`/ai-extraction/${job.id}/edit`}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
@@ -141,9 +304,27 @@ export default async function AiExtractionDetailPage({
         </div>
       ) : null}
 
+      {query?.error === "parse-empty" ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          Önce MarkItDown ile metin çıkarılmalıdır.
+        </div>
+      ) : null}
+
+      {query?.error === "parse" ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          Fatura bilgileri çıkarılırken bir hata oluştu.
+        </div>
+      ) : null}
+
       {query?.extracted === "1" ? (
         <div className="rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
           Dosyadan metin başarıyla çıkarıldı ve ham metin alanına kaydedildi.
+        </div>
+      ) : null}
+
+      {query?.parsed === "1" ? (
+        <div className="rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
+          Fatura bilgileri ham metinden çıkarıldı ve JSON alanına kaydedildi.
         </div>
       ) : null}
 
@@ -208,23 +389,7 @@ export default async function AiExtractionDetailPage({
         </div>
       </section>
 
-      <section className="rounded-lg border border-dashed border-[#cfd8cf] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">
-          Fatura Önizleme / Onay Alanı
-        </h2>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {previewFields.map((field) => (
-            <div key={field} className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-3">
-              <p className="text-xs font-semibold uppercase text-[#607167]">{field}</p>
-              <p className="mt-2 text-sm text-[#647067]">Bu alan sonraki aşamada bağlanacak</p>
-            </div>
-          ))}
-        </div>
-        <p className="mt-5 text-sm leading-6 text-[#647067]">
-          Gerçek AI/OCR entegrasyonu eklendiğinde çıkarılan bilgiler burada kontrol edilip
-          faturaya dönüştürülebilecek.
-        </p>
-      </section>
+      <InvoicePreviewCard data={parsedInvoiceData} />
 
       <section className="grid gap-5 lg:grid-cols-3">
         <TextBlock
