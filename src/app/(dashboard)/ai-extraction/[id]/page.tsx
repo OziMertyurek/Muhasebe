@@ -3,6 +3,12 @@ import { AiExtractionStatus, type CompanyType } from "@prisma/client";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ExternalLink, FileText, Pencil } from "lucide-react";
 import {
+  getAiInvoiceCreatedInvoiceId,
+  getAiInvoiceDefaultCompanyId,
+  type AiInvoiceCreateData,
+  parseAiInvoiceCreateData,
+} from "@/lib/ai-invoice-create-utils";
+import {
   updateAiExtractionStatusAction,
 } from "@/app/(dashboard)/ai-extraction/actions";
 import {
@@ -23,7 +29,15 @@ type AiExtractionDetailPageProps = {
     extracted?: string;
     parsed?: string;
     companyMatched?: string;
+    invoiceCreated?: string;
   }>;
+};
+
+type ActiveCompanyOption = {
+  id: string;
+  name: string;
+  type: CompanyType;
+  taxNumber: string | null;
 };
 
 function InfoItem({ label, value }: { label: string; value: string }) {
@@ -213,6 +227,159 @@ function CompanyMatchCard({ data }: { data: CompanyMatchResult | null }) {
   );
 }
 
+function AiInvoiceCreateCard({
+  jobId,
+  data,
+  companies,
+  createdInvoiceId,
+}: {
+  jobId: string;
+  data: AiInvoiceCreateData | null;
+  companies: ActiveCompanyOption[];
+  createdInvoiceId: string | null;
+}) {
+  const defaultCompanyId = getAiInvoiceDefaultCompanyId(data);
+  const hasActiveCompanies = companies.length > 0;
+  const defaultInvoiceType =
+    data?.invoiceTypeSuggestion === "SALES" || data?.invoiceTypeSuggestion === "PURCHASE"
+      ? data.invoiceTypeSuggestion
+      : "";
+
+  return (
+    <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h2 className="text-lg font-semibold text-[#16201b]">Fatura Olarak Kaydet</h2>
+          <p className="mt-2 text-sm leading-6 text-[#647067]">
+            Çıkarılan bilgileri kontrol edip onayladıktan sonra gerçek fatura kaydı oluşturabilirsiniz.
+          </p>
+        </div>
+        {createdInvoiceId ? (
+          <Link
+            href={`/invoices/${createdInvoiceId}`}
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+          >
+            Oluşan faturayı aç
+            <ExternalLink className="h-4 w-4" />
+          </Link>
+        ) : null}
+      </div>
+
+      {createdInvoiceId ? (
+        <div className="mt-5 rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
+          Bu analiz kaydından fatura oluşturulmuş. Aynı analizden tekrar fatura oluşturulamaz.
+        </div>
+      ) : null}
+
+      {!data ? (
+        <p className="mt-4 text-sm leading-6 text-[#647067]">
+          Önce fatura bilgileri çıkarılmalıdır.
+        </p>
+      ) : (
+        <div className="mt-5 space-y-5">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <PreviewValue label="Fatura No" value={data.invoiceNumber} />
+            <PreviewValue label="Fatura Tarihi" value={data.invoiceDate} />
+            <PreviewValue label="Vade Tarihi" value={data.dueDate} />
+            <PreviewValue
+              label="Genel Toplam"
+              value={formatParsedAmount(data.totalAmount, data.currency)}
+            />
+          </div>
+
+          <div className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-4">
+            <p className="text-sm font-semibold text-[#223028]">Cari bilgisi</p>
+            {data.companyMatch?.matchedCompany ? (
+              <p className="mt-2 text-sm leading-6 text-[#647067]">
+                Eşleşen cari:{" "}
+                <Link
+                  href={`/companies/${data.companyMatch.matchedCompany.id}`}
+                  className="font-semibold text-[#1f6f54] hover:text-[#195d47]"
+                >
+                  {data.companyMatch.matchedCompany.name}
+                </Link>{" "}
+                (%{Math.round(data.companyMatch.confidence * 100)})
+              </p>
+            ) : (
+              <p className="mt-2 text-sm leading-6 text-[#647067]">
+                Cari eşleşmesi yok. Aktif carilerden manuel seçim yapın.
+              </p>
+            )}
+          </div>
+
+          {!hasActiveCompanies ? (
+            <div className="rounded-md border border-[#ead7a4] bg-[#fffaf0] px-4 py-3 text-sm font-medium text-[#6f5220]">
+              Aktif cari bulunamadı. Fatura oluşturmadan önce cari eklemelisiniz.
+            </div>
+          ) : null}
+
+          <form
+            action={`/ai-extraction/${jobId}/create-invoice`}
+            className={createdInvoiceId ? "hidden" : "space-y-4"}
+            method="post"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label className="block text-sm font-semibold text-[#223028]">
+                Cari firma
+                <select
+                  name="companyId"
+                  defaultValue={defaultCompanyId}
+                  required
+                  disabled={!hasActiveCompanies}
+                  className="mt-2 h-11 w-full rounded-md border border-[#cfd8cf] bg-white px-3 text-sm text-[#223028] outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#1f6f54]/20"
+                >
+                  <option value="">Cari seçin</option>
+                  {companies.map((company) => (
+                    <option key={company.id} value={company.id}>
+                      {company.name} - {companyTypeLabels[company.type]}
+                      {company.taxNumber ? ` - VKN: ${company.taxNumber}` : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block text-sm font-semibold text-[#223028]">
+                Fatura tipi
+                <select
+                  name="invoiceType"
+                  defaultValue={defaultInvoiceType}
+                  required
+                  className="mt-2 h-11 w-full rounded-md border border-[#cfd8cf] bg-white px-3 text-sm text-[#223028] outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#1f6f54]/20"
+                >
+                  <option value="">Fatura tipi seçin</option>
+                  <option value="SALES">Ben fatura kestim</option>
+                  <option value="PURCHASE">Bana fatura kesildi</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="flex items-start gap-3 rounded-md border border-[#dce2dc] bg-[#fbfcfa] p-4 text-sm text-[#46534b]">
+              <input
+                type="checkbox"
+                name="confirmCreateInvoice"
+                value="yes"
+                required
+                className="mt-1 h-4 w-4 rounded border-[#cfd8cf] text-[#1f6f54]"
+              />
+              <span>
+                Çıkarılan bilgileri kontrol ettim ve bu analiz kaydından fatura oluşturmayı
+                onaylıyorum.
+              </span>
+            </label>
+
+            <button
+              disabled={!hasActiveCompanies}
+              className="inline-flex h-10 w-fit items-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Fatura Olarak Kaydet
+            </button>
+          </form>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function parseExtractedInvoiceJson(value: string | null) {
   if (!value) {
     return null;
@@ -389,28 +556,65 @@ function formatCompanyMatchType(value: CompanyMatchResult["matchType"]) {
   return "Eşleşme yok";
 }
 
+function formatCreateInvoiceError(value: string) {
+  switch (value) {
+    case "create-invoice-json":
+      return "Önce fatura bilgileri çıkarılmalıdır.";
+    case "create-invoice-existing":
+      return "Bu analiz kaydından zaten fatura oluşturulmuş. Aynı kayıttan tekrar fatura oluşturulamaz.";
+    case "create-invoice-confirm":
+      return "Fatura oluşturmak için onay kutusunu işaretleyin.";
+    case "create-invoice-company":
+      return "Aktif bir cari seçilmelidir.";
+    case "create-invoice-type":
+      return "Fatura tipi seçilmelidir.";
+    case "create-invoice-number":
+      return "Fatura no bulunamadı. Fatura oluşturmadan önce bilgileri kontrol edin.";
+    case "create-invoice-date":
+      return "Fatura tarihi bulunamadı veya geçersiz.";
+    case "create-invoice-total":
+      return "Genel toplam 0'dan büyük olmalıdır.";
+    case "create-invoice-duplicate":
+      return "Bu fatura no ile aktif bir fatura zaten var.";
+    default:
+      return "Fatura oluşturulurken bir hata oluştu.";
+  }
+}
+
 export default async function AiExtractionDetailPage({
   params,
   searchParams,
 }: AiExtractionDetailPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
-  const job = await prisma.aiExtractionJob.findUnique({
-    where: { id },
-    include: {
-      fileAttachment: {
-        select: {
-          id: true,
-          originalFileName: true,
-          storedFileName: true,
-          filePath: true,
-          mimeType: true,
-          fileSize: true,
-          relatedType: true,
-          uploadedAt: true,
+  const [job, companies] = await Promise.all([
+    prisma.aiExtractionJob.findUnique({
+      where: { id },
+      include: {
+        fileAttachment: {
+          select: {
+            id: true,
+            originalFileName: true,
+            storedFileName: true,
+            filePath: true,
+            mimeType: true,
+            fileSize: true,
+            relatedType: true,
+            uploadedAt: true,
+          },
         },
       },
-    },
-  });
+    }),
+    prisma.company.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: "asc" },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        taxNumber: true,
+      },
+    }),
+  ]);
 
   if (!job) {
     notFound();
@@ -418,6 +622,8 @@ export default async function AiExtractionDetailPage({
 
   const parsedInvoiceData = parseExtractedInvoiceJson(job.extractedJson);
   const companyMatchData = parseCompanyMatchJson(job.extractedJson);
+  const aiInvoiceCreateData = parseAiInvoiceCreateData(job.extractedJson);
+  const createdInvoiceId = getAiInvoiceCreatedInvoiceId(job.extractedJson);
 
   return (
     <div className="space-y-6">
@@ -521,6 +727,18 @@ export default async function AiExtractionDetailPage({
         </div>
       ) : null}
 
+      {query?.invoiceCreated === "1" ? (
+        <div className="rounded-md border border-[#b8dcc7] bg-[#f4fbf6] px-4 py-3 text-sm font-medium text-[#1f6f54]">
+          Fatura oluşturuldu, dosya faturaya bağlandı ve analiz kaydı incelendi olarak işaretlendi.
+        </div>
+      ) : null}
+
+      {query?.error?.startsWith("create-invoice") ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          {formatCreateInvoiceError(query.error)}
+        </div>
+      ) : null}
+
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
           <div className="flex items-start justify-between gap-4">
@@ -584,6 +802,12 @@ export default async function AiExtractionDetailPage({
 
       <InvoicePreviewCard data={parsedInvoiceData} />
       <CompanyMatchCard data={companyMatchData} />
+      <AiInvoiceCreateCard
+        jobId={job.id}
+        data={aiInvoiceCreateData}
+        companies={companies}
+        createdInvoiceId={createdInvoiceId}
+      />
 
       <section className="grid gap-5 lg:grid-cols-3">
         <TextBlock
