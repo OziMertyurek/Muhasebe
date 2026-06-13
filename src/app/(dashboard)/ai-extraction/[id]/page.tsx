@@ -498,7 +498,12 @@ function normalizeCompanyMatch(value: Record<string, unknown>): CompanyMatchResu
     return null;
   }
 
+  const matchedCompany = isRecord(value.matchedCompany)
+    ? normalizeMatchedCompany(value.matchedCompany)
+    : null;
+
   return {
+    matchedCompanyId: getNullableString(value, "matchedCompanyId") ?? matchedCompany?.id ?? null,
     matchType,
     confidence: getNumber(value, "confidence") ?? 0,
     extracted: {
@@ -507,9 +512,7 @@ function normalizeCompanyMatch(value: Record<string, unknown>): CompanyMatchResu
         ? getNullableString(value.extracted, "companyName")
         : null,
     },
-    matchedCompany: isRecord(value.matchedCompany)
-      ? normalizeMatchedCompany(value.matchedCompany)
-      : null,
+    matchedCompany,
     candidates: Array.isArray(value.candidates)
       ? value.candidates
           .filter(isRecord)

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 export type CompanyMatchType = "TAX_NUMBER" | "NAME" | "NONE";
 
 export type CompanyMatchResult = {
+  matchedCompanyId: string | null;
   matchType: CompanyMatchType;
   confidence: number;
   extracted: {
@@ -70,12 +71,15 @@ export async function matchCompany(
     });
 
     if (taxMatch) {
+      const matchedCompany = toMatchedCompany(taxMatch, 1);
+
       return {
+        matchedCompanyId: matchedCompany.id,
         matchType: "TAX_NUMBER",
         confidence: 1,
         extracted: { taxNumber, companyName },
-        matchedCompany: toMatchedCompany(taxMatch, 1),
-        candidates: [toMatchedCompany(taxMatch, 1)],
+        matchedCompany,
+        candidates: [matchedCompany],
         warnings,
       };
     }
@@ -97,6 +101,7 @@ export async function matchCompany(
 
     if (candidates.length > 0) {
       return {
+        matchedCompanyId: candidates[0].id,
         matchType: "NAME",
         confidence: candidates[0].score,
         extracted: { taxNumber, companyName },
@@ -110,6 +115,7 @@ export async function matchCompany(
   }
 
   return {
+    matchedCompanyId: null,
     matchType: "NONE",
     confidence: 0,
     extracted: { taxNumber, companyName },
@@ -154,7 +160,7 @@ function toMatchedCompany(company: CompanyForMatch, score: number): MatchedCompa
     taxNumber: company.taxNumber,
     city: company.city,
     country: company.country,
-    score: Number(score.toFixed(2)),
+    score: Number(normalizeCandidateScore(score).toFixed(2)),
   };
 }
 
@@ -206,10 +212,25 @@ function normalizeCompanyName(value: string) {
     .replace(/ü/g, "u")
     .replace(/ö/g, "o")
     .replace(/ç/g, "c")
+    .replace(/ş/g, "s")
+    .replace(/ı/g, "i")
+    .replace(/ğ/g, "g")
+    .replace(/ü/g, "u")
+    .replace(/ö/g, "o")
+    .replace(/ç/g, "c")
     .replace(/\b(ltd|sti|şti|limited|anonim|aş|as|ticaret|sanayi|ve)\b/g, " ")
+    .replace(/\b(sirketi|sirket|a\s*s)\b/g, " ")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function normalizeCandidateScore(score: number) {
+  if (score >= minimumNameScore && score < 0.75) {
+    return 0.75;
+  }
+
+  return Math.min(score, 0.95);
 }
 
 function levenshteinDistance(left: string, right: string) {
