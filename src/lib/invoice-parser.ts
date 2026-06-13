@@ -640,6 +640,20 @@ function isValidDateParts(year: number, month: number, day: number) {
 
 function foldForSearch(value: string) {
   return value
+    .replace(/ar\?iv/giu, "arsiv")
+    .replace(/d\?zen/giu, "duzen")
+    .replace(/sat\?c\?/giu, "satici")
+    .replace(/al\?c\?/giu, "alici")
+    .replace(/m\?\?teri/giu, "musteri")
+    .replace(/\?nvan\?/giu, "unvani")
+    .replace(/\?nvan/giu, "unvan")
+    .replace(/toplam\?/giu, "toplami")
+    .replace(/tutar\?/giu, "tutari")
+    .replace(/numaras\?/giu, "numarasi")
+    .replace(/faturas\?/giu, "faturasi")
+    .replace(/\?denecek/giu, "odenecek")
+    .replace(/\?deme/giu, "odeme")
+    .replace(/daires\?/giu, "dairesi")
     .replace(/İ/g, "I")
     .replace(/ı/g, "i")
     .replace(/Ş/g, "S")
