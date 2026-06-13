@@ -70,6 +70,7 @@ const taxOfficePatterns: FieldPattern[] = [
 
 const amountPatterns = {
   subtotal: [
+    /(?:^|\n)\s*mal\s*\/?\s*hizmet\s*toplam[ıi?]\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
     /(?:^|\n)\s*mal\s*\/?\s*hizmet\s*toplam[ıi]\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
     /(?:^|\n)\s*ara\s*toplam\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
   ],
