@@ -17,109 +17,209 @@ export type ParsedInvoiceData = {
   warnings: string[];
 };
 
-type FieldPattern = {
-  label: string;
-  pattern: RegExp;
+type ParsedFieldsForConfidence = {
+  invoiceNumber: string | null;
+  invoiceDate: string | null;
+  companyName: string | null;
+  taxNumber: string | null;
+  subtotal: number | null;
+  vatAmount: number | null;
+  totalAmount: number | null;
 };
 
 const maxRawTextLength = 200_000;
 
-const invoiceNumberPatterns: FieldPattern[] = [
-  { label: "Fatura No", pattern: /(?:^|\n)\s*(?:e[- ]?arşiv|e[- ]?fatura)?\s*fatura\s*no(?:su)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/._]{2,})/imu },
-  { label: "Fatura Numarası", pattern: /(?:^|\n)\s*fatura\s*numaras[ıi]\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/._]{2,})/imu },
-  { label: "Belge No", pattern: /(?:^|\n)\s*belge\s*no(?:su)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/._]{2,})/imu },
-  { label: "E-Arşiv No", pattern: /(?:^|\n)\s*e[- ]?arşiv\s*no(?:su)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/._]{2,})/imu },
-  { label: "E-Fatura No", pattern: /(?:^|\n)\s*e[- ]?fatura\s*no(?:su)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\-\/._]{2,})/imu },
+const invoiceNumberAliases = [
+  "e arsiv fatura no",
+  "e arşiv fatura no",
+  "e arsiv no",
+  "e arşiv no",
+  "e fatura no",
+  "e-fatura no",
+  "fatura numarasi",
+  "fatura numarası",
+  "fatura no",
+  "fatura nosu",
+  "belge numarasi",
+  "belge numarası",
+  "belge no",
+  "belge nosu",
 ];
 
-const invoiceDatePatterns: FieldPattern[] = [
-  { label: "Fatura Tarihi", pattern: /(?:^|\n)\s*fatura\s*tarihi\s*[:\-]?\s*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{1,4})/imu },
-  { label: "Düzenleme Tarihi", pattern: /(?:^|\n)\s*d[üu]zenleme\s*tarihi\s*[:\-]?\s*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{1,4})/imu },
-  { label: "Belge Tarihi", pattern: /(?:^|\n)\s*belge\s*tarihi\s*[:\-]?\s*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{1,4})/imu },
-  { label: "Tarih", pattern: /(?:^|\n)\s*tarih\s*[:\-]?\s*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{1,4})/imu },
+const invoiceDateAliases = [
+  "fatura tarihi",
+  "fatura tarih",
+  "duzenleme tarihi",
+  "düzenleme tarihi",
+  "duzenleme tarih",
+  "düzenleme tarih",
+  "belge tarihi",
+  "belge tarih",
+  "tarih",
 ];
 
-const dueDatePatterns: FieldPattern[] = [
-  { label: "Vade Tarihi", pattern: /(?:^|\n)\s*vade\s*tarihi\s*[:\-]?\s*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{1,4})/imu },
-  { label: "Ödeme Tarihi", pattern: /(?:^|\n)\s*[öo]deme\s*tarihi\s*[:\-]?\s*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{1,4})/imu },
-  { label: "Son Ödeme Tarihi", pattern: /(?:^|\n)\s*son\s*[öo]deme\s*tarihi\s*[:\-]?\s*([0-9]{1,4}[./-][0-9]{1,2}[./-][0-9]{1,4})/imu },
+const dueDateAliases = [
+  "vade tarihi",
+  "vade tarih",
+  "son odeme tarihi",
+  "son ödeme tarihi",
+  "son odeme tarih",
+  "son ödeme tarih",
+  "odeme tarihi",
+  "ödeme tarihi",
+  "odeme tarih",
+  "ödeme tarih",
 ];
 
-const companyPatterns: FieldPattern[] = [
-  { label: "Ticaret Ünvanı", pattern: /(?:^|\n)\s*ticaret\s*[üu]nvan[ıi]\s*[:\-]?\s*(.+)/imu },
-  { label: "Firma", pattern: /(?:^|\n)\s*firma\s*[:\-]?\s*(.+)/imu },
-  { label: "Ünvan", pattern: /(?:^|\n)\s*[üu]nvan\s*[:\-]?\s*(.+)/imu },
-  { label: "Alıcı", pattern: /(?:^|\n)\s*al[ıi]c[ıi]\s*[:\-]?\s*(.+)/imu },
-  { label: "Satıcı", pattern: /(?:^|\n)\s*sat[ıi]c[ıi]\s*[:\-]?\s*(.+)/imu },
-  { label: "Müşteri", pattern: /(?:^|\n)\s*m[üu][şs]teri\s*[:\-]?\s*(.+)/imu },
-  { label: "Cari", pattern: /(?:^|\n)\s*cari\s*[:\-]?\s*(.+)/imu },
+const companyAliases = [
+  "ticaret unvani",
+  "ticaret ünvanı",
+  "ticaret unvanı",
+  "firma unvani",
+  "firma ünvanı",
+  "firma adi",
+  "firma adı",
+  "firma ad",
+  "firma",
+  "unvani",
+  "ünvanı",
+  "unvan",
+  "ünvan",
+  "alici unvani",
+  "alıcı ünvanı",
+  "alici unvan",
+  "alıcı ünvan",
+  "alici",
+  "alıcı",
+  "satici unvani",
+  "satıcı ünvanı",
+  "satici unvan",
+  "satıcı ünvan",
+  "satici",
+  "satıcı",
+  "musteri",
+  "müşteri",
+  "cari",
 ];
 
-const taxNumberPatterns: FieldPattern[] = [
-  { label: "VKN", pattern: /(?:^|\n)\s*vkn\s*[:\-]?\s*([0-9]{10})/imu },
-  { label: "TCKN", pattern: /(?:^|\n)\s*tckn\s*[:\-]?\s*([0-9]{11})/imu },
-  { label: "Vergi No", pattern: /(?:^|\n)\s*vergi\s*no(?:su)?\s*[:\-]?\s*([0-9]{10,11})/imu },
-  { label: "Vergi Numarası", pattern: /(?:^|\n)\s*vergi\s*numaras[ıi]\s*[:\-]?\s*([0-9]{10,11})/imu },
-  { label: "Vergi Kimlik No", pattern: /(?:^|\n)\s*vergi\s*kimlik\s*no(?:su)?\s*[:\-]?\s*([0-9]{10,11})/imu },
+const taxNumberAliases = [
+  "vergi kimlik numarasi",
+  "vergi kimlik numarası",
+  "vergi kimlik no",
+  "vergi numarasi",
+  "vergi numarası",
+  "vergi no",
+  "vergi nosu",
+  "vkn tckn",
+  "vkn",
+  "tckn",
+  "tc kimlik no",
 ];
 
-const taxOfficePatterns: FieldPattern[] = [
-  { label: "Vergi Dairesi", pattern: /(?:^|\n)\s*vergi\s*dairesi\s*[:\-]?\s*(.+)/imu },
-  { label: "VD", pattern: /(?:^|\n)\s*vd\s*[:\-]?\s*(.+)/imu },
+const taxOfficeAliases = ["vergi dairesi", "vergi daires", "vergi daire", "vd"];
+
+const subtotalAliases = [
+  "mal hizmet toplami",
+  "mal hizmet toplamı",
+  "mal hizmet toplam",
+  "mal/hizmet toplami",
+  "mal/hizmet toplamı",
+  "mal/hizmet toplam",
+  "mal hizmet bedeli",
+  "ara toplam",
+  "aratoplam",
+  "matrah",
 ];
 
-const amountPatterns = {
-  subtotal: [
-    /(?:^|\n)\s*mal\s*\/?\s*hizmet\s*toplam[ıi?]\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*mal\s*\/?\s*hizmet\s*toplam[ıi]\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*ara\s*toplam\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-  ],
-  vatAmount: [
-    /(?:^|\n)\s*hesaplanan\s*kdv\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*vergiler\s*toplam[ıi]\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*kdv\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-  ],
-  discountAmount: [
-    /(?:^|\n)\s*iskonto\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*indirim\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-  ],
-  totalAmount: [
-    /(?:^|\n)\s*genel\s*toplam\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*[öo]denecek\s*tutar\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*toplam\s*tutar\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-    /(?:^|\n)\s*fatura\s*toplam[ıi]\s*[:\-]?\s*([₺€$]?\s*[-+]?[0-9][0-9.,\s]*\s*(?:TL|TRY|USD|EUR|₺|\$|€)?)/imu,
-  ],
-};
+const vatAmountAliases = [
+  "hesaplanan kdv",
+  "kdv tutari",
+  "kdv tutarı",
+  "kdv toplami",
+  "kdv toplamı",
+  "kdv toplam",
+  "vergiler toplami",
+  "vergiler toplamı",
+  "vergiler toplam",
+  "vergi toplami",
+  "vergi toplamı",
+  "vergi toplam",
+  "kdv",
+];
+
+const discountAmountAliases = ["iskonto tutari", "iskonto tutarı", "iskonto", "indirim tutari", "indirim tutarı", "indirim"];
+
+const totalAmountAliases = [
+  "genel toplam",
+  "odenecek tutar",
+  "ödenecek tutar",
+  "fatura toplami",
+  "fatura toplamı",
+  "fatura toplam",
+  "fatura toplam tutari",
+  "fatura toplam tutarı",
+  "toplam tutar",
+  "odenecek",
+  "ödenecek",
+];
+
+const scenarioAliases = ["senaryo no", "senaryo", "ettn", "uuid"];
+const allKnownAliases = [
+  ...invoiceNumberAliases,
+  ...invoiceDateAliases,
+  ...dueDateAliases,
+  ...companyAliases,
+  ...taxNumberAliases,
+  ...taxOfficeAliases,
+  ...subtotalAliases,
+  ...vatAmountAliases,
+  ...discountAmountAliases,
+  ...totalAmountAliases,
+  ...scenarioAliases,
+];
+
+const datePattern = /\b(?:[0-9]{4}[./-][0-9]{1,2}[./-][0-9]{1,2}|[0-9]{1,2}[./-][0-9]{1,2}[./-][0-9]{4})\b/u;
+const amountTokenPattern =
+  /(?:[$€₺]\s*)?[-+]?\d[\d\s.,]*(?:\s*(?:TL|TRY|USD|EUR|₺|\$|€))?/giu;
 
 export function parseInvoiceText(rawText: string): ParsedInvoiceData {
   const warnings: string[] = [];
   const text = normalizeWhitespace(rawText).slice(0, maxRawTextLength);
 
   if (rawText.length > maxRawTextLength) {
-    warnings.push("Ham metin çok uzun olduğu için ilk bölüm parse edildi");
+    warnings.push("Ham metin çok uzun olduğu için yalnızca ilk bölüm parse edildi.");
   }
 
   const invoiceNumber = extractInvoiceNumber(text);
-  const invoiceDate = normalizeDate(findByPatterns(text, invoiceDatePatterns));
-  const dueDate = normalizeDate(findByPatterns(text, dueDatePatterns));
-  const companyName = cleanTextValue(findByPatterns(text, companyPatterns));
+  const invoiceDate = findDateByAliases(text, invoiceDateAliases);
+  const dueDate = findDateByAliases(text, dueDateAliases);
+  const companyName = extractCompanyName(text);
   const taxNumber = extractTaxNumber(text);
-  const taxOffice = cleanTextValue(findByPatterns(text, taxOfficePatterns));
-  const subtotal = findAmount(text, amountPatterns.subtotal);
-  const vatAmount = findAmount(text, amountPatterns.vatAmount);
-  const discountAmount = findAmount(text, amountPatterns.discountAmount) ?? 0;
-  const totalAmount = findAmount(text, amountPatterns.totalAmount);
+  const taxOffice = extractTaxOffice(text);
+  const subtotal = findAmountByAliases(text, subtotalAliases);
+  const vatAmount = findAmountByAliases(text, vatAmountAliases);
+  const discountAmount = findAmountByAliases(text, discountAmountAliases) ?? 0;
+  const totalAmount = findAmountByAliases(text, totalAmountAliases);
   const currency = detectCurrency(text);
   const invoiceTypeSuggestion = detectInvoiceType(text);
 
-  if (!invoiceNumber) warnings.push("Fatura numarası bulunamadı");
-  if (!invoiceDate) warnings.push("Fatura tarihi bulunamadı");
-  if (!companyName) warnings.push("Firma adı bulunamadı");
-  if (!taxNumber) warnings.push("Vergi no bulunamadı");
-  if (subtotal === null) warnings.push("Ara toplam bulunamadı");
-  if (vatAmount === null) warnings.push("KDV tutarı bulunamadı");
-  if (totalAmount === null) warnings.push("Genel toplam bulunamadı");
-  if (invoiceTypeSuggestion === "UNKNOWN") warnings.push("Fatura tipi otomatik belirlenemedi");
+  pushMissingWarnings(warnings, {
+    invoiceNumber,
+    invoiceDate,
+    companyName,
+    taxNumber,
+    subtotal,
+    vatAmount,
+    totalAmount,
+  });
+
+  if (!dueDate) {
+    warnings.push("Vade tarihi bulunamadı. Bu alan opsiyoneldir; gerekirse manuel kontrol edin.");
+  }
+
+  if (invoiceTypeSuggestion === "UNKNOWN") {
+    warnings.push("Fatura tipi otomatik belirlenemedi. Kaydetmeden önce satış/alış tipini manuel seçin.");
+  }
 
   const confidenceScore = calculateConfidence({
     invoiceNumber,
@@ -130,6 +230,12 @@ export function parseInvoiceText(rawText: string): ParsedInvoiceData {
     vatAmount,
     totalAmount,
   });
+
+  if (confidenceScore < 0.75) {
+    warnings.push(
+      "Güven skoru düşük: zorunlu veya tutar alanlarından bazıları bulunamadı. Fatura oluşturmadan önce bilgileri kontrol edin.",
+    );
+  }
 
   return {
     invoiceNumber,
@@ -153,31 +259,34 @@ export function normalizeAmount(value: string) {
   const cleaned = value
     .replace(/[₺€$]/g, "")
     .replace(/\b(TL|TRY|USD|EUR)\b/giu, "")
-    .replace(/[^\d.,+-]/g, "")
+    .replace(/[^\d.,+\-\s]/g, "")
+    .replace(/\s+(?=\d{3}(?:\D|$))/g, "")
     .replace(/\s/g, "")
     .trim();
 
-  if (!cleaned) {
+  if (!cleaned || !/[0-9]/.test(cleaned)) {
     return null;
   }
 
-  const lastComma = cleaned.lastIndexOf(",");
-  const lastDot = cleaned.lastIndexOf(".");
-  let normalized = cleaned;
+  const sign = cleaned.startsWith("-") ? "-" : "";
+  const unsigned = cleaned.replace(/^[+-]/u, "");
+  const lastComma = unsigned.lastIndexOf(",");
+  const lastDot = unsigned.lastIndexOf(".");
+  let normalized = unsigned;
 
   if (lastComma > -1 && lastDot > -1) {
     const decimalSeparator = lastComma > lastDot ? "," : ".";
     const thousandSeparator = decimalSeparator === "," ? "." : ",";
-    normalized = cleaned
+    normalized = unsigned
       .replace(new RegExp(`\\${thousandSeparator}`, "g"), "")
       .replace(decimalSeparator, ".");
   } else if (lastComma > -1) {
-    normalized = inferSingleSeparatorAmount(cleaned, ",");
+    normalized = inferSingleSeparatorAmount(unsigned, ",");
   } else if (lastDot > -1) {
-    normalized = inferSingleSeparatorAmount(cleaned, ".");
+    normalized = inferSingleSeparatorAmount(unsigned, ".");
   }
 
-  const parsed = Number(normalized);
+  const parsed = Number(`${sign}${normalized}`);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
@@ -191,8 +300,8 @@ export function normalizeDate(value: string | null | undefined) {
   let month: number;
   let day: number;
 
-  const isoMatch = dateValue.match(/^([0-9]{4})[-/.]([0-9]{1,2})[-/.]([0-9]{1,2})$/);
-  const localMatch = dateValue.match(/^([0-9]{1,2})[-/.]([0-9]{1,2})[-/.]([0-9]{4})$/);
+  const isoMatch = dateValue.match(/^([0-9]{4})[-/.]([0-9]{1,2})[-/.]([0-9]{1,2})$/u);
+  const localMatch = dateValue.match(/^([0-9]{1,2})[-/.]([0-9]{1,2})[-/.]([0-9]{4})$/u);
 
   if (isoMatch) {
     year = Number(isoMatch[1]);
@@ -223,35 +332,85 @@ export function detectCurrency(text: string) {
 }
 
 export function extractTaxNumber(text: string) {
-  return findByPatterns(text, taxNumberPatterns);
-}
+  for (const line of getMeaningfulLines(text)) {
+    const value = findValueAfterAliases(line, taxNumberAliases);
+    const number = extractTaxNumberFromValue(value ?? line);
 
-export function extractInvoiceNumber(text: string) {
-  const withoutScenarioLines = text
-    .split("\n")
-    .filter((line) => !/senaryo\s*no/iu.test(line))
-    .join("\n");
-
-  return findByPatterns(withoutScenarioLines, invoiceNumberPatterns);
-}
-
-function findByPatterns(text: string, patterns: FieldPattern[]) {
-  for (const { pattern } of patterns) {
-    const match = text.match(pattern);
-    const value = cleanTextValue(match?.[1] ?? null);
-
-    if (value) {
-      return value;
+    if (value && number) {
+      return number;
     }
   }
 
   return null;
 }
 
-function findAmount(text: string, patterns: RegExp[]) {
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    const amount = match?.[1] ? normalizeAmount(match[1]) : null;
+export function extractInvoiceNumber(text: string) {
+  for (const line of getMeaningfulLines(text)) {
+    if (hasAnyAlias(line, scenarioAliases)) {
+      continue;
+    }
+
+    const value = findValueAfterAliases(line, invoiceNumberAliases);
+    const invoiceNumber = cleanInvoiceNumber(value);
+
+    if (invoiceNumber) {
+      return invoiceNumber;
+    }
+  }
+
+  return null;
+}
+
+function extractCompanyName(text: string) {
+  for (const line of getMeaningfulLines(text)) {
+    const value = findValueAfterAliases(line, companyAliases);
+    const companyName = cleanCompanyName(value);
+
+    if (companyName) {
+      return companyName;
+    }
+  }
+
+  return null;
+}
+
+function extractTaxOffice(text: string) {
+  for (const line of getMeaningfulLines(text)) {
+    const value = findValueAfterAliases(line, taxOfficeAliases);
+    const taxOffice = cleanFreeTextValue(value);
+
+    if (taxOffice) {
+      return truncateAtNextKnownLabel(taxOffice);
+    }
+  }
+
+  return null;
+}
+
+function findDateByAliases(text: string, aliases: string[]) {
+  for (const line of getMeaningfulLines(text)) {
+    const value = findValueAfterAliases(line, aliases);
+    const source = value ?? line;
+    const date = source.match(datePattern)?.[0] ?? null;
+    const normalized = normalizeDate(date);
+
+    if (value && normalized) {
+      return normalized;
+    }
+  }
+
+  return null;
+}
+
+function findAmountByAliases(text: string, aliases: string[]) {
+  for (const line of getMeaningfulLines(text)) {
+    const value = findValueAfterAliases(line, aliases);
+
+    if (!value) {
+      continue;
+    }
+
+    const amount = extractAmountFromValue(value);
 
     if (amount !== null) {
       return amount;
@@ -261,28 +420,145 @@ function findAmount(text: string, patterns: RegExp[]) {
   return null;
 }
 
-function inferSingleSeparatorAmount(value: string, separator: "," | ".") {
-  const parts = value.split(separator);
-  const lastPart = parts.at(-1) ?? "";
+function extractAmountFromValue(value: string) {
+  const matches = Array.from(value.matchAll(amountTokenPattern))
+    .map((match) => match[0])
+    .filter((match) => /\d/u.test(match))
+    .filter((match) => !match.trim().startsWith("%"));
 
-  if (lastPart.length === 3 && parts.length > 1) {
-    return parts.join("");
+  const currencyAware = matches.find((match) => /(?:\bTL\b|\bTRY\b|\bUSD\b|\bEUR\b|₺|\$|€)/iu.test(match));
+  const candidate = currencyAware ?? matches.at(-1) ?? null;
+
+  if (!candidate) {
+    return null;
   }
 
-  return value.replace(separator, ".");
+  return normalizeAmount(candidate);
 }
 
-function cleanTextValue(value: string | null | undefined) {
+function findValueAfterAliases(line: string, aliases: string[]) {
+  const foldedLine = foldForSearch(line);
+
+  for (const alias of aliases) {
+    const pattern = buildAliasPattern(alias);
+    const match = foldedLine.match(pattern);
+
+    if (!match || match.index === undefined) {
+      continue;
+    }
+
+    const value = line.slice(match.index + match[0].length);
+    const cleaned = cleanFreeTextValue(value);
+
+    if (cleaned) {
+      return cleaned;
+    }
+  }
+
+  return null;
+}
+
+function buildAliasPattern(alias: string) {
+  const words = foldForSearch(alias)
+    .split(/\s+/u)
+    .filter(Boolean)
+    .map(escapeRegex);
+  const body = words.join("[\\s\\-_/]*");
+
+  return new RegExp(`(?:^|[^a-z0-9])${body}\\s*(?:[:：=\\-–—]|\\s)+`, "iu");
+}
+
+function hasAnyAlias(line: string, aliases: string[]) {
+  return aliases.some((alias) => buildAliasPattern(alias).test(foldForSearch(line)));
+}
+
+function cleanInvoiceNumber(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const truncated = truncateAtNextKnownLabel(value);
+  const match = truncated.match(/[A-Z0-9][A-Z0-9/._-]{2,}/iu);
+
+  return match?.[0]?.trim() ?? null;
+}
+
+function cleanCompanyName(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const cleaned = truncateAtNextKnownLabel(value)
+    .replace(/\b(VKN|TCKN|Vergi\s*No|Vergi\s*Dairesi)\b.*$/iu, "")
+    .trim();
+
+  return cleanFreeTextValue(cleaned);
+}
+
+function cleanFreeTextValue(value: string | null | undefined) {
   if (!value) {
     return null;
   }
 
   const cleaned = value
     .replace(/\s+/g, " ")
-    .replace(/^[\s:;-]+|[\s;]+$/g, "")
+    .replace(/^[\s:;=\-–—]+|[\s;|]+$/g, "")
     .trim();
 
   return cleaned || null;
+}
+
+function truncateAtNextKnownLabel(value: string) {
+  let truncated = value;
+
+  for (const alias of allKnownAliases) {
+    const pattern = buildAliasPattern(alias);
+    const match = foldForSearch(truncated).match(pattern);
+
+    if (match?.index && match.index > 0) {
+      truncated = truncated.slice(0, match.index).trim();
+    }
+  }
+
+  return truncated.split(/\s{3,}|\t|\|/u)[0]?.trim() ?? truncated.trim();
+}
+
+function extractTaxNumberFromValue(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const compact = value.replace(/[^\d]/g, "");
+  const match = compact.match(/\d{10,11}/u);
+
+  return match?.[0] ?? null;
+}
+
+function getMeaningfulLines(text: string) {
+  return normalizeWhitespace(text)
+    .split("\n")
+    .flatMap((line) => line.split(/\s{4,}|\t|\|/u))
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function inferSingleSeparatorAmount(value: string, separator: "," | ".") {
+  const parts = value.split(separator);
+  const lastPart = parts.at(-1) ?? "";
+
+  if (parts.length > 2) {
+    return parts.join("");
+  }
+
+  if (lastPart.length === 3 && parts[0].length <= 3) {
+    return parts.join("");
+  }
+
+  if (lastPart.length === 1 || lastPart.length === 2) {
+    return value.replace(separator, ".");
+  }
+
+  return value.replace(separator, ".");
 }
 
 function normalizeWhitespace(text: string) {
@@ -290,26 +566,50 @@ function normalizeWhitespace(text: string) {
 }
 
 function detectInvoiceType(text: string): InvoiceTypeSuggestion {
-  if (/(?:sat[ıi][şs]\s*faturas[ıi]|bizden|taraf[ıi]m[ıi]zca)/iu.test(text)) {
+  const folded = foldForSearch(text);
+
+  if (/(?:satis\s*faturasi|bizden|tarafimizca|duzenleyen\s*biz)/iu.test(folded)) {
     return "SALES";
   }
 
-  if (/(?:al[ıi][şs]\s*faturas[ıi]|tedarik[çc]i|bize\s*kesilen)/iu.test(text)) {
+  if (/(?:alis\s*faturasi|tedarikci|bize\s*kesilen|satici)/iu.test(folded)) {
     return "PURCHASE";
   }
 
   return "UNKNOWN";
 }
 
-function calculateConfidence(values: {
-  invoiceNumber: string | null;
-  invoiceDate: string | null;
-  companyName: string | null;
-  taxNumber: string | null;
-  subtotal: number | null;
-  vatAmount: number | null;
-  totalAmount: number | null;
-}) {
+function pushMissingWarnings(warnings: string[], values: ParsedFieldsForConfidence) {
+  if (!values.invoiceNumber) {
+    warnings.push("Fatura no bulunamadı. E-Arşiv No, E-Fatura No, Belge No veya Fatura No alanını kontrol edin.");
+  }
+
+  if (!values.invoiceDate) {
+    warnings.push("Fatura tarihi bulunamadı. Fatura Tarihi, Düzenleme Tarihi veya Belge Tarihi alanını kontrol edin.");
+  }
+
+  if (!values.companyName) {
+    warnings.push("Firma adı bulunamadı. Firma, Ünvan, Alıcı veya Satıcı alanını kontrol edin.");
+  }
+
+  if (!values.taxNumber) {
+    warnings.push("Vergi no bulunamadı. VKN, Vergi No veya TCKN alanını kontrol edin.");
+  }
+
+  if (values.subtotal === null) {
+    warnings.push("Ara toplam bulunamadı. Mal Hizmet Toplamı veya Ara Toplam alanını kontrol edin.");
+  }
+
+  if (values.vatAmount === null) {
+    warnings.push("KDV tutarı bulunamadı. KDV, Hesaplanan KDV veya Vergiler Toplamı alanını kontrol edin.");
+  }
+
+  if (values.totalAmount === null) {
+    warnings.push("Genel toplam bulunamadı. Genel Toplam, Ödenecek Tutar veya Fatura Toplamı alanını kontrol edin.");
+  }
+}
+
+function calculateConfidence(values: ParsedFieldsForConfidence) {
   const checks = [
     values.invoiceNumber,
     values.invoiceDate,
@@ -336,4 +636,27 @@ function isValidDateParts(year: number, month: number, day: number) {
     date.getUTCMonth() === month - 1 &&
     date.getUTCDate() === day
   );
+}
+
+function foldForSearch(value: string) {
+  return value
+    .replace(/İ/g, "I")
+    .replace(/ı/g, "i")
+    .replace(/Ş/g, "S")
+    .replace(/ş/g, "s")
+    .replace(/Ğ/g, "G")
+    .replace(/ğ/g, "g")
+    .replace(/Ü/g, "U")
+    .replace(/ü/g, "u")
+    .replace(/Ö/g, "O")
+    .replace(/ö/g, "o")
+    .replace(/Ç/g, "C")
+    .replace(/ç/g, "c")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
