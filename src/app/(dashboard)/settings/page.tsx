@@ -11,7 +11,10 @@ import {
   Trash2,
 } from "lucide-react";
 import { appInfo } from "@/lib/app-info";
+import { isOnboardingCompleted } from "@/lib/onboarding-utils";
 import { isLocalPinConfigured } from "@/lib/security-utils";
+
+export const dynamic = "force-dynamic";
 
 const settingCards = [
   {
@@ -75,7 +78,10 @@ const plannedModules = [
 ];
 
 export default async function SettingsPage() {
-  const pinConfigured = await isLocalPinConfigured();
+  const [pinConfigured, onboardingCompleted] = await Promise.all([
+    isLocalPinConfigured(),
+    isOnboardingCompleted(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -103,6 +109,16 @@ export default async function SettingsPage() {
               PIN Belirle
             </Link>
           </div>
+        </section>
+      ) : null}
+
+      {onboardingCompleted ? (
+        <section className="rounded-lg border border-[#c7dfcf] bg-[#f4fbf6] p-4 text-sm text-[#1f6f54]">
+          <p className="font-semibold text-[#16201b]">İlk kurulum tamamlandı</p>
+          <p className="mt-1">
+            İlk kurulum bilgilerini güncellemek için Şirket Bilgileri ve Güvenlik / PIN
+            sayfalarını kullanabilirsiniz.
+          </p>
         </section>
       ) : null}
 

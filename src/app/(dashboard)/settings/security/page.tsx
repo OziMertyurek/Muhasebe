@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowLeft, LockKeyhole, ShieldCheck } from "lucide-react";
 import { isLocalPinConfigured } from "@/lib/security-utils";
 
+export const dynamic = "force-dynamic";
+
 type SecuritySettingsPageProps = {
   searchParams?: Promise<{
     error?: string;

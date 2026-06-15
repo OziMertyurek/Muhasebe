@@ -1,5 +1,6 @@
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { maxBackupZipSize, validateBackupZip } from "@/lib/backup-utils";
+import { requireRequestOnboardingCompleted } from "@/lib/onboarding-utils";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
@@ -9,6 +10,12 @@ export async function POST(request: Request) {
 
   if (authResponse) {
     return authResponse;
+  }
+
+  const onboardingResponse = await requireRequestOnboardingCompleted();
+
+  if (onboardingResponse) {
+    return onboardingResponse;
   }
 
   let formData: FormData;

@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { getDatabaseBackupInfo, formatBackupFileName } from "@/lib/backup-utils";
+import { requireRequestOnboardingCompleted } from "@/lib/onboarding-utils";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
@@ -10,6 +11,12 @@ export async function GET(request: Request) {
 
   if (authResponse) {
     return authResponse;
+  }
+
+  const onboardingResponse = await requireRequestOnboardingCompleted();
+
+  if (onboardingResponse) {
+    return onboardingResponse;
   }
 
   const database = getDatabaseBackupInfo();

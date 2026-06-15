@@ -6,6 +6,8 @@ import {
   isLocalSessionValid,
 } from "@/lib/security-utils";
 
+export const dynamic = "force-dynamic";
+
 type LoginPageProps = {
   searchParams?: Promise<{
     error?: string;

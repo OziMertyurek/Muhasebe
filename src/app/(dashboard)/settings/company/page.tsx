@@ -4,6 +4,8 @@ import { updateCompanySettingsAction } from "@/app/(dashboard)/settings/company/
 import { CompanySettingsForm } from "@/components/settings/company-settings-form";
 import { getCompanySettings } from "@/lib/settings-utils";
 
+export const dynamic = "force-dynamic";
+
 type CompanySettingsPageProps = {
   searchParams?: Promise<{
     saved?: string;
