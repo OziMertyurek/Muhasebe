@@ -1,10 +1,17 @@
 import { readFile } from "node:fs/promises";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { getDatabaseBackupInfo, formatBackupFileName } from "@/lib/backup-utils";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const database = getDatabaseBackupInfo();
 
   if (!database.databasePath || !database.exists) {

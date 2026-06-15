@@ -59,6 +59,25 @@ export async function upsertCompanySettings(settings: CompanySettings) {
   );
 }
 
+export async function getAppSetting(key: string) {
+  return prisma.appSetting.findUnique({
+    where: { key },
+  });
+}
+
+export async function getAppSettingValue(key: string) {
+  const setting = await getAppSetting(key);
+  return setting?.value ?? null;
+}
+
+export async function upsertAppSetting(key: string, value: string) {
+  return prisma.appSetting.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value },
+  });
+}
+
 export function getSettingValue(settings: CompanySettings, key: CompanySettingKey) {
   return settings[key] ?? defaultCompanySettings[key];
 }

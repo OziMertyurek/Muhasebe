@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Building2 } from "lucide-react";
+import { Building2, LogOut } from "lucide-react";
 import { clsx } from "clsx";
 import { navigationItems } from "@/lib/navigation";
 import { appInfo } from "@/lib/app-info";
@@ -85,9 +85,23 @@ export function Sidebar() {
               </Link>
             );
           })}
+          <Link
+            href="/cikis"
+            className="flex h-11 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium text-[#46534b] transition hover:bg-[#f1f4f1] hover:text-[#16201b] md:hidden"
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span className="whitespace-nowrap">Çıkış Yap</span>
+          </Link>
         </nav>
 
         <div className="hidden border-t border-[#dce2dc] px-5 py-4 text-xs text-[#647067] md:block">
+          <Link
+            href="/cikis"
+            className="mb-3 flex h-9 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#46534b] transition hover:border-[#8ea99b] hover:text-[#16201b]"
+          >
+            <LogOut className="h-4 w-4" />
+            Çıkış Yap
+          </Link>
           <p className="font-semibold text-[#16201b]">v{appInfo.version}</p>
           <p>{appInfo.mode} kullanım</p>
         </div>

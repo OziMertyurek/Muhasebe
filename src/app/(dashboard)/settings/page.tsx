@@ -7,9 +7,11 @@ import {
   History,
   Info,
   Monitor,
+  ShieldCheck,
   Trash2,
 } from "lucide-react";
 import { appInfo } from "@/lib/app-info";
+import { isLocalPinConfigured } from "@/lib/security-utils";
 
 const settingCards = [
   {
@@ -23,6 +25,12 @@ const settingCards = [
     description: "SQLite veritabanı yedeğini indirin ve upload dosyaları için kontrol listesini izleyin.",
     href: "/settings/backup",
     icon: DatabaseBackup,
+  },
+  {
+    title: "Güvenlik / PIN",
+    description: "Local giriş PIN'ini belirleyin veya değiştirin.",
+    href: "/settings/security",
+    icon: ShieldCheck,
   },
   {
     title: "Silinen Kayıtlar",
@@ -66,7 +74,9 @@ const plannedModules = [
   "Gelişmiş yedek geri yükleme",
 ];
 
-export default function SettingsPage() {
+export default async function SettingsPage() {
+  const pinConfigured = await isLocalPinConfigured();
+
   return (
     <div className="space-y-6">
       <section className="border-b border-[#dce2dc] pb-6">
@@ -78,6 +88,23 @@ export default function SettingsPage() {
           Şirket bilgileri, uygulama durumu ve yerel yedekleme adımlarını buradan yönetin.
         </p>
       </section>
+
+      {!pinConfigured ? (
+        <section className="rounded-lg border border-[#f0d9a2] bg-[#fffaf0] p-4 text-sm text-[#745214]">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p>
+              Bu local uygulama için henüz PIN belirlenmemiş. Bilgisayarı kullanan
+              başka biri uygulamayı açabilir.
+            </p>
+            <Link
+              href="/settings/security"
+              className="inline-flex shrink-0 items-center justify-center rounded-md bg-[#1f6f54] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#185741]"
+            >
+              PIN Belirle
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {settingCards.map((card) => {

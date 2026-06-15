@@ -9,6 +9,7 @@ import {
   getDatabaseBackupInfo,
   getUploadsBackupInfo,
 } from "@/lib/backup-utils";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
 
@@ -82,7 +83,13 @@ async function addUploadsToZip(zip: JSZip, uploadsPath: string) {
   await walk(uploadsPath);
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const database = getDatabaseBackupInfo();
   const uploads = getUploadsBackupInfo();
 

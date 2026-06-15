@@ -1,10 +1,17 @@
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { maxBackupZipSize, restoreFromBackupZip } from "@/lib/backup-utils";
 import { prisma } from "@/lib/prisma";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   let formData: FormData;
 
   try {
