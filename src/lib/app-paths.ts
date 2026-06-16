@@ -1,6 +1,8 @@
 import "server-only";
 
-import { join } from "node:path";
+import { mkdir } from "node:fs/promises";
+import { homedir } from "node:os";
+import { dirname, join } from "node:path";
 
 export function isDesktopMode() {
   return (
@@ -39,4 +41,55 @@ export function getPythonWorkerDir() {
 
 export function getPythonWorkerScriptPath() {
   return join(getPythonWorkerDir(), "extract_markdown.py");
+}
+
+export function getDesktopAppDataDir() {
+  const appDataRoot =
+    process.env.APPDATA ||
+    (process.platform === "win32"
+      ? join(homedir(), "AppData", "Roaming")
+      : join(homedir(), ".local", "share"));
+
+  return join(appDataRoot, "MuhasebeTakip");
+}
+
+export function getDesktopDatabasePath() {
+  return join(getDesktopAppDataDir(), "database", "dev.db");
+}
+
+export function getDesktopUploadsDir() {
+  return join(getDesktopAppDataDir(), "uploads");
+}
+
+export function getDesktopRestoreBackupsDir() {
+  return join(getDesktopAppDataDir(), "restore-backups");
+}
+
+export function getDesktopBackupsDir() {
+  return join(getDesktopAppDataDir(), "backups");
+}
+
+export function getDesktopLogsDir() {
+  return join(getDesktopAppDataDir(), "logs");
+}
+
+export async function ensureDesktopDataDirs() {
+  const dirs = [
+    dirname(getDesktopDatabasePath()),
+    getDesktopUploadsDir(),
+    getDesktopRestoreBackupsDir(),
+    getDesktopBackupsDir(),
+    getDesktopLogsDir(),
+  ];
+
+  await Promise.all(dirs.map((dir) => mkdir(dir, { recursive: true })));
+
+  return {
+    appDataDir: getDesktopAppDataDir(),
+    databasePath: getDesktopDatabasePath(),
+    uploadsDir: getDesktopUploadsDir(),
+    restoreBackupsDir: getDesktopRestoreBackupsDir(),
+    backupsDir: getDesktopBackupsDir(),
+    logsDir: getDesktopLogsDir(),
+  };
 }

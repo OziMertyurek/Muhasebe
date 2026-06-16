@@ -2,11 +2,19 @@ import "server-only";
 
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
+import { dirname } from "node:path";
 import { appInfo } from "@/lib/app-info";
 import {
+  getDesktopAppDataDir,
+  getDesktopBackupsDir,
+  getDesktopDatabasePath,
+  getDesktopLogsDir,
+  getDesktopRestoreBackupsDir,
+  getDesktopUploadsDir,
   getProjectRoot,
   getPythonWorkerScriptPath,
   getRestoreBackupsDir,
+  isDesktopMode,
 } from "@/lib/app-paths";
 import {
   formatBackupReminderDate,
@@ -47,6 +55,7 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
   const database = getDatabaseBackupInfo();
   const uploads = getUploadsBackupInfo();
   const restoreBackupsPath = getRestoreBackupsDir();
+  const desktopChecks = getDesktopPreparationChecks();
 
   const [
     onboardingCompleted,
@@ -133,6 +142,7 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
         ? "Restore öncesi güvenlik yedeği klasörü mevcut."
         : "Henüz restore işlemi yapılmadıysa bu klasör oluşmamış olabilir.",
     },
+    ...desktopChecks,
     {
       id: "python",
       title: "Python",
@@ -161,6 +171,68 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
       ),
     ),
   };
+}
+
+function getDesktopPreparationChecks(): SystemStatusCheck[] {
+  const desktopMode = isDesktopMode();
+
+  try {
+    const appDataDir = getDesktopAppDataDir();
+    const desktopDirs = [
+      dirname(getDesktopDatabasePath()),
+      getDesktopUploadsDir(),
+      getDesktopRestoreBackupsDir(),
+      getDesktopBackupsDir(),
+      getDesktopLogsDir(),
+    ];
+    const allDirsExist = desktopDirs.every((dir) => existsSync(dir));
+
+    return [
+      {
+        id: "desktop-mode",
+        title: "Desktop modu",
+        status: desktopMode ? "healthy" : "unknown",
+        label: desktopMode ? "Aktif" : "Pasif",
+        description: desktopMode
+          ? "Uygulama desktop modu icin hazirlanan ayarlarla calisiyor."
+          : "Uygulama su anda normal local web modu ile calisiyor.",
+      },
+      {
+        id: "desktop-appdata",
+        title: "Desktop AppData hazirligi",
+        status: appDataDir ? "healthy" : "warning",
+        label: appDataDir ? "Hesaplanabilir" : "Hesaplanamadi",
+        description: appDataDir
+          ? "Windows AppData tabanli desktop veri klasoru hesaplanabiliyor. Tam path gizlilik icin gosterilmiyor."
+          : "Desktop veri klasoru hesaplanamadi.",
+      },
+      {
+        id: "desktop-data-folders",
+        title: "Desktop veri klasorleri",
+        status: desktopMode ? (allDirsExist ? "healthy" : "warning") : "unknown",
+        label: allDirsExist ? "Hazir" : "Olusturulmadi",
+        description: desktopMode
+          ? allDirsExist
+            ? "Desktop veri klasorleri mevcut gorunuyor."
+            : "Desktop mode aktif ancak veri klasorlerinin tamami mevcut degil."
+          : "Desktop mode aktif olmadigi icin AppData veri klasorleri otomatik olusturulmadi.",
+        suggestion:
+          desktopMode && !allDirsExist
+            ? "Desktop baslatma akisi ensureDesktopDataDirs() fonksiyonunu kontrollu sekilde cagirmali."
+            : undefined,
+      },
+    ];
+  } catch {
+    return [
+      {
+        id: "desktop-appdata",
+        title: "Desktop AppData hazirligi",
+        status: "warning",
+        label: "Kontrol edilemedi",
+        description: "Desktop veri klasoru durumu kontrol edilemedi.",
+      },
+    ];
+  }
 }
 
 async function checkPythonCommand(): Promise<CommandResult> {
