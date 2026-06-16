@@ -1,5 +1,6 @@
 import Link from "next/link";
 import {
+  Activity,
   ArrowRight,
   Building2,
   CheckCircle2,
@@ -28,6 +29,12 @@ const settingCards = [
     description: "SQLite veritabanı yedeğini indirin ve upload dosyaları için kontrol listesini izleyin.",
     href: "/settings/backup",
     icon: DatabaseBackup,
+  },
+  {
+    title: "Sistem Durumu",
+    description: "Veritabanı, yedekleme, PIN, Python ve MarkItDown kontrollerini görün.",
+    href: "/settings/system-status",
+    icon: Activity,
   },
   {
     title: "Güvenlik / PIN",
