@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { initializeDefaultBackupReminderSettings } from "@/lib/backup-reminder-utils";
 import {
   readOnboardingCompanySettings,
   saveOnboardingSettings,
@@ -56,6 +57,7 @@ export async function POST(request: Request) {
 
   try {
     await saveOnboardingSettings({ company });
+    await initializeDefaultBackupReminderSettings();
     await createAuditLog({
       entityType: "SETTINGS",
       action: "UPDATE",
@@ -65,6 +67,8 @@ export async function POST(request: Request) {
         company,
         onboardingCompleted: true,
         pinConfigured: Boolean(pinHash),
+        backupReminderEnabled: true,
+        backupReminderIntervalDays: 7,
       },
     });
   } catch {

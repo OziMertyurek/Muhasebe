@@ -3,6 +3,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import JSZip from "jszip";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { updateLastFullBackupDate } from "@/lib/backup-reminder-utils";
 import {
   createBackupMetadata,
   formatFullBackupFileName,
@@ -127,6 +128,7 @@ export async function GET(request: Request) {
     });
     const fileName = formatFullBackupFileName(backupDate);
 
+    await updateLastFullBackupDate(backupDate);
     await createAuditLog({
       entityType: "BACKUP",
       action: "FULL_BACKUP_DOWNLOAD",

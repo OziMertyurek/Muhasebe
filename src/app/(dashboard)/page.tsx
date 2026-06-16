@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   Building2,
   CalendarClock,
+  DatabaseBackup,
   FilePlus2,
   FileWarning,
   Plus,
@@ -11,6 +12,10 @@ import {
   WalletCards,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import {
+  formatBackupReminderDate,
+  getBackupReminderStatus,
+} from "@/lib/backup-reminder-utils";
 import { formatDate } from "@/lib/company-utils";
 import {
   formatDashboardMoney,
@@ -90,7 +95,10 @@ function EmptyState({ text }: { text: string }) {
 }
 
 export default async function DashboardPage() {
-  const dashboard = await getDashboardData();
+  const [dashboard, backupReminder] = await Promise.all([
+    getDashboardData(),
+    getBackupReminderStatus(),
+  ]);
   const { cards, lists } = dashboard;
 
   const dashboardStats = [
@@ -243,6 +251,46 @@ export default async function DashboardPage() {
             Müşteri: {cards.companyBreakdown.CUSTOMER} · Tedarikçi:{" "}
             {cards.companyBreakdown.SUPPLIER} · İkisi de: {cards.companyBreakdown.BOTH}
           </p>
+        </div>
+      </section>
+
+      <section
+        className={
+          backupReminder.tone === "warning"
+            ? "rounded-lg border border-[#f0d9a2] bg-[#fffaf0] p-5 shadow-sm"
+            : "rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm"
+        }
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-start gap-3">
+            <span
+              className={
+                backupReminder.tone === "warning"
+                  ? "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fff4dc] text-[#765116]"
+                  : "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]"
+              }
+            >
+              <DatabaseBackup className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold text-[#16201b]">Yedek durumu</h2>
+              <p className="mt-1 text-sm leading-6 text-[#647067]">
+                {backupReminder.message}
+              </p>
+              <p className="mt-2 text-xs text-[#647067]">
+                Son tam yedek: {formatBackupReminderDate(backupReminder.lastFullBackupAt)}
+                {backupReminder.enabled
+                  ? ` · Hatırlatma aralığı: ${backupReminder.intervalDays} gün`
+                  : " · Hatırlatma kapalı"}
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/settings/backup"
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          >
+            Yedekleme Sayfasına Git
+          </Link>
         </div>
       </section>
 

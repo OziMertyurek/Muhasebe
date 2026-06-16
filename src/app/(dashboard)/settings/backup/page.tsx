@@ -9,11 +9,23 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import {
+  formatBackupReminderDate,
+  getBackupReminderStatus,
+} from "@/lib/backup-reminder-utils";
+import {
   formatFileSize,
   getDatabaseBackupInfo,
   getUploadsBackupInfo,
 } from "@/lib/backup-utils";
 import { RestoreValidationForm } from "@/components/settings/restore-validation-form";
+
+export const dynamic = "force-dynamic";
+
+type BackupSettingsPageProps = {
+  searchParams?: Promise<{
+    reminderSaved?: string;
+  }>;
+};
 
 const checklist = [
   "Tam yedeği indir",
@@ -22,9 +34,16 @@ const checklist = [
   "Önemli işlemlerden önce yeni yedek al",
 ];
 
-export default function BackupSettingsPage() {
+export default async function BackupSettingsPage({ searchParams }: BackupSettingsPageProps) {
   const database = getDatabaseBackupInfo();
   const uploads = getUploadsBackupInfo();
+  const [backupReminder, params] = await Promise.all([
+    getBackupReminderStatus(),
+    searchParams,
+  ]);
+  const selectedReminderValue = backupReminder.enabled
+    ? String(backupReminder.intervalDays)
+    : "off";
 
   return (
     <div className="space-y-6">
@@ -46,6 +65,12 @@ export default function BackupSettingsPage() {
         </p>
       </section>
 
+      {params?.reminderSaved === "1" ? (
+        <div className="rounded-md border border-[#b9d8c7] bg-[#f1faf4] px-4 py-3 text-sm font-medium text-[#14543f]">
+          Yedek hatırlatma ayarı kaydedildi.
+        </div>
+      ) : null}
+
       <section className="rounded-lg border border-[#e0c4bf] bg-[#fff7f5] p-5 shadow-sm">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fdecea] text-[#8b2f28]">
@@ -59,6 +84,77 @@ export default function BackupSettingsPage() {
               yöntemidir.
             </p>
           </div>
+        </div>
+      </section>
+
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-2xl">
+            <h2 className="text-lg font-semibold text-[#16201b]">
+              Otomatik yedek hatırlatma
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#647067]">
+              Sistem arka planda otomatik yedek almaz. Sadece son tam yedek tarihine göre
+              size hatırlatma gösterir.
+            </p>
+            <div className="mt-4 grid gap-3 text-sm text-[#46534b] md:grid-cols-3">
+              <InfoLine
+                label="Son tam yedek"
+                value={formatBackupReminderDate(backupReminder.lastFullBackupAt)}
+              />
+              <InfoLine
+                label="Hatırlatma durumu"
+                value={backupReminder.enabled ? "Aktif" : "Kapalı"}
+              />
+              <InfoLine
+                label="Geçen süre"
+                value={
+                  backupReminder.daysSinceLastBackup === null
+                    ? "Yedek yok"
+                    : `${backupReminder.daysSinceLastBackup} gün`
+                }
+              />
+            </div>
+            <div
+              className={
+                backupReminder.tone === "warning"
+                  ? "mt-4 rounded-md border border-[#f0d9a2] bg-[#fffaf0] px-4 py-3 text-sm text-[#745214]"
+                  : "mt-4 rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 py-3 text-sm text-[#46534b]"
+              }
+            >
+              {backupReminder.message}
+            </div>
+          </div>
+
+          <form
+            action="/settings/backup/reminder"
+            method="post"
+            className="w-full rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-4 lg:max-w-xs"
+          >
+            <label
+              htmlFor="reminderInterval"
+              className="text-sm font-semibold text-[#16201b]"
+            >
+              Hatırlatma aralığı
+            </label>
+            <select
+              id="reminderInterval"
+              name="reminderInterval"
+              defaultValue={selectedReminderValue}
+              className="mt-2 w-full rounded-md border border-[#cfd8cf] bg-white px-3 py-2 text-sm text-[#16201b] outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d8eadf]"
+            >
+              <option value="off">Kapalı</option>
+              <option value="7">7 gün</option>
+              <option value="15">15 gün</option>
+              <option value="30">30 gün</option>
+            </select>
+            <button
+              type="submit"
+              className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+            >
+              Ayarı Kaydet
+            </button>
+          </form>
         </div>
       </section>
 
