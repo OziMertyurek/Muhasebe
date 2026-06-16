@@ -87,19 +87,21 @@ pip install -r requirements.txt
 
 Bu özellik PDF, görsel veya HTML fatura dosyasından Markdown/metin çıkarmak için kullanılır. Henüz fatura alanlarını otomatik doldurmaz ve `Invoice` kaydı oluşturmaz.
 
-## Antigravity Olmadan Çalıştırma
+## Windows'ta Antigravity Olmadan Çalıştırma
 
 Antigravity şart değildir. Bu proje Windows üzerinde normal bir local web uygulaması olarak çalışır. Bilgisayarda Node.js yüklü olmalıdır.
 
 Windows'ta hızlı kullanım:
 
 1. İlk kurulum için proje klasöründeki `setup.bat` dosyasını çalıştırın.
-2. Günlük kullanım için `start-dev.bat` dosyasını çalıştırın.
+2. Sonraki kullanımlarda `start-dev.bat` veya `start-prod.bat` dosyasını çalıştırın.
 3. Tarayıcıdan `http://localhost:3000` adresini açın.
 
-Alternatif olarak production modda çalıştırmak için `start-prod.bat` dosyasını kullanabilirsiniz. Bu dosya önce build alır, sonra `npm run start` ile uygulamayı başlatır.
+`setup.bat` bağımlılıkları kurar, Prisma client üretir, migration çalıştırır ve Python varsa MarkItDown worker bağımlılıklarını yükler. `start-dev.bat` günlük local kullanım için geliştirme server'ını açar. `start-prod.bat` önce build alır, sonra `npm run start` ile production modda uygulamayı başlatır.
 
 Kayıtlar `prisma/dev.db` dosyasında saklanır. Upload dosyaları `storage/uploads/` içinde tutulur. Bu dosyalar GitHub'a gitmez; düzenli olarak `Ayarlar > Yedekleme > Tam Yedek İndir` ile tam yedek alınmalıdır.
+
+Çift tıklanabilir `.exe` veya klasik Windows setup paketi sonraki aşamada hazırlanacaktır.
 
 ## Ortam Değişkenleri
 

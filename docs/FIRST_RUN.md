@@ -55,7 +55,7 @@ Antigravity olmadan Windows bilgisayarda çalıştırmak için proje kökündeki
 setup.bat
 ```
 
-Bu dosya sırasıyla `npm install`, `npm run prisma:generate` ve `npx prisma migrate dev` komutlarını çalıştırır.
+Bu dosya sırasıyla `npm install`, `npm run prisma:generate` ve `npx prisma migrate dev` komutlarını çalıştırır. Python yüklüyse `python-worker` klasöründeki MarkItDown bağımlılıklarını da kurar.
 
 Günlük kullanım:
 
@@ -72,6 +72,14 @@ start-prod.bat
 ```
 
 Bu dosya `npm run build` çalıştırır ve ardından `npm run start` ile uygulamayı başlatır.
+
+Server'ı kapatma bilgisini görmek için:
+
+```text
+stop-info.bat
+```
+
+Server açık olan komut penceresinde çalışır. Kapatmak için o pencerede `Ctrl+C` kullanın.
 
 ## .env Oluşturma
 
