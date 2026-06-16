@@ -10,6 +10,7 @@ import {
   isAllowedUploadType,
   maxUploadSize,
 } from "@/lib/file-utils";
+import { getUploadsDir } from "@/lib/app-paths";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -163,7 +164,7 @@ export async function uploadFileAction(
 
   const extension = getSafeFileExtension(fileValue.name, fileValue.type, relatedType);
   const storedFileName = `${randomUUID()}${extension}`;
-  const uploadDirectory = join(process.cwd(), "storage", "uploads");
+  const uploadDirectory = getUploadsDir();
   const absolutePath = join(uploadDirectory, storedFileName);
   const relativePath = `storage/uploads/${storedFileName}`;
 

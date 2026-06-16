@@ -2,8 +2,12 @@ import "server-only";
 
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
-import { join } from "node:path";
 import { appInfo } from "@/lib/app-info";
+import {
+  getProjectRoot,
+  getPythonWorkerScriptPath,
+  getRestoreBackupsDir,
+} from "@/lib/app-paths";
 import {
   formatBackupReminderDate,
   getBackupReminderStatus,
@@ -42,7 +46,7 @@ const commandTimeoutMs = 15_000;
 export async function getSystemStatus(): Promise<SystemStatusSummary> {
   const database = getDatabaseBackupInfo();
   const uploads = getUploadsBackupInfo();
-  const restoreBackupsPath = join(process.cwd(), "storage", "restore-backups");
+  const restoreBackupsPath = getRestoreBackupsDir();
 
   const [
     onboardingCompleted,
@@ -196,7 +200,7 @@ async function checkMarkItDownWorker(
     };
   }
 
-  const scriptPath = join(process.cwd(), "python-worker", "extract_markdown.py");
+  const scriptPath = getPythonWorkerScriptPath();
 
   if (!existsSync(scriptPath)) {
     return {
@@ -211,7 +215,7 @@ async function checkMarkItDownWorker(
 
   const result = await runCommand(
     pythonStatus.command,
-    ["python-worker/extract_markdown.py", "README.md"],
+    [scriptPath, "README.md"],
     commandTimeoutMs,
   );
 
@@ -249,7 +253,7 @@ function runCommand(
       command,
       args,
       {
-        cwd: process.cwd(),
+        cwd: getProjectRoot(),
         shell: false,
         timeout,
         windowsHide: true,

@@ -9,6 +9,12 @@ import {
 import { basename, dirname, join } from "node:path";
 import JSZip from "jszip";
 import { appInfo } from "@/lib/app-info";
+import {
+  getDatabasePath,
+  getProjectRoot,
+  getRestoreBackupsDir,
+  getUploadsDir,
+} from "@/lib/app-paths";
 
 export const maxBackupZipSize = 500 * 1024 * 1024;
 
@@ -44,7 +50,7 @@ export type RestoreBackupResult = {
 };
 
 export function getDatabaseBackupInfo() {
-  const databasePath = join(process.cwd(), "prisma", "dev.db");
+  const databasePath = getDatabasePath();
 
   if (!existsSync(databasePath)) {
     return {
@@ -66,7 +72,7 @@ export function getDatabaseBackupInfo() {
 }
 
 export function getUploadsBackupInfo() {
-  const uploadsPath = join(/* turbopackIgnore: true */ process.cwd(), "storage", "uploads");
+  const uploadsPath = getUploadsDir();
   const exists = existsSync(uploadsPath);
 
   return {
@@ -105,7 +111,7 @@ function formatRestoreDirectoryName(date = new Date()) {
 }
 
 function getUniqueRestoreBackupPath(date = new Date()) {
-  const backupBasePath = join(process.cwd(), "storage", "restore-backups");
+  const backupBasePath = getRestoreBackupsDir();
   const directoryName = formatRestoreDirectoryName(date);
   let candidatePath = join(backupBasePath, directoryName);
   let suffix = 2;
@@ -495,7 +501,7 @@ export async function restoreFromBackupZip(file: File): Promise<RestoreBackupRes
 
   const restoreDate = new Date();
   const tempRoot = join(
-    process.cwd(),
+    getProjectRoot(),
     "storage",
     "restore-temp",
     `restore-${restoreDate.getTime()}`,

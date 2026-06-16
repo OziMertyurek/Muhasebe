@@ -1,4 +1,6 @@
 import type { FileAttachment } from "@prisma/client";
+import { join } from "node:path";
+import { getPythonWorkerScriptPath, getUploadsDir } from "@/lib/app-paths";
 
 type MarkItDownFile = Pick<
   FileAttachment,
@@ -67,7 +69,7 @@ export async function extractMarkdownFromFileAttachment(
     };
   }
 
-  const scriptPath = "python-worker/extract_markdown.py";
+  const scriptPath = getPythonWorkerScriptPath();
 
   try {
     const { access } = await import("node:fs/promises");
@@ -100,7 +102,7 @@ function resolveUploadPath(filePath: string) {
     return null;
   }
 
-  return `storage/uploads/${pathParts.join("/")}`;
+  return join(getUploadsDir(), ...pathParts);
 }
 
 function getFileExtension(fileName: string) {
