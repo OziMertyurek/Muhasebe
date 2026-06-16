@@ -20,6 +20,7 @@ import {
   formatBackupReminderDate,
   getBackupReminderStatus,
 } from "@/lib/backup-reminder-utils";
+import { getDesktopRuntimeSummary } from "@/lib/desktop-runtime-utils";
 import { getDatabaseBackupInfo, getUploadsBackupInfo } from "@/lib/backup-utils";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
 import { isLocalPinConfigured } from "@/lib/security-utils";
@@ -178,6 +179,7 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
 
   try {
     const appDataDir = getDesktopAppDataDir();
+    const runtimeSummary = getDesktopRuntimeSummary();
     const desktopDirs = [
       dirname(getDesktopDatabasePath()),
       getDesktopUploadsDir(),
@@ -220,6 +222,15 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
           desktopMode && !allDirsExist
             ? "Desktop baslatma akisi ensureDesktopDataDirs() fonksiyonunu kontrollu sekilde cagirmali."
             : undefined,
+      },
+      {
+        id: "desktop-runtime-env",
+        title: "Desktop runtime env",
+        status: runtimeSummary.databaseUrlAvailable ? "healthy" : "warning",
+        label: runtimeSummary.helperReady ? "Hazir" : "Kontrol edilmeli",
+        description: runtimeSummary.databaseUrlAvailable
+          ? "Desktop runtime helper APP_MODE ve SQLite DATABASE_URL degerlerini uretebiliyor. Tam DATABASE_URL gizlilik icin gosterilmiyor."
+          : "Desktop runtime DATABASE_URL degeri uretilemedi.",
       },
     ];
   } catch {

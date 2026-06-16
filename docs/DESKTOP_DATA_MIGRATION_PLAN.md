@@ -251,6 +251,9 @@ Desktop DB gecisi uygulanmadan once ve uygulandiktan sonra testler:
 - Electron main process icinde `APP_MODE=desktop` set edilir.
 - AppData DB yolu hesaplanir.
 - `DATABASE_URL=file:<AppData DB path>` server baslamadan once set edilir.
+- `src/lib/desktop-runtime-utils.ts` helper'i bu degerleri uretmek icin hazirlanmistir.
+- Bu helper normal web/local modda otomatik calismaz, `process.env` degerlerini degistirmez.
+- Electron main process ileride Next.js server'i baslatmadan once ayni mantikla runtime env hazirlayacaktir.
 
 ### B. AppData DB bootstrap helper
 
