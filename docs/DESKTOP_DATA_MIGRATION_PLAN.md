@@ -261,6 +261,9 @@ Desktop DB gecisi uygulanmadan once ve uygulandiktan sonra testler:
 - AppData DB var/yok kontrolu yapilir.
 - AppData DB yoksa local DB kopyalama veya migration akisi uygulanir.
 - Hicbir durumda mevcut AppData DB otomatik overwrite edilmez.
+- `src/lib/desktop-bootstrap-utils.ts` helper'i bootstrap durumu ve klasor hazirligi icin eklendi.
+- Ilk hazirlik asamasinda helper sadece `database/`, `uploads/`, `restore-backups/`, `backups/` ve `logs/` klasorlerini olusturur.
+- DB kopyalama, upload migration ve Prisma migration islemleri sonraki kontrollu asamada yapilacaktir.
 
 ### C. AppData upload/bootstrap helper
 

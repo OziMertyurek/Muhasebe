@@ -20,6 +20,7 @@ import {
   formatBackupReminderDate,
   getBackupReminderStatus,
 } from "@/lib/backup-reminder-utils";
+import { getDesktopBootstrapStatus } from "@/lib/desktop-bootstrap-utils";
 import { getDesktopRuntimeSummary } from "@/lib/desktop-runtime-utils";
 import { getDatabaseBackupInfo, getUploadsBackupInfo } from "@/lib/backup-utils";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
@@ -179,6 +180,7 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
 
   try {
     const appDataDir = getDesktopAppDataDir();
+    const bootstrapStatus = getDesktopBootstrapStatus();
     const runtimeSummary = getDesktopRuntimeSummary();
     const desktopDirs = [
       dirname(getDesktopDatabasePath()),
@@ -211,17 +213,43 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
       {
         id: "desktop-data-folders",
         title: "Desktop veri klasorleri",
-        status: desktopMode ? (allDirsExist ? "healthy" : "warning") : "unknown",
+        status: desktopMode
+          ? bootstrapStatus.readyForDesktopRuntime
+            ? "healthy"
+            : "warning"
+          : "unknown",
         label: allDirsExist ? "Hazir" : "Olusturulmadi",
         description: desktopMode
-          ? allDirsExist
-            ? "Desktop veri klasorleri mevcut gorunuyor."
-            : "Desktop mode aktif ancak veri klasorlerinin tamami mevcut degil."
+          ? bootstrapStatus.readyForDesktopRuntime
+            ? "Desktop veri klasorleri runtime icin hazir gorunuyor."
+            : "Desktop mode aktif ancak bootstrap klasor yapisi tam hazir degil."
           : "Desktop mode aktif olmadigi icin AppData veri klasorleri otomatik olusturulmadi.",
         suggestion:
-          desktopMode && !allDirsExist
-            ? "Desktop baslatma akisi ensureDesktopDataDirs() fonksiyonunu kontrollu sekilde cagirmali."
+          desktopMode && !bootstrapStatus.readyForDesktopRuntime
+            ? "Desktop baslatma akisi ensureDesktopDataStructure() fonksiyonunu kontrollu sekilde cagirmali."
             : undefined,
+      },
+      {
+        id: "desktop-bootstrap",
+        title: "Desktop bootstrap",
+        status: bootstrapStatus.readyForDesktopRuntime ? "healthy" : "unknown",
+        label: bootstrapStatus.readyForDesktopRuntime ? "Hazir" : "Beklemede",
+        description: bootstrapStatus.readyForDesktopRuntime
+          ? "Desktop klasor yapisi hazir. Tam path gizlilik icin gosterilmiyor."
+          : "Desktop bootstrap helper hazir; normal local modda otomatik klasor olusturmaz.",
+        suggestion:
+          desktopMode && bootstrapStatus.warnings.length > 0
+            ? bootstrapStatus.warnings[0]
+            : undefined,
+      },
+      {
+        id: "desktop-database-file",
+        title: "Desktop veritabani",
+        status: bootstrapStatus.databaseFileExists ? "healthy" : "unknown",
+        label: bootstrapStatus.databaseFileExists ? "Var" : "Henuz yok",
+        description: bootstrapStatus.databaseFileExists
+          ? "Desktop SQLite veritabani dosyasi mevcut gorunuyor."
+          : "Desktop SQLite veritabani henuz olusturulmadi veya migrate edilmedi.",
       },
       {
         id: "desktop-runtime-env",
