@@ -5,13 +5,14 @@ const http = require("node:http");
 const path = require("node:path");
 
 const APP_URL = process.env.ELECTRON_START_URL || "http://localhost:3000";
+const SERVER_MODE = process.env.ELECTRON_SERVER_MODE === "production" ? "production" : "development";
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
 const SERVER_POLL_INTERVAL_MS = 1000;
 
-let nextDevServerProcess = null;
+let nextServerProcess = null;
 let nextDevServerPortOwnerPid = null;
-let startedNextDevServer = false;
+let startedNextServer = false;
 let isCleaningUp = false;
 let serverStartupError = null;
 
@@ -36,22 +37,24 @@ function wait(milliseconds) {
   });
 }
 
-function getNextDevServerCommand() {
+function getNextServerCommand() {
+  const scriptName = SERVER_MODE === "production" ? "start" : "dev";
+
   if (process.platform === "win32") {
     return {
       command: "cmd.exe",
-      args: ["/d", "/s", "/c", "npm.cmd", "run", "dev"],
+      args: ["/d", "/s", "/c", "npm.cmd", "run", scriptName],
     };
   }
 
   return {
     command: "npm",
-    args: ["run", "dev"],
+    args: ["run", scriptName],
   };
 }
 
-function startNextDevServer() {
-  const serverCommand = getNextDevServerCommand();
+function startNextServer() {
+  const serverCommand = getNextServerCommand();
   const child = spawn(serverCommand.command, serverCommand.args, {
     cwd: path.join(__dirname, ".."),
     env: {
@@ -63,8 +66,8 @@ function startNextDevServer() {
     windowsHide: true,
   });
 
-  nextDevServerProcess = child;
-  startedNextDevServer = true;
+  nextServerProcess = child;
+  startedNextServer = true;
 
   child.stdout?.on("data", (data) => {
     process.stdout.write(data);
@@ -76,16 +79,16 @@ function startNextDevServer() {
 
   child.on("error", (error) => {
     serverStartupError = error;
-    process.stderr.write(`Next.js dev server başlatılamadı: ${error.message}\n`);
+    process.stderr.write(`Next.js ${SERVER_MODE} server başlatılamadı: ${error.message}\n`);
   });
 
   child.on("exit", (code, signal) => {
-    if (nextDevServerProcess === child) {
-      nextDevServerProcess = null;
+    if (nextServerProcess === child) {
+      nextServerProcess = null;
     }
 
     if (!isCleaningUp && code !== 0) {
-      process.stderr.write(`Next.js dev server kapandı. code=${code} signal=${signal || "-"}\n`);
+      process.stderr.write(`Next.js ${SERVER_MODE} server kapandı. code=${code} signal=${signal || "-"}\n`);
     }
   });
 
@@ -106,13 +109,13 @@ async function waitForServerReady(url) {
   return false;
 }
 
-async function ensureNextDevServer() {
+async function ensureNextServer() {
   if (await checkServer(APP_URL)) {
     return true;
   }
 
   try {
-    startNextDevServer();
+    startNextServer();
   } catch (error) {
     serverStartupError = error;
     return false;
@@ -120,7 +123,7 @@ async function ensureNextDevServer() {
 
   const ready = await waitForServerReady(APP_URL);
 
-  if (ready && startedNextDevServer) {
+  if (ready && startedNextServer) {
     nextDevServerPortOwnerPid = getWindowsPortOwnerPid(APP_URL);
   }
 
@@ -152,6 +155,16 @@ function getWindowsPortOwnerPid(url) {
 }
 
 function buildServerErrorPage() {
+  const manualCommand = SERVER_MODE === "production" ? "npm run build && npm run start" : "npm run dev";
+  const title =
+    SERVER_MODE === "production"
+      ? "Production sunucu başlatılamadı"
+      : "Uygulama sunucusu başlatılamadı";
+  const description =
+    SERVER_MODE === "production"
+      ? "Electron açıldı, ancak production sunucu belirlenen sürede hazır hale gelmedi. Önce npm run build çalıştırın."
+      : "Electron açıldı, ancak uygulama sunucusu belirlenen sürede hazır hale gelmedi.";
+
   return `data:text/html;charset=utf-8,${encodeURIComponent(`
     <!doctype html>
     <html lang="tr">
@@ -189,9 +202,9 @@ function buildServerErrorPage() {
       </head>
       <body>
         <main>
-          <h1>Uygulama sunucusu başlatılamadı</h1>
-          <p>Electron açıldı, ancak uygulama sunucusu belirlenen sürede hazır hale gelmedi.</p>
-          <p>Lütfen terminal çıktısını kontrol edin. Manuel denemek için <code>npm run dev</code> komutunu çalıştırabilirsiniz.</p>
+          <h1>${title}</h1>
+          <p>${description}</p>
+          <p>Lütfen terminal çıktısını kontrol edin. Manuel denemek için <code>${manualCommand}</code> komutunu çalıştırabilirsiniz.</p>
           ${serverStartupError ? `<p>Teknik hata: <code>${String(serverStartupError.message || serverStartupError)}</code></p>` : ""}
         </main>
       </body>
@@ -234,17 +247,17 @@ async function createWindow() {
     }
   });
 
-  const serverReady = await ensureNextDevServer();
+  const serverReady = await ensureNextServer();
   await window.loadURL(serverReady ? APP_URL : buildServerErrorPage());
 }
 
-function cleanupNextDevServer() {
-  if (isCleaningUp || !startedNextDevServer) {
+function cleanupNextServer() {
+  if (isCleaningUp || !startedNextServer) {
     return;
   }
 
   isCleaningUp = true;
-  const childPids = [nextDevServerProcess?.pid, nextDevServerPortOwnerPid]
+  const childPids = [nextServerProcess?.pid, nextDevServerPortOwnerPid]
     .filter(Boolean)
     .map(String);
 
@@ -260,15 +273,15 @@ function cleanupNextDevServer() {
       }
     }
   } else {
-    nextDevServerProcess?.kill("SIGTERM");
+    nextServerProcess?.kill("SIGTERM");
   }
 }
 
 app.whenReady().then(createWindow);
 
-app.on("before-quit", cleanupNextDevServer);
+app.on("before-quit", cleanupNextServer);
 
 app.on("window-all-closed", () => {
-  cleanupNextDevServer();
+  cleanupNextServer();
   app.quit();
 });

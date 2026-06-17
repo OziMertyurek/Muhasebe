@@ -267,8 +267,9 @@ Ilk deneme notu:
 - `electron/main.js`, `electron/preload.js` ve `electron/README.md` eklendi.
 - `npm run electron:dev` script'i mevcut `http://localhost:3000` adresini Electron penceresinde acar.
 - `npm run electron:dev` artik port 3000'i kontrol eder; server yoksa `npm run dev` komutunu child process olarak baslatir.
+- `npm run electron:prod` eklendi; build alinmis uygulamayi `npm run start` ile Electron icinde dener.
 - Port 3000 zaten doluysa mevcut server'i kullanir ve onu kapatmaya calismaz.
-- Electron kapanirken sadece kendi baslattigi Next.js dev server process'ini kapatir.
+- Electron kapanirken sadece kendi baslattigi Next.js server process'ini kapatir.
 - Installer, setup.exe, Electron builder, AppData DB gecisi ve `DATABASE_URL` degisikligi bu asamada yoktur.
 
 Kabul kriteri:
