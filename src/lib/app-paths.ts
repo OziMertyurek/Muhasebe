@@ -16,22 +16,42 @@ export function getProjectRoot() {
 }
 
 export function getDatabasePath() {
+  if (isDesktopMode()) {
+    return getDesktopDatabasePath();
+  }
+
   return join(getProjectRoot(), "prisma", "dev.db");
 }
 
 export function getUploadsDir() {
+  if (isDesktopMode()) {
+    return getDesktopUploadsDir();
+  }
+
   return join(getProjectRoot(), "storage", "uploads");
 }
 
 export function getRestoreBackupsDir() {
+  if (isDesktopMode()) {
+    return getDesktopRestoreBackupsDir();
+  }
+
   return join(getProjectRoot(), "storage", "restore-backups");
 }
 
 export function getBackupsDir() {
+  if (isDesktopMode()) {
+    return getDesktopBackupsDir();
+  }
+
   return join(getProjectRoot(), "storage", "backups");
 }
 
 export function getLogsDir() {
+  if (isDesktopMode()) {
+    return getDesktopLogsDir();
+  }
+
   return join(getProjectRoot(), "storage", "logs");
 }
 

@@ -13,6 +13,9 @@ const STANDALONE_ROOT = app.isPackaged
   ? path.join(process.resourcesPath, "standalone")
   : path.join(PROJECT_ROOT, ".next", "standalone");
 const STANDALONE_SERVER_PATH = path.join(STANDALONE_ROOT, "server.js");
+const DESKTOP_APP_DATA_DIR = path.join(app.getPath("appData"), "MuhasebeTakip");
+const DESKTOP_DATABASE_PATH = path.join(DESKTOP_APP_DATA_DIR, "database", "dev.db");
+const DESKTOP_DATABASE_URL = `file:${DESKTOP_DATABASE_PATH.replace(/\\/g, "/")}`;
 const LOCAL_DATABASE_URL = `file:${path.join(PROJECT_ROOT, "prisma", "dev.db").replace(/\\/g, "/")}`;
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
@@ -23,6 +26,72 @@ let nextDevServerPortOwnerPid = null;
 let startedNextServer = false;
 let isCleaningUp = false;
 let serverStartupError = null;
+let desktopRuntimePrepared = false;
+
+function getServerDatabaseUrl() {
+  return app.isPackaged ? DESKTOP_DATABASE_URL : process.env.DATABASE_URL || LOCAL_DATABASE_URL;
+}
+
+function getServerAppMode() {
+  return app.isPackaged ? "desktop" : process.env.APP_MODE;
+}
+
+function ensureDesktopDataDirectories() {
+  const dirs = [
+    path.dirname(DESKTOP_DATABASE_PATH),
+    path.join(DESKTOP_APP_DATA_DIR, "uploads"),
+    path.join(DESKTOP_APP_DATA_DIR, "restore-backups"),
+    path.join(DESKTOP_APP_DATA_DIR, "backups"),
+    path.join(DESKTOP_APP_DATA_DIR, "logs"),
+  ];
+
+  for (const dir of dirs) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+}
+
+function runDesktopDatabaseBootstrap() {
+  const bootstrapScriptPath = path.join(PROJECT_ROOT, "electron", "desktop-db-bootstrap.js");
+  const migrationsPath = path.join(PROJECT_ROOT, "prisma", "migrations");
+
+  if (!fs.existsSync(bootstrapScriptPath) || !fs.existsSync(migrationsPath)) {
+    throw new Error("Desktop veritabani hazirlama dosyalari bulunamadi.");
+  }
+
+  execFileSync(
+    process.platform === "win32" ? "node.exe" : "node",
+    [bootstrapScriptPath, DESKTOP_DATABASE_PATH, migrationsPath, STANDALONE_ROOT],
+    {
+      cwd: PROJECT_ROOT,
+      env: {
+        ...process.env,
+        APP_MODE: "desktop",
+        DATABASE_URL: DESKTOP_DATABASE_URL,
+        APP_PROJECT_ROOT: PROJECT_ROOT,
+        ELECTRON_RUN_AS_NODE: "",
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true,
+    },
+  );
+}
+
+function preparePackagedDesktopRuntime() {
+  if (!app.isPackaged || desktopRuntimePrepared) {
+    return;
+  }
+
+  try {
+    ensureDesktopDataDirectories();
+    runDesktopDatabaseBootstrap();
+    desktopRuntimePrepared = true;
+  } catch (error) {
+    process.stderr.write(
+      `Desktop veritabani hazirlanamadi. ${error instanceof Error ? error.message : String(error)}\n`,
+    );
+    throw new Error("Desktop veritabani hazirlanamadi.");
+  }
+}
 
 function checkServer(url) {
   return new Promise((resolve) => {
@@ -79,7 +148,8 @@ function startNextServer() {
     env: {
       ...process.env,
       APP_PROJECT_ROOT: PROJECT_ROOT,
-      DATABASE_URL: process.env.DATABASE_URL || LOCAL_DATABASE_URL,
+      APP_MODE: getServerAppMode(),
+      DATABASE_URL: getServerDatabaseUrl(),
       ELECTRON_RUN_AS_NODE: "",
       NODE_ENV: SERVER_MODE === "production" ? "production" : process.env.NODE_ENV,
       ...serverCommand.env,
@@ -133,6 +203,13 @@ async function waitForServerReady(url) {
 }
 
 async function ensureNextServer() {
+  try {
+    preparePackagedDesktopRuntime();
+  } catch (error) {
+    serverStartupError = error;
+    return false;
+  }
+
   if (await checkServer(APP_URL)) {
     return true;
   }
@@ -179,12 +256,17 @@ function getWindowsPortOwnerPid(url) {
 
 function buildServerErrorPage() {
   const manualCommand = SERVER_MODE === "production" ? "npm run build && npm run electron:prod" : "npm run dev";
+  const isDesktopDatabaseError = serverStartupError?.message === "Desktop veritabani hazirlanamadi.";
   const title =
-    SERVER_MODE === "production"
+    isDesktopDatabaseError
+      ? "Desktop veritabani hazirlanamadi"
+      : SERVER_MODE === "production"
       ? "Production sunucu başlatılamadı"
       : "Uygulama sunucusu başlatılamadı";
   const description =
-    SERVER_MODE === "production"
+    isDesktopDatabaseError
+      ? "Uygulama verileri hazirlanirken hata olustu. Lutfen uygulamayi yeniden baslatmayi deneyin."
+      : SERVER_MODE === "production"
       ? "Electron açıldı, ancak production sunucu belirlenen sürede hazır hale gelmedi. Önce npm run build çalıştırın."
       : "Electron açıldı, ancak uygulama sunucusu belirlenen sürede hazır hale gelmedi.";
 
