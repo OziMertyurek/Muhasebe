@@ -17,7 +17,7 @@ npm run build
 npm run electron:prod
 ```
 
-`npm run electron:prod` port 3000 bos ise `npm run start` komutunu child process olarak baslatir. Build yoksa veya production server acilamazsa Electron penceresinde Turkce hata ekrani gorunur.
+`npm run electron:prod` port 3000 bos ise `.next/standalone/server.js` dosyasini Node child process olarak baslatir. Build yoksa veya production server acilamazsa Electron penceresinde Turkce hata ekrani gorunur.
 
 Notlar:
 

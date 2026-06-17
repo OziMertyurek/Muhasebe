@@ -128,7 +128,7 @@ npm run build
 npm run electron:prod
 ```
 
-`npm run electron:prod`, port 3000 boşsa `npm run start` ile production server başlatır. Port 3000 zaten doluysa mevcut server'ı kullanır ve onu kapatmaya çalışmaz.
+`npm run electron:prod`, port 3000 boşsa `.next/standalone/server.js` dosyasını Node child process olarak başlatır. Port 3000 zaten doluysa mevcut server'ı kullanır ve onu kapatmaya çalışmaz.
 
 Bu aşamada `DATABASE_URL`, SQLite veritabanı yolu, upload klasörü ve AppData veri geçişi değiştirilmemiştir.
 

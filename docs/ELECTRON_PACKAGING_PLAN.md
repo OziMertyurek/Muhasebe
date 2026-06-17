@@ -16,7 +16,7 @@ Mevcut Electron akisi:
   - Electron penceresinde `http://localhost:3000` acar.
 - `electron:prod`
   - Port 3000'i kontrol eder.
-  - Server yoksa `npm run start` baslatir.
+  - Server yoksa `.next/standalone/server.js` dosyasini baslatir.
   - `npm run build` daha once calistirilmis olmalidir.
 - Port 3000 zaten doluysa mevcut server kullanilir.
 - Electron sadece kendi baslattigi server process'ini kapatir.
@@ -35,7 +35,7 @@ npm run build
 npm run electron:prod
 ```
 
-Electron main process ise production modda `npm run start` cagirir.
+Electron main process ise production modda `.next/standalone/server.js` dosyasini Node child process olarak cagirir.
 
 Paketlenmis bir Electron uygulamasinda bu yaklasim dogrudan garanti degildir:
 
@@ -325,7 +325,7 @@ Portable paketleme oncesi testler:
 3. Electron production:
    - `npm run build`
    - `npm run electron:prod`
-   - Port bosken `next start` aciliyor
+- Port bosken standalone `server.js` aciliyor
    - Port doluyken mevcut server kullaniliyor
    - Kapanista sadece kendi server'i kapaniyor
 
@@ -354,7 +354,7 @@ Portable paketleme oncesi testler:
 - `.next/standalone/server.js` calistirilir.
 - Mevcut server route'lari ve Prisma calisir mi dogrulanir.
 - POC sonucu: standalone server lokal olarak calismistir; `/onboarding` 200 donmus, korumali route'lar onboarding yonlendirmesi vermistir.
-- `next start`, standalone modda uyarili calisir; Electron production akisi ileride `node .next/standalone/server.js` kullanacak sekilde guncellenmelidir.
+- `next start`, standalone modda uyarili calisir; Electron production akisi `node .next/standalone/server.js` kullanacak sekilde guncellenmistir.
 - `.next/standalone` ciktisi paketleme oncesinde temizlenmelidir; trace genis dosya agaci, loglar, `storage` ve `prisma/dev.db` gibi istenmeyen dosyalari yakalayabilir.
 - PDF export tarafinda Windows font path trace uyarisi gorulebilir; portable paketlemeden once font/resource stratejisi netlestirilmelidir.
 

@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { app, BrowserWindow, shell } = require("electron");
 const { execFileSync, spawn } = require("node:child_process");
+const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
 
 const APP_URL = process.env.ELECTRON_START_URL || "http://localhost:3000";
 const SERVER_MODE = process.env.ELECTRON_SERVER_MODE === "production" ? "production" : "development";
+const PROJECT_ROOT = path.join(__dirname, "..");
+const STANDALONE_SERVER_PATH = path.join(PROJECT_ROOT, ".next", "standalone", "server.js");
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
 const SERVER_POLL_INTERVAL_MS = 1000;
@@ -38,7 +41,18 @@ function wait(milliseconds) {
 }
 
 function getNextServerCommand() {
-  const scriptName = SERVER_MODE === "production" ? "start" : "dev";
+  if (SERVER_MODE === "production") {
+    if (!fs.existsSync(STANDALONE_SERVER_PATH)) {
+      throw new Error("Standalone production build bulunamadı. Önce npm run build çalıştırın.");
+    }
+
+    return {
+      command: process.platform === "win32" ? "node.exe" : "node",
+      args: [STANDALONE_SERVER_PATH],
+    };
+  }
+
+  const scriptName = "dev";
 
   if (process.platform === "win32") {
     return {
@@ -56,10 +70,12 @@ function getNextServerCommand() {
 function startNextServer() {
   const serverCommand = getNextServerCommand();
   const child = spawn(serverCommand.command, serverCommand.args, {
-    cwd: path.join(__dirname, ".."),
+    cwd: PROJECT_ROOT,
     env: {
       ...process.env,
       ELECTRON_RUN_AS_NODE: "",
+      NODE_ENV: SERVER_MODE === "production" ? "production" : process.env.NODE_ENV,
+      ...serverCommand.env,
     },
     shell: false,
     stdio: ["ignore", "pipe", "pipe"],
@@ -155,7 +171,7 @@ function getWindowsPortOwnerPid(url) {
 }
 
 function buildServerErrorPage() {
-  const manualCommand = SERVER_MODE === "production" ? "npm run build && npm run start" : "npm run dev";
+  const manualCommand = SERVER_MODE === "production" ? "npm run build && npm run electron:prod" : "npm run dev";
   const title =
     SERVER_MODE === "production"
       ? "Production sunucu başlatılamadı"
