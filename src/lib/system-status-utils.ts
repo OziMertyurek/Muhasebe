@@ -21,6 +21,7 @@ import {
   getBackupReminderStatus,
 } from "@/lib/backup-reminder-utils";
 import { getDesktopBootstrapStatus } from "@/lib/desktop-bootstrap-utils";
+import { getDesktopMigrationDryRun } from "@/lib/desktop-migration-dry-run-utils";
 import { getDesktopRuntimeSummary } from "@/lib/desktop-runtime-utils";
 import { getDatabaseBackupInfo, getUploadsBackupInfo } from "@/lib/backup-utils";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
@@ -181,6 +182,7 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
   try {
     const appDataDir = getDesktopAppDataDir();
     const bootstrapStatus = getDesktopBootstrapStatus();
+    const migrationDryRun = getDesktopMigrationDryRun();
     const runtimeSummary = getDesktopRuntimeSummary();
     const desktopDirs = [
       dirname(getDesktopDatabasePath()),
@@ -260,6 +262,50 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
           ? "Desktop runtime helper APP_MODE ve SQLite DATABASE_URL degerlerini uretebiliyor. Tam DATABASE_URL gizlilik icin gosterilmiyor."
           : "Desktop runtime DATABASE_URL degeri uretilemedi.",
       },
+      {
+        id: "desktop-migration-dry-run-local-db",
+        title: "Desktop migration dry-run: local DB",
+        status: migrationDryRun.localDatabaseExists ? "healthy" : "unknown",
+        label: migrationDryRun.localDatabaseExists ? "Var" : "Yok",
+        description:
+          "Dry-run analizi local SQLite veritabani varligini kontrol eder; dosya kopyalama yapmaz.",
+      },
+      {
+        id: "desktop-migration-dry-run-desktop-db",
+        title: "Desktop migration dry-run: desktop DB",
+        status: migrationDryRun.desktopDatabaseExists ? "healthy" : "unknown",
+        label: migrationDryRun.desktopDatabaseExists ? "Var" : "Yok",
+        description:
+          "Dry-run analizi AppData desktop DB durumunu path gostermeden kontrol eder.",
+        suggestion: migrationDryRun.desktopDatabaseExists
+          ? "Desktop DB mevcutsa otomatik overwrite yapilmamalidir."
+          : undefined,
+      },
+      {
+        id: "desktop-migration-dry-run-uploads",
+        title: "Desktop migration dry-run: uploads",
+        status:
+          migrationDryRun.localUploadsExists || migrationDryRun.desktopUploadsExists
+            ? "healthy"
+            : "unknown",
+        label: `Local: ${migrationDryRun.localUploadsExists ? "Var" : "Yok"} / Desktop: ${
+          migrationDryRun.desktopUploadsExists ? "Var" : "Yok"
+        }`,
+        description:
+          "Dry-run analizi upload klasorlerinin durumunu kontrol eder; upload kopyalama yapmaz.",
+        suggestion: migrationDryRun.shouldCopyUploads
+          ? "Local uploads mevcut; desktop uploads icin kontrollu kopyalama gerekebilir."
+          : undefined,
+      },
+      {
+        id: "desktop-migration-dry-run-action",
+        title: "Desktop migration dry-run",
+        status: migrationDryRun.errors.length > 0 ? "error" : "unknown",
+        label: formatDesktopMigrationAction(migrationDryRun.recommendedAction),
+        description:
+          "Bu sadece analizdir; DB veya upload dosyasi kopyalamaz, DATABASE_URL degistirmez.",
+        suggestion: migrationDryRun.warnings[0],
+      },
     ];
   } catch {
     return [
@@ -272,6 +318,20 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
       },
     ];
   }
+}
+
+function formatDesktopMigrationAction(
+  action: ReturnType<typeof getDesktopMigrationDryRun>["recommendedAction"],
+) {
+  if (action === "COPY_LOCAL_DB_TO_DESKTOP") {
+    return "Local DB kopyalama onerilir";
+  }
+
+  if (action === "CREATE_EMPTY_DESKTOP_DB") {
+    return "Bos desktop DB olusturulmali";
+  }
+
+  return "Mevcut desktop DB kullanilmali";
 }
 
 async function checkPythonCommand(): Promise<CommandResult> {

@@ -225,6 +225,9 @@ Risk azaltma:
 - Upload kaynak/hedef durumu nedir?
 - Kopyalama yapilsa ne olur?
 - Hicbir dosyaya yazmadan rapor uretir.
+- `src/lib/desktop-migration-dry-run-utils.ts` bu analiz icin hazirlanacaktir.
+- Dry-run sonucu local DB, desktop DB, local uploads, desktop uploads, onerilen aksiyon, uyarilar ve hatalari raporlar.
+- Dry-run kesinlikle DB kopyalamaz, upload tasimaz ve `DATABASE_URL` degistirmez.
 
 ### C. Copy helper ama otomatik calismayacak
 
