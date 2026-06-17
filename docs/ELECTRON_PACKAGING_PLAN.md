@@ -198,6 +198,8 @@ Notlar:
 - Bu yapi nihai degildir; electron-builder ve Next standalone testinden sonra netlestirilmelidir.
 - Runtime kullanici verisi bu klasorlerde tutulmamalidir.
 - DB ve upload icin hedef uzun vadede AppData olmalidir.
+- `.next/static` standalone cikti klasorunun icine otomatik kopyalanmadigi icin portable build adiminda ayrica dahil edilmelidir.
+- Projede `public/` klasoru yoksa bu adim bos gecilebilir; ileride eklenirse paketlemeye dahil edilmelidir.
 
 ## electron-builder Stratejisi
 
@@ -227,13 +229,17 @@ Olası build config ilkeleri:
 - Haric tutulacaklar:
   - `.env`
   - `.env.local`
+  - `storage/`
   - `prisma/dev.db`
   - `prisma/dev.db-journal`
   - `storage/uploads/`
   - `storage/restore-backups/`
   - `storage/restore-temp/`
+  - `storage/backups/`
+  - `storage/logs/`
   - test backup ZIP dosyalari
   - PDF/CSV ciktilari
+  - gecici test dosyalari
   - dev server loglari
   - `.next/cache`
   - gereksiz dev dosyalari
@@ -242,6 +248,10 @@ Onemli:
 
 - `electron-builder` eklenmeden once standalone output ve runtime server baslatma yerel olarak test edilmelidir.
 - `asar` kullanimi native moduller ve Prisma dosyalari icin dikkat ister. Gerekirse belirli dosyalar `asarUnpack` ile disari alinmalidir.
+- Standalone trace exclude POC sonucunda `.env`, `.env.local`, `prisma/dev.db`, `storage/`, ZIP/PDF/CSV ciktilari ve `*.log` dosyalari standalone ciktidan dusurulmustur.
+- Standalone runtime icin `server.js`, Prisma Client, `better-sqlite3` native dosyasi, `prisma/schema.prisma` ve `prisma/migrations` mevcut kalmalidir.
+- Yerel Electron production denemesinde standalone server sistem `node.exe` ile calistirilir; Electron binary'si Node runtime olarak kullanildiginda native `better-sqlite3` ABI uyusmazligi olusabilir.
+- Electron production child process, local mod davranisini korumak icin mevcut proje kokunu `APP_PROJECT_ROOT` ile ve mevcut SQLite DB'yi `DATABASE_URL=file:<proje>/prisma/dev.db` ile acik verir. AppData gecisi sonraki asamadir.
 
 ## Prisma Stratejisi
 

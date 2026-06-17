@@ -9,6 +9,7 @@ const APP_URL = process.env.ELECTRON_START_URL || "http://localhost:3000";
 const SERVER_MODE = process.env.ELECTRON_SERVER_MODE === "production" ? "production" : "development";
 const PROJECT_ROOT = path.join(__dirname, "..");
 const STANDALONE_SERVER_PATH = path.join(PROJECT_ROOT, ".next", "standalone", "server.js");
+const LOCAL_DATABASE_URL = `file:${path.join(PROJECT_ROOT, "prisma", "dev.db").replace(/\\/g, "/")}`;
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
 const SERVER_POLL_INTERVAL_MS = 1000;
@@ -73,6 +74,8 @@ function startNextServer() {
     cwd: PROJECT_ROOT,
     env: {
       ...process.env,
+      APP_PROJECT_ROOT: PROJECT_ROOT,
+      DATABASE_URL: process.env.DATABASE_URL || LOCAL_DATABASE_URL,
       ELECTRON_RUN_AS_NODE: "",
       NODE_ENV: SERVER_MODE === "production" ? "production" : process.env.NODE_ENV,
       ...serverCommand.env,

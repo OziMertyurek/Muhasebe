@@ -12,7 +12,7 @@ export function isDesktopMode() {
 }
 
 export function getProjectRoot() {
-  return process.cwd();
+  return process.env.APP_PROJECT_ROOT || process.cwd();
 }
 
 export function getDatabasePath() {
