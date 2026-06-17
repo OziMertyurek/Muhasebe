@@ -107,14 +107,19 @@ Kayıtlar `prisma/dev.db` dosyasında saklanır. Upload dosyaları `storage/uplo
 
 İlk Electron wrapper denemesi eklenmiştir. Bu deneme installer veya setup.exe üretmez; yalnızca mevcut Next.js uygulamasını Electron penceresinde açar.
 
-Kullanım:
+Electron penceresinde tek komutla çalıştırmak için:
 
 ```bash
-npm run dev
 npm run electron:dev
 ```
 
-`npm run dev` Next.js server'ını `http://localhost:3000` adresinde başlatır. `npm run electron:dev` bu adresi Electron penceresinde açar. Next.js server çalışmıyorsa Electron penceresinde Türkçe hata ekranı gösterilir.
+`npm run electron:dev` port 3000'de çalışan bir Next.js server var mı kontrol eder. Varsa mevcut server'ı kullanır. Yoksa `npm run dev` komutunu otomatik başlatır ve server hazır olunca Electron penceresinde uygulamayı açar. Next.js server belirlenen sürede açılmazsa Electron penceresinde Türkçe hata ekranı gösterilir.
+
+Normal web/tarayıcı kullanımı hâlâ aynıdır:
+
+```bash
+npm run dev
+```
 
 Bu aşamada `DATABASE_URL`, SQLite veritabanı yolu, upload klasörü ve AppData veri geçişi değiştirilmemiştir.
 
