@@ -330,9 +330,11 @@ Portable paketleme oncesi testler:
    - Kapanista sadece kendi server'i kapaniyor
 
 4. Standalone proof-of-concept:
-   - `output: "standalone"` deneme branch'inde test edilir
+   - `output: "standalone"` ile `.next/standalone/server.js` olusur
    - Standalone `server.js` lokal baslatilir
-   - Prisma sorgulari ve API route'lar calisir
+   - Prisma sorgulari ve API route'lar route uzerinden dogrulanir
+   - `.next/static` standalone yanina ayrica kopyalanmalidir
+   - Build trace ciktisi yasakli veri/log dosyalari icin incelenmelidir
 
 5. Portable smoke test:
    - Temiz klasorde exe acilir
@@ -351,6 +353,10 @@ Portable paketleme oncesi testler:
 - `next.config.ts` icinde `output: "standalone"` deneme branch'inde test edilir.
 - `.next/standalone/server.js` calistirilir.
 - Mevcut server route'lari ve Prisma calisir mi dogrulanir.
+- POC sonucu: standalone server lokal olarak calismistir; `/onboarding` 200 donmus, korumali route'lar onboarding yonlendirmesi vermistir.
+- `next start`, standalone modda uyarili calisir; Electron production akisi ileride `node .next/standalone/server.js` kullanacak sekilde guncellenmelidir.
+- `.next/standalone` ciktisi paketleme oncesinde temizlenmelidir; trace genis dosya agaci, loglar, `storage` ve `prisma/dev.db` gibi istenmeyen dosyalari yakalayabilir.
+- PDF export tarafinda Windows font path trace uyarisi gorulebilir; portable paketlemeden once font/resource stratejisi netlestirilmelidir.
 
 ### B. Electron packaged runtime script hazirligi
 
