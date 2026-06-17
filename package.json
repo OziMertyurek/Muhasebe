@@ -2,16 +2,87 @@
   "name": "muhasebe",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "electron:dev": "set ELECTRON_RUN_AS_NODE=& electron electron/main.js",
     "electron:prod": "set ELECTRON_RUN_AS_NODE=& set ELECTRON_SERVER_MODE=production& electron electron/main.js",
+    "prepare:standalone": "node scripts/prepare-standalone.js",
+    "electron:pack": "npm run prepare:standalone && electron-builder --dir",
+    "dist:portable": "npm run prepare:standalone && electron-builder --win portable",
+    "dist:win": "npm run prepare:standalone && electron-builder --win portable",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio"
+  },
+  "build": {
+    "appId": "com.local.muhasebetakip",
+    "productName": "Muhasebe Takip",
+    "asar": false,
+    "npmRebuild": false,
+    "disableDefaultIgnoredFiles": true,
+    "afterPack": "scripts/electron-after-pack.js",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "python-worker/**/*",
+      "prisma/schema.prisma",
+      "prisma/migrations/**/*",
+      "package.json",
+      "!**/.env",
+      "!**/.env.local",
+      "!**/.env.*",
+      "!prisma/dev.db",
+      "!prisma/dev.db-journal",
+      "!storage/**/*",
+      "!**/dist/**/*",
+      "!**/*.db",
+      "!**/*.db-journal",
+      "!**/*.zip",
+      "!**/*.pdf",
+      "!**/*.csv",
+      "!**/*.log",
+      "!**/tmp-*"
+    ],
+    "extraResources": [
+      {
+        "from": ".next/standalone",
+        "to": "standalone",
+        "filter": [
+          "**/*",
+          "!dist/**/*",
+          "!storage/**/*",
+          "!prisma/dev.db",
+          "!prisma/dev.db-journal",
+          "!**/*.db",
+          "!**/*.db-journal",
+          "!**/*.zip",
+          "!**/*.pdf",
+          "!**/*.csv",
+          "!**/*.log",
+          "!**/tmp-*",
+          "!**/.env",
+          "!**/.env.local",
+          "!**/.env.*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "MuhasebeTakip-${version}-portable.${ext}"
+    }
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.8.0",
@@ -32,6 +103,7 @@
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "electron": "^42.4.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.39.4",
     "eslint-config-next": "^16.2.7",
     "prisma": "^7.8.0",

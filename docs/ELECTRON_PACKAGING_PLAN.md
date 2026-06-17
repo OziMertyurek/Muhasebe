@@ -253,6 +253,28 @@ Onemli:
 - Yerel Electron production denemesinde standalone server sistem `node.exe` ile calistirilir; Electron binary'si Node runtime olarak kullanildiginda native `better-sqlite3` ABI uyusmazligi olusabilir.
 - Electron production child process, local mod davranisini korumak icin mevcut proje kokunu `APP_PROJECT_ROOT` ile ve mevcut SQLite DB'yi `DATABASE_URL=file:<proje>/prisma/dev.db` ile acik verir. AppData gecisi sonraki asamadir.
 
+## Ilk Portable Build POC Sonucu
+
+Ilk portable build denemesinde `electron-builder` devDependency olarak eklendi ve Windows portable hedefi icin su scriptler hazirlandi:
+
+- `prepare:standalone`
+- `electron:pack`
+- `dist:portable`
+- `dist:win`
+
+POC bulgulari:
+
+- `npm run dist:portable` `dist/MuhasebeTakip-0.1.0-portable.exe` ve `dist/win-unpacked/` ciktisini uretti.
+- `.env`, `.env.local`, `prisma/dev.db`, `prisma/dev.db-journal`, `storage/`, upload/restore-backup klasorleri, ZIP/PDF/CSV ciktilari ve log dosyalari paket ciktisina dahil edilmedi.
+- `.next/standalone` icinde onceki paket ciktisi kalirsa `dist/` agaci tekrar pakete sizabiliyor. Bu nedenle `scripts/prepare-standalone.js` standalone icindeki `dist`, `storage` ve local DB dosyalarini temizler.
+- Electron-builder normal `files` / `extraResources` akisi nested standalone `node_modules` agacini eksik tasiyabildi. Bu nedenle `scripts/electron-after-pack.js` hook'u `.next/standalone` ciktisini portable arsiv uretilmeden once `resources/standalone` altina dogrudan kopyalar.
+- `npmRebuild: false` kullanildi. Ilk denemede Electron 42 ABI ile `better-sqlite3` rebuild hatasi olustu; bu POC'ta standalone server sistem Node ile calistigi icin Electron'a gore rebuild devre disi birakildi.
+- `asar: false` kullanildi. Bu POC icin pratik olsa da final paketleme asamasinda `asar` + `asarUnpack` stratejisi tekrar degerlendirilmelidir.
+- Paketli exe pencereyi aciyor ve server process baslatmayi deniyor, ancak AppData DB/bootstrap henuz yapilmadigi icin paketli calistirmada `/onboarding` HTTP 500 alindi. Test sirasinda `resources/app/prisma/dev.db` konumunda bos DB olusabildi; bu kalici cozum degildir ve AppData DB asamasinda ele alinmalidir.
+- Kaynak modda `npm run dev`, `npm run electron:dev` ve `npm run electron:prod` HTTP 200 ile calismaya devam etti.
+
+Sonuc: Portable exe uretimi basarili POC seviyesine geldi; kullanilabilir desktop dagitim icin siradaki kritik is AppData DB/bootstrap entegrasyonudur.
+
 ## Prisma Stratejisi
 
 Prisma icin dikkat edilmesi gerekenler:

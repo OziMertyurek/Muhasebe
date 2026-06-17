@@ -132,6 +132,15 @@ npm run electron:prod
 
 Bu aşamada `DATABASE_URL`, SQLite veritabanı yolu, upload klasörü ve AppData veri geçişi değiştirilmemiştir.
 
+İlk portable Electron build denemesi için:
+
+```bash
+npm run build
+npm run dist:portable
+```
+
+Bu komut `dist/MuhasebeTakip-0.1.0-portable.exe` çıktısını üretir. Bu hâlâ bir proof-of-concept aşamasıdır: setup installer, AppData veritabanı geçişi ve gömülü Python paketleme henüz yapılmamıştır. Paket içine `.env`, local DB ve upload klasörleri alınmaz; kalıcı kullanım için AppData DB/bootstrap aşaması tamamlanmalıdır.
+
 ## Ortam Değişkenleri
 
 `.env.example` dosyasına göre local `.env` dosyası oluşturun.

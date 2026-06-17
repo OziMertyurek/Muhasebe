@@ -6,9 +6,13 @@ const http = require("node:http");
 const path = require("node:path");
 
 const APP_URL = process.env.ELECTRON_START_URL || "http://localhost:3000";
-const SERVER_MODE = process.env.ELECTRON_SERVER_MODE === "production" ? "production" : "development";
-const PROJECT_ROOT = path.join(__dirname, "..");
-const STANDALONE_SERVER_PATH = path.join(PROJECT_ROOT, ".next", "standalone", "server.js");
+const SERVER_MODE =
+  process.env.ELECTRON_SERVER_MODE === "production" || app.isPackaged ? "production" : "development";
+const PROJECT_ROOT = app.isPackaged ? path.join(process.resourcesPath, "app") : path.join(__dirname, "..");
+const STANDALONE_ROOT = app.isPackaged
+  ? path.join(process.resourcesPath, "standalone")
+  : path.join(PROJECT_ROOT, ".next", "standalone");
+const STANDALONE_SERVER_PATH = path.join(STANDALONE_ROOT, "server.js");
 const LOCAL_DATABASE_URL = `file:${path.join(PROJECT_ROOT, "prisma", "dev.db").replace(/\\/g, "/")}`;
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
@@ -71,7 +75,7 @@ function getNextServerCommand() {
 function startNextServer() {
   const serverCommand = getNextServerCommand();
   const child = spawn(serverCommand.command, serverCommand.args, {
-    cwd: PROJECT_ROOT,
+    cwd: SERVER_MODE === "production" ? STANDALONE_ROOT : PROJECT_ROOT,
     env: {
       ...process.env,
       APP_PROJECT_ROOT: PROJECT_ROOT,
