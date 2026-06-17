@@ -262,6 +262,13 @@ Kabul kriteri:
 - BrowserWindow local server'i acar.
 - App kapaninca server kapanir.
 
+Ilk deneme notu:
+
+- `electron/main.js`, `electron/preload.js` ve `electron/README.md` eklendi.
+- `npm run electron:dev` script'i mevcut `http://localhost:3000` adresini Electron penceresinde acar.
+- Bu ilk deneme Next.js server'i otomatik baslatmaz; once `npm run dev` calismalidir.
+- Installer, setup.exe, Electron builder, AppData DB gecisi ve `DATABASE_URL` degisikligi bu asamada yoktur.
+
 Kabul kriteri:
 
 - Uygulama browser acmadan desktop penceresinde calisir.

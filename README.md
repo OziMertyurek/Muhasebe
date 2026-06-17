@@ -103,6 +103,21 @@ Kayıtlar `prisma/dev.db` dosyasında saklanır. Upload dosyaları `storage/uplo
 
 Çift tıklanabilir `.exe` veya klasik Windows setup paketi sonraki aşamada hazırlanacaktır.
 
+## Electron Geliştirme Denemesi
+
+İlk Electron wrapper denemesi eklenmiştir. Bu deneme installer veya setup.exe üretmez; yalnızca mevcut Next.js uygulamasını Electron penceresinde açar.
+
+Kullanım:
+
+```bash
+npm run dev
+npm run electron:dev
+```
+
+`npm run dev` Next.js server'ını `http://localhost:3000` adresinde başlatır. `npm run electron:dev` bu adresi Electron penceresinde açar. Next.js server çalışmıyorsa Electron penceresinde Türkçe hata ekranı gösterilir.
+
+Bu aşamada `DATABASE_URL`, SQLite veritabanı yolu, upload klasörü ve AppData veri geçişi değiştirilmemiştir.
+
 ## Ortam Değişkenleri
 
 `.env.example` dosyasına göre local `.env` dosyası oluşturun.
