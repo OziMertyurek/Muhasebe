@@ -101,11 +101,11 @@ Windows'ta hızlı kullanım:
 
 Kayıtlar `prisma/dev.db` dosyasında saklanır. Upload dosyaları `storage/uploads/` içinde tutulur. Bu dosyalar GitHub'a gitmez; düzenli olarak `Ayarlar > Yedekleme > Tam Yedek İndir` ile tam yedek alınmalıdır.
 
-Çift tıklanabilir `.exe` veya klasik Windows setup paketi sonraki aşamada hazırlanacaktır.
+Windows desktop paketleri de hazırdır: Electron portable exe ve Windows setup installer build komutları aşağıdaki bölümde yer alır. Desktop paketli modda veriler AppData altında saklanır; yine de düzenli tam yedek alınmalıdır.
 
-## Electron Geliştirme Denemesi
+## Electron Desktop Kullanımı
 
-İlk Electron wrapper denemesi eklenmiştir. Bu deneme installer veya setup.exe üretmez; yalnızca mevcut Next.js uygulamasını Electron penceresinde açar.
+Electron wrapper, dev/prod çalışma, portable exe ve Windows setup installer build akışları hazırdır. Normal web kullanımı hâlâ desteklenir.
 
 Electron penceresinde tek komutla çalıştırmak için:
 
@@ -130,7 +130,7 @@ npm run electron:prod
 
 `npm run electron:prod`, port 3000 boşsa `.next/standalone/server.js` dosyasını Node child process olarak başlatır. Port 3000 zaten doluysa mevcut server'ı kullanır ve onu kapatmaya çalışmaz.
 
-Bu aşamada `DATABASE_URL`, SQLite veritabanı yolu, upload klasörü ve AppData veri geçişi değiştirilmemiştir.
+Normal web/local modda `DATABASE_URL`, SQLite veritabanı yolu ve upload klasörü değiştirilmemiştir. Paketli Electron modunda kullanıcı verisi `%APPDATA%/MuhasebeTakip/` altında saklanır.
 
 İlk portable Electron build denemesi için:
 
@@ -139,7 +139,7 @@ npm run build
 npm run dist:portable
 ```
 
-Bu komut `dist/MuhasebeTakip-0.1.0-portable.exe` çıktısını üretir. Paket içine `.env`, local DB ve upload klasörleri alınmaz; paketli Electron modunda kullanıcı verisi AppData altındaki `MuhasebeTakip` veri klasöründe tutulur.
+Bu komut `dist/Muhasebe-Takip-Portable-1.8.1.exe` çıktısını üretir. Paket içine `.env`, local DB ve upload klasörleri alınmaz; paketli Electron modunda kullanıcı verisi AppData altındaki `MuhasebeTakip` veri klasöründe tutulur.
 
 Windows setup installer denemesi için:
 
@@ -148,7 +148,9 @@ npm run build
 npm run dist:installer
 ```
 
-Bu komut `dist/MuhasebeTakip-0.1.0-setup.exe` çıktısını üretir. Installer masaüstü ve Start Menu kısayolu oluşturur. Kaldırma sırasında AppData içindeki uygulama verisi otomatik silinmez; veritabanı ve upload dosyaları için düzenli tam yedek alınmaya devam edilmelidir.
+Bu komut `dist/Muhasebe-Takip-Setup-1.8.1.exe` çıktısını üretir. Installer masaüstü ve Start Menu kısayolu oluşturur. Kaldırma sırasında AppData içindeki uygulama verisi otomatik silinmez; veritabanı ve upload dosyaları için düzenli tam yedek alınmaya devam edilmelidir.
+
+Desktop build çıktıları `dist/` altında oluşur ve Git'e alınmaz. Son kullanıcıya dosya vermeden önce `Ayarlar > Yedekleme > Tam Yedek İndir` akışı ile tam yedek alma alışkanlığı korunmalıdır.
 
 ## Ortam Değişkenleri
 

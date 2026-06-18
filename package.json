@@ -1,6 +1,6 @@
 {
   "name": "muhasebe",
-  "version": "0.1.0",
+  "version": "1.8.1",
   "private": true,
   "main": "electron/main.js",
   "scripts": {
@@ -20,7 +20,7 @@
     "prisma:studio": "prisma studio"
   },
   "build": {
-    "appId": "com.local.muhasebetakip",
+    "appId": "com.ozimertyurek.muhasebetakip",
     "productName": "Muhasebe Takip",
     "asar": false,
     "npmRebuild": false,
@@ -90,10 +90,10 @@
       ]
     },
     "portable": {
-      "artifactName": "MuhasebeTakip-${version}-portable.${ext}"
+      "artifactName": "Muhasebe-Takip-Portable-${version}.${ext}"
     },
     "nsis": {
-      "artifactName": "MuhasebeTakip-${version}-setup.${ext}",
+      "artifactName": "Muhasebe-Takip-Setup-${version}.${ext}",
       "oneClick": false,
       "perMachine": false,
       "allowElevation": false,

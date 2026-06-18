@@ -22,7 +22,7 @@ Mevcut Electron akisi:
 - Electron sadece kendi baslattigi server process'ini kapatir.
 - DB halen `prisma/dev.db` yolundadir.
 - Upload halen `storage/uploads/` yolundadir.
-- AppData DB gecisi ve installer henuz yoktur.
+- AppData DB bootstrap, portable build ve NSIS installer build akislari POC seviyesinde tamamlanmistir.
 
 Bu yapi kaynak kod klasorunde calisir. Portable paketleme icin ayni yaklasimin dogrudan tasinmasi risklidir.
 
@@ -251,7 +251,7 @@ Onemli:
 - Standalone trace exclude POC sonucunda `.env`, `.env.local`, `prisma/dev.db`, `storage/`, ZIP/PDF/CSV ciktilari ve `*.log` dosyalari standalone ciktidan dusurulmustur.
 - Standalone runtime icin `server.js`, Prisma Client, `better-sqlite3` native dosyasi, `prisma/schema.prisma` ve `prisma/migrations` mevcut kalmalidir.
 - Yerel Electron production denemesinde standalone server sistem `node.exe` ile calistirilir; Electron binary'si Node runtime olarak kullanildiginda native `better-sqlite3` ABI uyusmazligi olusabilir.
-- Electron production child process, local mod davranisini korumak icin mevcut proje kokunu `APP_PROJECT_ROOT` ile ve mevcut SQLite DB'yi `DATABASE_URL=file:<proje>/prisma/dev.db` ile acik verir. AppData gecisi sonraki asamadir.
+- Electron production child process kaynak/local modda mevcut proje kokunu `APP_PROJECT_ROOT` ile ve mevcut SQLite DB'yi `DATABASE_URL=file:<proje>/prisma/dev.db` ile acik verir. Packaged modda AppData DB bootstrap devrededir.
 - NSIS installer hedefinde masaustu ve Start Menu kisayollari olusturulur, kurulum tek kullanici modunda admin zorunlulugu olmadan denenir ve `deleteAppDataOnUninstall: false` ile AppData altindaki kullanici verisi otomatik silinmez.
 
 ## Ilk Portable Build POC Sonucu
@@ -265,13 +265,13 @@ Ilk portable build denemesinde `electron-builder` devDependency olarak eklendi v
 
 POC bulgulari:
 
-- `npm run dist:portable` `dist/MuhasebeTakip-0.1.0-portable.exe` ve `dist/win-unpacked/` ciktisini uretti.
+- `npm run dist:portable` ilk POC'ta portable exe ve `dist/win-unpacked/` ciktisini uretti. Guncel urun dosya adi standardi `dist/Muhasebe-Takip-Portable-${version}.exe` seklindedir.
 - `.env`, `.env.local`, `prisma/dev.db`, `prisma/dev.db-journal`, `storage/`, upload/restore-backup klasorleri, ZIP/PDF/CSV ciktilari ve log dosyalari paket ciktisina dahil edilmedi.
 - `.next/standalone` icinde onceki paket ciktisi kalirsa `dist/` agaci tekrar pakete sizabiliyor. Bu nedenle `scripts/prepare-standalone.js` standalone icindeki `dist`, `storage` ve local DB dosyalarini temizler.
 - Electron-builder normal `files` / `extraResources` akisi nested standalone `node_modules` agacini eksik tasiyabildi. Bu nedenle `scripts/electron-after-pack.js` hook'u `.next/standalone` ciktisini portable arsiv uretilmeden once `resources/standalone` altina dogrudan kopyalar.
 - `npmRebuild: false` kullanildi. Ilk denemede Electron 42 ABI ile `better-sqlite3` rebuild hatasi olustu; bu POC'ta standalone server sistem Node ile calistigi icin Electron'a gore rebuild devre disi birakildi.
 - `asar: false` kullanildi. Bu POC icin pratik olsa da final paketleme asamasinda `asar` + `asarUnpack` stratejisi tekrar degerlendirilmelidir.
-- Paketli exe pencereyi aciyor ve server process baslatmayi deniyor, ancak AppData DB/bootstrap henuz yapilmadigi icin paketli calistirmada `/onboarding` HTTP 500 alindi. Test sirasinda `resources/app/prisma/dev.db` konumunda bos DB olusabildi; bu kalici cozum degildir ve AppData DB asamasinda ele alinmalidir.
+- Ilk POC'ta AppData DB/bootstrap henuz yapilmadigi icin paketli calistirmada `/onboarding` HTTP 500 alindi. Sonraki AppData DB bootstrap entegrasyonu ile bu sorun giderildi ve packaged `/onboarding` 200/yonlendirme davranisi dogrulandi.
 - Kaynak modda `npm run dev`, `npm run electron:dev` ve `npm run electron:prod` HTTP 200 ile calismaya devam etti.
 
 Sonuc: Portable exe uretimi basarili POC seviyesine geldi; kullanilabilir desktop dagitim icin siradaki kritik is AppData DB/bootstrap entegrasyonudur.
@@ -287,7 +287,10 @@ Portable hedef korunarak NSIS setup installer hedefi eklendi:
 Installer ayarlari:
 
 - Product name: `Muhasebe Takip`
-- App id: `com.local.muhasebetakip`
+- App id: `com.ozimertyurek.muhasebetakip`
+- Version standardi: `package.json` ve uygulama ici `appInfo.version` ayni tutulur.
+- Setup dosya adi: `Muhasebe-Takip-Setup-${version}.exe`
+- Portable dosya adi: `Muhasebe-Takip-Portable-${version}.exe`
 - Tek kullanici kurulumu hedeflenir (`perMachine: false`).
 - Admin zorunlulugu istenmez (`allowElevation: false`).
 - Masaustu kisayolu olusturulur.
@@ -313,6 +316,19 @@ Installer smoke testte kontrol edilecekler:
 - Uygulama kapaninca sadece kendi baslattigi server process'i kapanir.
 - Uninstall denenirse AppData verisi korunur.
 
+## Urun Adi ve Surum Standardi
+
+Desktop dagitimlarinda kullanilacak standartlar:
+
+- Uygulama adi / productName: `Muhasebe Takip`
+- App id: `com.ozimertyurek.muhasebetakip`
+- Pencere basligi: `Muhasebe Takip`
+- Setup artifact: `Muhasebe-Takip-Setup-${version}.exe`
+- Portable artifact: `Muhasebe-Takip-Portable-${version}.exe`
+- Version kaynagi: `package.json` ve `src/lib/app-info.ts` birlikte guncellenir.
+
+`dist/` altindaki portable, setup ve unpacked ciktilar Git'e alinmaz. Paketli modda AppData DB bootstrap calisir ve mevcut AppData verisi uzerine yazilmaz.
+
 ## Packaged Download Handling
 
 Packaged Electron uygulamasinda backup ve export indirmeleri tarayici disinda Electron download katmaniyla yonetilir:
@@ -324,6 +340,7 @@ Packaged Electron uygulamasinda backup ve export indirmeleri tarayici disinda El
 - Backup ve export UI baglantilari native anchor olarak tutulur; attachment route'lari Next.js client-side navigation ile acilirsa dosya kaydetme davranisi kirilabilir.
 - Backend backup/export auth davranisi ve cookie ayarlari degistirilmez.
 - UI veya hata ekranlarinda `DATABASE_URL`, `.env` icerigi ya da tam local path gosterilmez.
+- Packaged download handling smoke testte tam yedek ZIP, CSV export ve PDF export dosyalarinin diskte olustugu dogrulandi.
 
 Download smoke testte kontrol edilecekler:
 
@@ -341,7 +358,7 @@ Prisma icin dikkat edilmesi gerekenler:
 - Native SQLite adapter ve `better-sqlite3` dosyalari paket icinde calismalidir.
 - `prisma/schema.prisma` ve `prisma/migrations` desktop bootstrap/migration icin gerekebilir.
 - `DATABASE_URL` paketleme asamasinda kaynak repo DB'sine baglanmamalidir.
-- Uzun vadede Electron main process Next server'i baslatmadan once `DATABASE_URL=file:<AppData>/MuhasebeTakip/database/dev.db` set etmelidir.
+- Packaged modda Electron main process Next server'i baslatmadan once `DATABASE_URL=file:<AppData>/MuhasebeTakip/database/dev.db` set eder.
 
 Gecis sirasi:
 
