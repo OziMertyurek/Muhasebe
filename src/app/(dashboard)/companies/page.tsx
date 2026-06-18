@@ -53,13 +53,13 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
+          <a
             href={exportHref}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
             CSV Dışa Aktar
-          </Link>
+          </a>
           <Link
             href="/companies/new"
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"

@@ -313,6 +313,26 @@ Installer smoke testte kontrol edilecekler:
 - Uygulama kapaninca sadece kendi baslattigi server process'i kapanir.
 - Uninstall denenirse AppData verisi korunur.
 
+## Packaged Download Handling
+
+Packaged Electron uygulamasinda backup ve export indirmeleri tarayici disinda Electron download katmaniyla yonetilir:
+
+- `will-download` event'i backup ZIP, veritabani yedegi, CSV export ve PDF export icin tek noktadan yakalanir.
+- Dosyalar varsayilan olarak kullanicinin `Downloads/MuhasebeTakip` klasorune kaydedilir.
+- Dosya adlari path traversal riskine karsi temizlenir; slash, backslash, `..` ve Windows icin gecersiz karakterler kaldirilir.
+- Ayni dosya adi varsa mevcut dosyanin uzerine yazilmaz, sirali benzersiz ad uretilir.
+- Backup ve export UI baglantilari native anchor olarak tutulur; attachment route'lari Next.js client-side navigation ile acilirsa dosya kaydetme davranisi kirilabilir.
+- Backend backup/export auth davranisi ve cookie ayarlari degistirilmez.
+- UI veya hata ekranlarinda `DATABASE_URL`, `.env` icerigi ya da tam local path gosterilmez.
+
+Download smoke testte kontrol edilecekler:
+
+- Tam yedek ZIP diskte olusur.
+- ZIP icinde `database/dev.db`, `backup-info.json` ve upload klasoru bilgisi bulunur.
+- ZIP icinde `.env`, `.env.local`, `node_modules`, `.next` veya build ciktisi bulunmaz.
+- En az bir CSV export ve bir PDF export diskte olusur.
+- Test indirme dosyalari Git adayina girmez ve test sonunda temizlenir.
+
 ## Prisma Stratejisi
 
 Prisma icin dikkat edilmesi gerekenler:

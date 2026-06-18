@@ -42,3 +42,11 @@ npm run dist:installer
 ```
 
 Installer masaustu ve Start Menu kisayolu olusturur. Kaldirma sirasinda AppData altindaki `MuhasebeTakip` verisi otomatik silinmez.
+
+Packaged app download handling:
+
+- Paketli Electron uygulamasi backup ZIP, veritabani yedegi, CSV export ve PDF export indirmelerini `Downloads/MuhasebeTakip` klasorune kaydeder.
+- Dosya adlari path traversal riskine karsi temizlenir.
+- Ayni dosya adi daha once varsa mevcut dosyanin uzerine yazilmaz; dosya adina sirali ek eklenir.
+- Backup ve export UI baglantilari native anchor olarak tutulmalidir; attachment route'lari Next.js client-side navigation ile acilmamalidir.
+- Backend backup/export route auth davranisi degistirilmez.

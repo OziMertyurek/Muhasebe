@@ -54,13 +54,13 @@ export default async function DueInvoicesPage({ searchParams }: DueInvoicesPageP
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link
+          <a
             href={pdfHref}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
             PDF İndir
-          </Link>
+          </a>
           <Link
             href="/reports"
             className="inline-flex h-10 w-fit items-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"

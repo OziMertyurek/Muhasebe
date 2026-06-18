@@ -187,13 +187,13 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
           </div>
 
           {database.exists ? (
-            <Link
+            <a
               href="/settings/backup/download-full"
               className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
             >
               <Download className="h-4 w-4" />
               Tam Yedek İndir
-            </Link>
+            </a>
           ) : (
             <div className="mt-5 rounded-md border border-[#e0c4bf] bg-[#fff7f5] px-4 py-3 text-sm text-[#8b2f28]">
               Veritabanı dosyası bulunamadığı için tam yedek oluşturulamaz.
@@ -222,13 +222,13 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
           </div>
 
           {database.exists ? (
-            <Link
+            <a
               href="/settings/backup/download-db"
               className="mt-5 inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#16201b] shadow-sm transition hover:bg-[#f1f4f1]"
             >
               <Download className="h-4 w-4" />
               Veritabanı Yedeğini İndir
-            </Link>
+            </a>
           ) : (
             <div className="mt-5 rounded-md border border-[#e0c4bf] bg-[#fff7f5] px-4 py-3 text-sm text-[#8b2f28]">
               Veritabanı dosyası bulunamadı. Uygulama ilk migration sonrasında dosyayı oluşturur.

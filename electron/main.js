@@ -20,6 +20,7 @@ const LOCAL_DATABASE_URL = `file:${path.join(PROJECT_ROOT, "prisma", "dev.db").r
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
 const SERVER_POLL_INTERVAL_MS = 1000;
+const DOWNLOADS_FOLDER_NAME = "MuhasebeTakip";
 
 let nextServerProcess = null;
 let nextDevServerPortOwnerPid = null;
@@ -111,6 +112,72 @@ function checkServer(url) {
 function wait(milliseconds) {
   return new Promise((resolve) => {
     setTimeout(resolve, milliseconds);
+  });
+}
+
+function getDownloadsDirectory() {
+  return path.join(app.getPath("downloads"), DOWNLOADS_FOLDER_NAME);
+}
+
+function sanitizeDownloadFileName(fileName) {
+  const baseName = path.basename(String(fileName || "indirilen-dosya"));
+  const withoutTraversal = baseName.replace(/\.\.+/g, ".");
+  const sanitized = withoutTraversal
+    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+    .replace(/\s+/g, " ")
+    .replace(/^\.+/, "")
+    .trim();
+
+  return (sanitized || "indirilen-dosya").slice(0, 180);
+}
+
+function getUniqueDownloadPath(downloadsDir, fileName) {
+  const parsed = path.parse(fileName);
+  let candidate = path.join(downloadsDir, fileName);
+  let index = 1;
+
+  while (fs.existsSync(candidate)) {
+    const nextFileName = `${parsed.name}-${index}${parsed.ext}`;
+    candidate = path.join(downloadsDir, nextFileName);
+    index += 1;
+  }
+
+  return candidate;
+}
+
+function configureDownloadHandling(window) {
+  const downloadSession = window.webContents.session;
+
+  if (downloadSession.__muhasebeDownloadHandlingConfigured) {
+    return;
+  }
+
+  downloadSession.__muhasebeDownloadHandlingConfigured = true;
+
+  downloadSession.on("will-download", (_event, item) => {
+    let savePath = "";
+
+    try {
+      const downloadsDir = getDownloadsDirectory();
+      fs.mkdirSync(downloadsDir, { recursive: true });
+
+      const safeFileName = sanitizeDownloadFileName(item.getFilename());
+      savePath = getUniqueDownloadPath(downloadsDir, safeFileName);
+      item.setSavePath(savePath);
+    } catch {
+      process.stderr.write("Indirme hazirlanamadi. Lutfen indirme klasoru izinlerini kontrol edin.\n");
+    }
+
+    item.once("done", (_event, state) => {
+      const safeFileName = savePath ? path.basename(savePath) : sanitizeDownloadFileName(item.getFilename());
+
+      if (state === "completed") {
+        process.stdout.write(`Indirme tamamlandi: ${safeFileName}\n`);
+        return;
+      }
+
+      process.stderr.write(`Indirme tamamlanamadi: ${safeFileName} (${state})\n`);
+    });
   });
 }
 
@@ -336,6 +403,8 @@ async function createWindow() {
   window.once("ready-to-show", () => {
     window.show();
   });
+
+  configureDownloadHandling(window);
 
   window.webContents.setWindowOpenHandler(({ url }) => {
     shell.openExternal(url);
