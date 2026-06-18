@@ -1,6 +1,6 @@
-# Electron Gelistirme Denemesi
+# Electron Gelistirme ve Paketleme Notlari
 
-Bu klasor ilk Electron wrapper denemesi icindir. Installer, setup.exe veya AppData veritabani gecisi bu asamada yoktur.
+Bu klasor Electron wrapper ve paketli desktop denemeleri icindir. Dev/prod calisma, portable build ve NSIS setup installer hedefleri desteklenir.
 
 Kullanim:
 
@@ -24,5 +24,21 @@ Notlar:
 - Electron sadece kendi baslattigi Next.js server process'ini kapatir.
 - Port 3000 zaten aciksa mevcut server'i kullanir ve onu kapatmaya calismaz.
 - Next.js server belirlenen surede acilmazsa Electron penceresinde Turkce hata ekrani gorunur.
-- Veritabani yolu, upload klasoru ve `DATABASE_URL` degistirilmez.
-- Installer ve paketleme sonraki asamada ele alinacaktir.
+- Kaynak modda veritabani yolu, upload klasoru ve `DATABASE_URL` degistirilmez.
+- Paketli modda AppData altinda desktop veritabani bootstrap edilir ve mevcut AppData DB uzerine yazilmaz.
+
+Portable build:
+
+```bash
+npm run build
+npm run dist:portable
+```
+
+Windows setup installer:
+
+```bash
+npm run build
+npm run dist:installer
+```
+
+Installer masaustu ve Start Menu kisayolu olusturur. Kaldirma sirasinda AppData altindaki `MuhasebeTakip` verisi otomatik silinmez.

@@ -12,7 +12,8 @@
     "prepare:standalone": "node scripts/prepare-standalone.js",
     "electron:pack": "npm run prepare:standalone && electron-builder --dir",
     "dist:portable": "npm run prepare:standalone && electron-builder --win portable",
-    "dist:win": "npm run prepare:standalone && electron-builder --win portable",
+    "dist:installer": "npm run prepare:standalone && electron-builder --win nsis",
+    "dist:win": "npm run dist:portable && npm run dist:installer",
     "lint": "eslint",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -79,9 +80,29 @@
           "arch": [
             "x64"
           ]
+        },
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
         }
-      ],
+      ]
+    },
+    "portable": {
       "artifactName": "MuhasebeTakip-${version}-portable.${ext}"
+    },
+    "nsis": {
+      "artifactName": "MuhasebeTakip-${version}-setup.${ext}",
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "Muhasebe Takip",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": false
     }
   },
   "dependencies": {

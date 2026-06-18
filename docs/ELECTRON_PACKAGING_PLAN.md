@@ -212,7 +212,7 @@ npm install --save-dev electron-builder
 Olası hedef:
 
 - Windows portable exe
-- Sonraki asamada NSIS installer
+- Windows NSIS setup installer
 
 Olası build config ilkeleri:
 
@@ -252,6 +252,7 @@ Onemli:
 - Standalone runtime icin `server.js`, Prisma Client, `better-sqlite3` native dosyasi, `prisma/schema.prisma` ve `prisma/migrations` mevcut kalmalidir.
 - Yerel Electron production denemesinde standalone server sistem `node.exe` ile calistirilir; Electron binary'si Node runtime olarak kullanildiginda native `better-sqlite3` ABI uyusmazligi olusabilir.
 - Electron production child process, local mod davranisini korumak icin mevcut proje kokunu `APP_PROJECT_ROOT` ile ve mevcut SQLite DB'yi `DATABASE_URL=file:<proje>/prisma/dev.db` ile acik verir. AppData gecisi sonraki asamadir.
+- NSIS installer hedefinde masaustu ve Start Menu kisayollari olusturulur, kurulum tek kullanici modunda admin zorunlulugu olmadan denenir ve `deleteAppDataOnUninstall: false` ile AppData altindaki kullanici verisi otomatik silinmez.
 
 ## Ilk Portable Build POC Sonucu
 
@@ -274,6 +275,43 @@ POC bulgulari:
 - Kaynak modda `npm run dev`, `npm run electron:dev` ve `npm run electron:prod` HTTP 200 ile calismaya devam etti.
 
 Sonuc: Portable exe uretimi basarili POC seviyesine geldi; kullanilabilir desktop dagitim icin siradaki kritik is AppData DB/bootstrap entegrasyonudur.
+
+## Ilk Windows Setup Installer Denemesi
+
+Portable hedef korunarak NSIS setup installer hedefi eklendi:
+
+- `dist:portable`: portable exe uretir.
+- `dist:installer`: NSIS setup exe uretir.
+- `dist:win`: portable ve installer hedeflerini birlikte uretir.
+
+Installer ayarlari:
+
+- Product name: `Muhasebe Takip`
+- App id: `com.local.muhasebetakip`
+- Tek kullanici kurulumu hedeflenir (`perMachine: false`).
+- Admin zorunlulugu istenmez (`allowElevation: false`).
+- Masaustu kisayolu olusturulur.
+- Start Menu kisayolu olusturulur.
+- Kaldirma sirasinda AppData altindaki `MuhasebeTakip` verisi otomatik silinmez.
+
+Installer paketine alinmayacak dosyalar:
+
+- `.env`, `.env.local`, `.env.*`
+- `prisma/dev.db`, `prisma/dev.db-journal`, `*.db`, `*.db-journal`
+- `storage/`, `storage/uploads/`, `storage/restore-backups/`
+- `dist/`, `.git`, log dosyalari
+- ZIP/PDF/CSV ciktilari ve gecici test dosyalari
+
+Installer smoke testte kontrol edilecekler:
+
+- Setup exe uretilir.
+- Kurulum tamamlanir.
+- Kurulu uygulama acilir.
+- `/onboarding` HTTP 200 doner veya onboarding tamamli AppData durumunda dashboard'a yonlenir.
+- AppData DB bootstrap calisir ve mevcut DB uzerine yazilmaz.
+- Masaustu ve Start Menu kisayollari olusur.
+- Uygulama kapaninca sadece kendi baslattigi server process'i kapanir.
+- Uninstall denenirse AppData verisi korunur.
 
 ## Prisma Stratejisi
 
@@ -424,9 +462,10 @@ Portable paketleme oncesi testler:
 
 ### G. Installer / setup.exe
 
-- Portable test stabil olduktan sonra installer hedefi eklenir.
-- AppData verisinin update sirasinda korunmasi test edilir.
+- Portable test stabil olduktan sonra NSIS installer hedefi eklenir.
+- AppData verisinin update ve uninstall sirasinda korunmasi test edilir.
 - Masaustu ve Start Menu kisayollari eklenir.
+- Installer ciktisi `dist/` altinda kalir ve Git'e alinmaz.
 
 ## Sonraki Onerilen Adim
 

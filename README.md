@@ -139,7 +139,16 @@ npm run build
 npm run dist:portable
 ```
 
-Bu komut `dist/MuhasebeTakip-0.1.0-portable.exe` çıktısını üretir. Bu hâlâ bir proof-of-concept aşamasıdır: setup installer, AppData veritabanı geçişi ve gömülü Python paketleme henüz yapılmamıştır. Paket içine `.env`, local DB ve upload klasörleri alınmaz; kalıcı kullanım için AppData DB/bootstrap aşaması tamamlanmalıdır.
+Bu komut `dist/MuhasebeTakip-0.1.0-portable.exe` çıktısını üretir. Paket içine `.env`, local DB ve upload klasörleri alınmaz; paketli Electron modunda kullanıcı verisi AppData altındaki `MuhasebeTakip` veri klasöründe tutulur.
+
+Windows setup installer denemesi için:
+
+```bash
+npm run build
+npm run dist:installer
+```
+
+Bu komut `dist/MuhasebeTakip-0.1.0-setup.exe` çıktısını üretir. Installer masaüstü ve Start Menu kısayolu oluşturur. Kaldırma sırasında AppData içindeki uygulama verisi otomatik silinmez; veritabanı ve upload dosyaları için düzenli tam yedek alınmaya devam edilmelidir.
 
 ## Ortam Değişkenleri
 
