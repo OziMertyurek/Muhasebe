@@ -9,6 +9,7 @@ const APP_URL = process.env.ELECTRON_START_URL || "http://localhost:3000";
 const SERVER_MODE =
   process.env.ELECTRON_SERVER_MODE === "production" || app.isPackaged ? "production" : "development";
 const PROJECT_ROOT = app.isPackaged ? path.join(process.resourcesPath, "app") : path.join(__dirname, "..");
+const APP_ICON_PATH = path.join(PROJECT_ROOT, "assets", "icon.ico");
 const STANDALONE_ROOT = app.isPackaged
   ? path.join(process.resourcesPath, "standalone")
   : path.join(PROJECT_ROOT, ".next", "standalone");
@@ -391,6 +392,7 @@ async function createWindow() {
     height: 900,
     minWidth: 1024,
     minHeight: 700,
+    icon: fs.existsSync(APP_ICON_PATH) ? APP_ICON_PATH : undefined,
     show: false,
     webPreferences: {
       contextIsolation: true,

@@ -22,6 +22,7 @@
   "build": {
     "appId": "com.ozimertyurek.muhasebetakip",
     "productName": "Muhasebe Takip",
+    "icon": "assets/icon.ico",
     "asar": false,
     "npmRebuild": false,
     "disableDefaultIgnoredFiles": true,
@@ -31,6 +32,7 @@
     },
     "files": [
       "electron/**/*",
+      "assets/**/*",
       "python-worker/**/*",
       "prisma/schema.prisma",
       "prisma/migrations/**/*",
@@ -74,6 +76,7 @@
       }
     ],
     "win": {
+      "icon": "assets/icon.ico",
       "target": [
         {
           "target": "portable",

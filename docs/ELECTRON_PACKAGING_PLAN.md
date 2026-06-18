@@ -323,11 +323,22 @@ Desktop dagitimlarinda kullanilacak standartlar:
 - Uygulama adi / productName: `Muhasebe Takip`
 - App id: `com.ozimertyurek.muhasebetakip`
 - Pencere basligi: `Muhasebe Takip`
+- Icon dosyasi: `assets/icon.ico`
 - Setup artifact: `Muhasebe-Takip-Setup-${version}.exe`
 - Portable artifact: `Muhasebe-Takip-Portable-${version}.exe`
 - Version kaynagi: `package.json` ve `src/lib/app-info.ts` birlikte guncellenir.
 
 `dist/` altindaki portable, setup ve unpacked ciktilar Git'e alinmaz. Paketli modda AppData DB bootstrap calisir ve mevcut AppData verisi uzerine yazilmaz.
+
+## Desktop Icon Packaging
+
+Electron desktop paketlerinde ikon kaynagi `assets/icon.ico` dosyasidir:
+
+- Electron BrowserWindow pencere ikonu `assets/icon.ico` ile acilir.
+- electron-builder `icon` ve Windows `win.icon` ayarlari ayni dosyayi kullanir.
+- Portable exe, NSIS setup installer, masaustu kisayolu ve Start Menu kisayolu bu ikonu kullanir.
+- `assets/icon.png` yalnizca kaynak/preview dosyasidir.
+- Gercek marka ikonu hazirlandiginda `assets/icon.ico` ve `assets/icon.png` ayni dosya adlariyla degistirilebilir.
 
 ## Packaged Download Handling
 

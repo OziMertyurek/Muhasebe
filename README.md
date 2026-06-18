@@ -132,6 +132,8 @@ npm run electron:prod
 
 Normal web/local modda `DATABASE_URL`, SQLite veritabanı yolu ve upload klasörü değiştirilmemiştir. Paketli Electron modunda kullanıcı verisi `%APPDATA%/MuhasebeTakip/` altında saklanır.
 
+Desktop ikon dosyalari `assets/` klasorundedir. `assets/icon.ico` Windows exe, installer, masaustu kisayolu, Start Menu kisayolu ve Electron pencere ikonu icin kullanilir; `assets/icon.png` kaynak/preview dosyasidir.
+
 İlk portable Electron build denemesi için:
 
 ```bash
