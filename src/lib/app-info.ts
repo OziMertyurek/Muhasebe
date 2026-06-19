@@ -1,6 +1,6 @@
 export const appInfo = {
   appName: "Local Muhasebe Takip Sistemi",
-  version: "1.8.1",
+  version: "2.0.0",
   mode: "Local",
   database: "SQLite",
 } as const;

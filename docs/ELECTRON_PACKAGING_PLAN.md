@@ -334,6 +334,14 @@ Desktop dagitimlarinda kullanilacak standartlar:
 
 `dist/` altindaki portable, setup ve unpacked ciktilar Git'e alinmaz. Paketli modda AppData DB bootstrap calisir ve mevcut AppData verisi uzerine yazilmaz.
 
+v2.0.0 desktop release hazirliginda guncel urun ciktisi adlari:
+
+- Setup artifact: `Muhasebe-Takip-Setup-2.0.0.exe`
+- Portable artifact: `Muhasebe-Takip-Portable-2.0.0.exe`
+- System Status surumu: `2.0.0`
+
+Final release testinde setup/portable build, Node PATH olmadan installed app, AppData DB bootstrap, onboarding, PIN/login, backup ZIP, CSV/PDF export, AI fatura okuma ve uninstall sonrasi AppData veri koruma akislari dogrulanmistir.
+
 ## Desktop Icon Packaging
 
 Electron desktop paketlerinde ikon kaynagi `assets/icon.ico` dosyasidir:

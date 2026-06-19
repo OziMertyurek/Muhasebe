@@ -4,13 +4,14 @@ Bu proje local çalışan, şirket içi kullanım için geliştirilmiş mini muh
 
 Uygulama online yayınlanmak için değil, yerel bilgisayarda çalışmak için tasarlanmıştır. Kod private GitHub repository içinde tutulabilir; veritabanı ve yüklenen dosyalar ayrıca yedeklenmelidir.
 
-## v1.0.0 Durumu
+## v2.0.0 Desktop Release Durumu
 
-Bu sürüm local kullanım için ilk stabil sürümdür.
+Bu sürüm Windows desktop kullanımı için setup installer ve portable exe paketleri hazır olan stabil desktop release sürümüdür.
 
-- Gerçek AI/OCR entegrasyonu henüz bağlı değildir.
-- Veriler local SQLite veritabanında saklanır.
-- Upload dosyaları `storage/uploads/` içinde saklanır.
+- Windows setup installer ve portable exe üretilebilir.
+- Paketli desktop modda veriler `%APPDATA%/MuhasebeTakip/` altında saklanır.
+- Node.js kurulu olmayan kullanıcılar için paketli uygulamada bundled Node runtime kullanılır.
+- Onboarding, local PIN/login, backup/restore, ZIP/CSV/PDF download ve AI fatura okuma akışları korunur.
 - GitHub sadece kodu saklar; veritabanı ve upload dosyalarını saklamaz.
 - Veritabanı ve upload dosyaları için düzenli yedek alınmalıdır.
 
@@ -141,7 +142,7 @@ npm run build
 npm run dist:portable
 ```
 
-Bu komut `dist/Muhasebe-Takip-Portable-1.8.1.exe` çıktısını üretir. Paket içine `.env`, local DB ve upload klasörleri alınmaz; paketli Electron modunda kullanıcı verisi AppData altındaki `MuhasebeTakip` veri klasöründe tutulur.
+Bu komut `dist/Muhasebe-Takip-Portable-2.0.0.exe` çıktısını üretir. Paket içine `.env`, local DB ve upload klasörleri alınmaz; paketli Electron modunda kullanıcı verisi AppData altındaki `MuhasebeTakip` veri klasöründe tutulur.
 
 Windows setup installer denemesi için:
 
@@ -150,7 +151,7 @@ npm run build
 npm run dist:installer
 ```
 
-Bu komut `dist/Muhasebe-Takip-Setup-1.8.1.exe` çıktısını üretir. Installer masaüstü ve Start Menu kısayolu oluşturur. Kaldırma sırasında AppData içindeki uygulama verisi otomatik silinmez; veritabanı ve upload dosyaları için düzenli tam yedek alınmaya devam edilmelidir.
+Bu komut `dist/Muhasebe-Takip-Setup-2.0.0.exe` çıktısını üretir. Installer masaüstü ve Start Menu kısayolu oluşturur. Kaldırma sırasında AppData içindeki uygulama verisi otomatik silinmez; veritabanı ve upload dosyaları için düzenli tam yedek alınmaya devam edilmelidir.
 
 Desktop build çıktıları `dist/` altında oluşur ve Git'e alınmaz. Son kullanıcıya dosya vermeden önce `Ayarlar > Yedekleme > Tam Yedek İndir` akışı ile tam yedek alma alışkanlığı korunmalıdır.
 
