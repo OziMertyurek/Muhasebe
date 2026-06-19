@@ -19,6 +19,13 @@ npm run electron:prod
 
 `npm run electron:prod` port 3000 bos ise `.next/standalone/server.js` dosyasini Node child process olarak baslatir. Build yoksa veya production server acilamazsa Electron penceresinde Turkce hata ekrani gorunur.
 
+Packaged Node runtime:
+
+- Portable ve installer build sirasinda calisan `node.exe`, `resources/node/node.exe` altina kopyalanir.
+- Paketli uygulama standalone server ve desktop DB bootstrap icin once bu bundled Node runtime'i kullanir.
+- Bundled runtime bulunamazsa sistem `node.exe` fallback olarak denenir.
+- Node runtime hic bulunamazsa uygulama sessiz kapanmaz; hata `AppData/Roaming/MuhasebeTakip/logs/startup.log` dosyasina yazilir ve Turkce hata ekrani gosterilir.
+
 Notlar:
 
 - Electron sadece kendi baslattigi Next.js server process'ini kapatir.

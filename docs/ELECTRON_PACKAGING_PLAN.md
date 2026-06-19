@@ -251,6 +251,10 @@ Onemli:
 - Standalone trace exclude POC sonucunda `.env`, `.env.local`, `prisma/dev.db`, `storage/`, ZIP/PDF/CSV ciktilari ve `*.log` dosyalari standalone ciktidan dusurulmustur.
 - Standalone runtime icin `server.js`, Prisma Client, `better-sqlite3` native dosyasi, `prisma/schema.prisma` ve `prisma/migrations` mevcut kalmalidir.
 - Yerel Electron production denemesinde standalone server sistem `node.exe` ile calistirilir; Electron binary'si Node runtime olarak kullanildiginda native `better-sqlite3` ABI uyusmazligi olusabilir.
+- Packaged portable/installer build icin sistem Node.js'e bagimli kalmamak adina build sirasinda calisan `node.exe`, `resources/node/node.exe` altina kopyalanir.
+- Packaged Electron main process, DB bootstrap ve standalone server baslatirken once bundled Node runtime'i kullanir; bundled runtime yoksa sistem `node.exe` fallback olarak denenir.
+- Electron binary'sini `ELECTRON_RUN_AS_NODE=1` ile server runtime olarak kullanmak bu projede kisa vadede onerilmez; `better-sqlite3` native modulu Electron ABI ile uyumsuz hata verebilir.
+- Node runtime hic bulunamazsa uygulama sessiz kapanmamalidir; `AppData/Roaming/MuhasebeTakip/logs/startup.log` dosyasina hata yazilmali ve Turkce hata ekrani gosterilmelidir.
 - Electron production child process kaynak/local modda mevcut proje kokunu `APP_PROJECT_ROOT` ile ve mevcut SQLite DB'yi `DATABASE_URL=file:<proje>/prisma/dev.db` ile acik verir. Packaged modda AppData DB bootstrap devrededir.
 - NSIS installer hedefinde masaustu ve Start Menu kisayollari olusturulur, kurulum tek kullanici modunda admin zorunlulugu olmadan denenir ve `deleteAppDataOnUninstall: false` ile AppData altindaki kullanici verisi otomatik silinmez.
 

@@ -59,11 +59,13 @@ const DESKTOP_MIGRATIONS_PATH = resolveFirstExistingPath([
   path.join(PROJECT_ROOT, "prisma", "migrations"),
   path.join(process.resourcesPath || "", "app", "prisma", "migrations"),
 ]);
+const BUNDLED_NODE_PATH = path.join(process.resourcesPath || PROJECT_ROOT, "node", "node.exe");
 const STARTUP_LOG_PATH = path.join(DESKTOP_APP_DATA_DIR, "logs", "startup.log");
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
 const SERVER_POLL_INTERVAL_MS = 1000;
 const DOWNLOADS_FOLDER_NAME = DESKTOP_DATA_FOLDER_NAME;
+const NODE_RUNTIME_MISSING_MESSAGE = "Node runtime bulunamadi. Uygulama sunucusu baslatilamadi.";
 
 let nextServerProcess = null;
 let nextDevServerPortOwnerPid = null;
@@ -120,6 +122,26 @@ function buildChildProcessEnv(overrides = {}) {
   return env;
 }
 
+function getNodeRuntimeCommand() {
+  if (app.isPackaged && process.platform === "win32" && fs.existsSync(BUNDLED_NODE_PATH)) {
+    return {
+      command: BUNDLED_NODE_PATH,
+      label: "bundled-node",
+    };
+  }
+
+  return {
+    command: process.platform === "win32" ? "node.exe" : "node",
+    label: "system-node",
+  };
+}
+
+function isNodeRuntimeMissingError(error) {
+  const code = error?.code;
+  const message = String(error?.message || "");
+  return code === "ENOENT" && /node/i.test(message);
+}
+
 function logStartupSnapshot() {
   writeStartupLog("startup", {
     packaged: app.isPackaged,
@@ -131,6 +153,7 @@ function logStartupSnapshot() {
     standaloneServerExists: fs.existsSync(STANDALONE_SERVER_PATH),
     bootstrapScriptExists: fs.existsSync(DESKTOP_BOOTSTRAP_SCRIPT_PATH),
     migrationsExists: fs.existsSync(DESKTOP_MIGRATIONS_PATH),
+    bundledNodeExists: fs.existsSync(BUNDLED_NODE_PATH),
     databaseUrl: redactValue(getServerDatabaseUrl()),
   });
 }
@@ -174,16 +197,16 @@ function runDesktopDatabaseBootstrap() {
     throw new Error("Desktop veritabani hazirlama dosyalari bulunamadi.");
   }
 
-  const nodeCommand = process.platform === "win32" ? "node.exe" : "node";
+  const nodeRuntime = getNodeRuntimeCommand();
   writeStartupLog("desktop-db-bootstrap-start", {
-    command: nodeCommand,
+    command: nodeRuntime.label,
     databaseExistsBefore: fs.existsSync(DESKTOP_DATABASE_PATH),
     databaseUrl: redactValue(DESKTOP_DATABASE_URL),
   });
 
   try {
     const output = execFileSync(
-      nodeCommand,
+      nodeRuntime.command,
       [DESKTOP_BOOTSTRAP_SCRIPT_PATH, DESKTOP_DATABASE_PATH, DESKTOP_MIGRATIONS_PATH, STANDALONE_ROOT],
       {
         cwd: PROJECT_ROOT,
@@ -203,11 +226,15 @@ function runDesktopDatabaseBootstrap() {
       output: output.trim() || "-",
     });
   } catch (error) {
+    const runtimeMissing = isNodeRuntimeMissingError(error);
     writeStartupLog("desktop-db-bootstrap-failed", {
-      message: error instanceof Error ? error.message : String(error),
+      message: runtimeMissing ? NODE_RUNTIME_MISSING_MESSAGE : error instanceof Error ? error.message : String(error),
       stdout: error?.stdout ? String(error.stdout).trim() : "-",
       stderr: error?.stderr ? String(error.stderr).trim() : "-",
     });
+    if (runtimeMissing) {
+      throw new Error(NODE_RUNTIME_MISSING_MESSAGE);
+    }
     throw error;
   }
 }
@@ -225,6 +252,9 @@ function preparePackagedDesktopRuntime() {
     writeStartupLog("desktop-runtime-prepare-failed", {
       message: error instanceof Error ? error.message : String(error),
     });
+    if (error instanceof Error && error.message === NODE_RUNTIME_MISSING_MESSAGE) {
+      throw error;
+    }
     process.stderr.write(
       `Desktop veritabani hazirlanamadi. ${error instanceof Error ? error.message : String(error)}\n`,
     );
@@ -324,9 +354,11 @@ function getNextServerCommand() {
     if (!fs.existsSync(STANDALONE_SERVER_PATH)) {
       throw new Error("Standalone production build bulunamadı. Önce npm run build çalıştırın.");
     }
+    const nodeRuntime = getNodeRuntimeCommand();
 
     return {
-      command: process.platform === "win32" ? "node.exe" : "node",
+      command: nodeRuntime.command,
+      label: nodeRuntime.label,
       args: [STANDALONE_SERVER_PATH],
     };
   }
@@ -350,7 +382,7 @@ function startNextServer() {
   const serverCommand = getNextServerCommand();
   writeStartupLog("next-server-start", {
     mode: SERVER_MODE,
-    command: serverCommand.command,
+    command: serverCommand.label || serverCommand.command,
     args: serverCommand.args.join(" "),
     cwd: SERVER_MODE === "production" ? STANDALONE_ROOT : PROJECT_ROOT,
     databaseUrl: redactValue(getServerDatabaseUrl()),
@@ -474,14 +506,19 @@ function getWindowsPortOwnerPid(url) {
 function buildServerErrorPage() {
   const manualCommand = SERVER_MODE === "production" ? "npm run build && npm run electron:prod" : "npm run dev";
   const isDesktopDatabaseError = serverStartupError?.message === "Desktop veritabani hazirlanamadi.";
+  const isNodeRuntimeMissing = serverStartupError?.message === NODE_RUNTIME_MISSING_MESSAGE;
   const title =
-    isDesktopDatabaseError
+    isNodeRuntimeMissing
+      ? "Node runtime bulunamadi"
+      : isDesktopDatabaseError
       ? "Desktop veritabani hazirlanamadi"
       : SERVER_MODE === "production"
       ? "Production sunucu başlatılamadı"
       : "Uygulama sunucusu başlatılamadı";
   const description =
-    isDesktopDatabaseError
+    isNodeRuntimeMissing
+      ? "Node runtime bulunamadi. Uygulama sunucusu baslatilamadi."
+      : isDesktopDatabaseError
       ? "Uygulama verileri hazirlanirken hata olustu. Lutfen uygulamayi yeniden baslatmayi deneyin."
       : SERVER_MODE === "production"
       ? "Electron açıldı, ancak production sunucu belirlenen sürede hazır hale gelmedi. Önce npm run build çalıştırın."

@@ -39,6 +39,29 @@ function ensureElectronEntrypoint(context) {
   fs.writeFileSync(targetPackagePath, `${JSON.stringify(nextPackage, null, 2)}\n`);
 }
 
+function copyBundledNodeRuntime(context) {
+  if (process.platform !== "win32") {
+    return;
+  }
+
+  const sourceNodePath = process.execPath;
+  const targetNodeDir = path.join(context.appOutDir, "resources", "node");
+  const targetNodePath = path.join(targetNodeDir, "node.exe");
+
+  if (!fs.existsSync(sourceNodePath)) {
+    throw new Error("Node runtime bulunamadi. Portable paket icin node.exe kopyalanamadi.");
+  }
+
+  fs.rmSync(targetNodeDir, {
+    recursive: true,
+    force: true,
+  });
+  fs.mkdirSync(targetNodeDir, {
+    recursive: true,
+  });
+  fs.copyFileSync(sourceNodePath, targetNodePath);
+}
+
 exports.default = async function afterPack(context) {
   const sourceStandaloneDir = path.join(context.packager.projectDir, ".next", "standalone");
   const targetStandaloneDir = path.join(context.appOutDir, "resources", "standalone");
@@ -60,4 +83,5 @@ exports.default = async function afterPack(context) {
 
   removeForbiddenEntries(targetStandaloneDir);
   ensureElectronEntrypoint(context);
+  copyBundledNodeRuntime(context);
 };
