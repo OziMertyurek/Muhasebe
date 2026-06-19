@@ -26,6 +26,11 @@
     "asar": false,
     "npmRebuild": false,
     "disableDefaultIgnoredFiles": true,
+    "extraMetadata": {
+      "main": "electron/main.js",
+      "name": "muhasebe",
+      "productName": "Muhasebe Takip"
+    },
     "afterPack": "scripts/electron-after-pack.js",
     "directories": {
       "output": "dist"

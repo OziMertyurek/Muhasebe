@@ -18,6 +18,27 @@ function removeForbiddenEntries(targetDir) {
   }
 }
 
+function ensureElectronEntrypoint(context) {
+  const sourcePackagePath = path.join(context.packager.projectDir, "package.json");
+  const targetPackagePath = path.join(context.appOutDir, "resources", "app", "package.json");
+
+  if (!fs.existsSync(targetPackagePath)) {
+    throw new Error("Packaged app package.json bulunamadi.");
+  }
+
+  const sourcePackage = JSON.parse(fs.readFileSync(sourcePackagePath, "utf8"));
+  const targetPackage = JSON.parse(fs.readFileSync(targetPackagePath, "utf8"));
+  const nextPackage = {
+    ...targetPackage,
+    name: targetPackage.name || sourcePackage.name,
+    version: targetPackage.version || sourcePackage.version,
+    productName: targetPackage.productName || sourcePackage.build?.productName,
+    main: "electron/main.js",
+  };
+
+  fs.writeFileSync(targetPackagePath, `${JSON.stringify(nextPackage, null, 2)}\n`);
+}
+
 exports.default = async function afterPack(context) {
   const sourceStandaloneDir = path.join(context.packager.projectDir, ".next", "standalone");
   const targetStandaloneDir = path.join(context.appOutDir, "resources", "standalone");
@@ -38,4 +59,5 @@ exports.default = async function afterPack(context) {
   });
 
   removeForbiddenEntries(targetStandaloneDir);
+  ensureElectronEntrypoint(context);
 };
