@@ -11,7 +11,7 @@ export type DesktopRuntimeSummary = {
   helperReady: boolean;
   appMode: "desktop";
   databaseUrlScheme: "file";
-  databaseTarget: "AppData SQLite";
+  databaseTarget: "Desktop SQLite";
   databaseUrlAvailable: boolean;
 };
 
@@ -35,7 +35,7 @@ export function getDesktopRuntimeSummary(): DesktopRuntimeSummary {
     helperReady: true,
     appMode: "desktop",
     databaseUrlScheme: "file",
-    databaseTarget: "AppData SQLite",
+    databaseTarget: "Desktop SQLite",
     databaseUrlAvailable: Boolean(getDesktopDatabaseUrl()),
   };
 }

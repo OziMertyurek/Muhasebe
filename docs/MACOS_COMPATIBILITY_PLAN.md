@@ -62,7 +62,7 @@ Muhasebe-Takip-v2.x.x-macOS-x64.dmg
 
 ## Path Uyumlulugu
 
-`src/lib/app-paths.ts` ileride platform bazli hale getirilmelidir:
+`src/lib/app-paths.ts` platform bazli desktop veri klasoru hesaplamasini destekleyecek sekilde hazirlanmistir:
 
 - `process.platform === "win32"`: `%APPDATA%/MuhasebeTakip/`
 - `process.platform === "darwin"`: `~/Library/Application Support/MuhasebeTakip/`
@@ -77,6 +77,13 @@ Planlanan davranis:
 - DB icindeki dosya referanslari mumkun oldugunca relative kalmali.
 - Download/export icin macOS'ta `app.getPath("downloads")/MuhasebeTakip` kullanilmali.
 - Tam local path, `DATABASE_URL` veya `.env` degerleri UI'da gosterilmemeli.
+
+Durum notu:
+
+- Platform-aware app path hazirligi eklendi.
+- Normal web/local modda `prisma/dev.db`, `storage/uploads/` ve `storage/restore-backups/` davranisi degismedi.
+- `APP_MODE=desktop` oldugunda desktop pathleri platforma gore hesaplanir.
+- Bu hazirlik DB tasimasi, macOS build config veya electron-builder mac target eklemez.
 
 ## Node Runtime Stratejisi
 
@@ -225,7 +232,7 @@ Kontrol edilmesi gerekenler:
 
 A. Platform path abstraction
 
-- `app-paths.ts` icinde `darwin` icin `~/Library/Application Support/MuhasebeTakip` destegi ekle.
+- `app-paths.ts` icinde `darwin` icin `~/Library/Application Support/MuhasebeTakip` destegi hazirlandi.
 - System Status'ta macOS veri klasoru durumunu gizli path gostermeden raporla.
 
 B. macOS runtime resolver

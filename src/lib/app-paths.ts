@@ -4,6 +4,8 @@ import { mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
+const appDataFolderName = "MuhasebeTakip";
+
 export function isDesktopMode() {
   return (
     process.env.APP_MODE?.toLocaleLowerCase("tr-TR") === "desktop" ||
@@ -63,14 +65,23 @@ export function getPythonWorkerScriptPath() {
   return join(getPythonWorkerDir(), "extract_markdown.py");
 }
 
-export function getDesktopAppDataDir() {
-  const appDataRoot =
-    process.env.APPDATA ||
-    (process.platform === "win32"
-      ? join(homedir(), "AppData", "Roaming")
-      : join(homedir(), ".local", "share"));
+export function getDesktopAppDataRoot(
+  platform = process.platform,
+  homeDir = homedir(),
+) {
+  if (platform === "win32") {
+    return process.env.APPDATA || join(homeDir, "AppData", "Roaming");
+  }
 
-  return join(appDataRoot, "MuhasebeTakip");
+  if (platform === "darwin") {
+    return join(homeDir, "Library", "Application Support");
+  }
+
+  return join(homeDir, ".local", "share");
+}
+
+export function getDesktopAppDataDir() {
+  return join(getDesktopAppDataRoot(), appDataFolderName);
 }
 
 export function getDesktopDatabasePath() {

@@ -26,6 +26,18 @@ Mevcut Electron akisi:
 
 Bu yapi kaynak kod klasorunde calisir. Portable paketleme icin ayni yaklasimin dogrudan tasinmasi risklidir.
 
+## Platform-aware Veri Klasoru Notu
+
+Desktop veri klasoru helperlari platforma gore hazirlanmistir:
+
+- Windows: `%APPDATA%/MuhasebeTakip/`
+- macOS hedefi: `~/Library/Application Support/MuhasebeTakip/`
+- Linux/test fallback: `~/.local/share/MuhasebeTakip/`
+
+Her platformda ic yapi aynidir: `database/dev.db`, `uploads/`, `restore-backups/`, `backups/` ve `logs/`.
+
+Normal web/local modda mevcut davranis degismez; DB `prisma/dev.db`, upload dosyalari `storage/uploads/` ve restore backup dosyalari `storage/restore-backups/` altinda kalir.
+
 ## Mevcut Production Yapisi Paketlenince Calisir Mi?
 
 Bugunku `electron:prod` script'i su mantiga dayanir:

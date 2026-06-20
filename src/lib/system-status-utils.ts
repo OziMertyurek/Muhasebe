@@ -213,6 +213,14 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
 
     return [
       {
+        id: "desktop-platform",
+        title: "Desktop platform",
+        status: "healthy",
+        label: formatDesktopPlatform(process.platform),
+        description:
+          "Desktop veri klasoru platforma gore hesaplanir. Tam path gizlilik icin gosterilmiyor.",
+      },
+      {
         id: "desktop-mode",
         title: "Desktop modu",
         status: desktopMode ? "healthy" : "unknown",
@@ -223,11 +231,11 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
       },
       {
         id: "desktop-appdata",
-        title: "Desktop AppData hazirligi",
+        title: "Desktop veri klasoru hazirligi",
         status: appDataDir ? "healthy" : "warning",
         label: appDataDir ? "Hesaplanabilir" : "Hesaplanamadi",
         description: appDataDir
-          ? "Windows AppData tabanli desktop veri klasoru hesaplanabiliyor. Tam path gizlilik icin gosterilmiyor."
+          ? "Platforma uygun desktop veri klasoru hesaplanabiliyor. Tam path gizlilik icin gosterilmiyor."
           : "Desktop veri klasoru hesaplanamadi.",
       },
       {
@@ -329,13 +337,29 @@ function getDesktopPreparationChecks(): SystemStatusCheck[] {
     return [
       {
         id: "desktop-appdata",
-        title: "Desktop AppData hazirligi",
+        title: "Desktop veri klasoru hazirligi",
         status: "warning",
         label: "Kontrol edilemedi",
         description: "Desktop veri klasoru durumu kontrol edilemedi.",
       },
     ];
   }
+}
+
+function formatDesktopPlatform(platform: NodeJS.Platform) {
+  if (platform === "win32") {
+    return "Windows";
+  }
+
+  if (platform === "darwin") {
+    return "macOS";
+  }
+
+  if (platform === "linux") {
+    return "Linux";
+  }
+
+  return platform;
 }
 
 function formatDesktopMigrationAction(
