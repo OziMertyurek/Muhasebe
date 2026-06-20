@@ -1,17 +1,17 @@
 # Release Notes
 
-## v2.0.1 - Bundled Python / MarkItDown Taslak
+## v2.0.1 - Bundled Python / MarkItDown
 
-Bu taslak surum, Windows packaged uygulama icinde MarkItDown metin cikarma icin paketli Python runtime hazirligini kapsar.
+Bu patch release, Windows packaged uygulama icinde MarkItDown metin cikarma icin paketli Python runtime destegini tamamlar.
 
 ### One Cikanlar
 
-- Packaged app icin `resources/python/python.exe` runtime destegi
-- Build sirasinda `prepare:bundled-python` ile `build/python` hazirligi
-- MarkItDown worker icin paketli Python oncelikli resolver
-- Sistem Python yoksa paketli Python ile AI fatura metni cikarma
-- System Status icinde Paketli Python ve MarkItDown worker durumu
-- Normal web/local modda sistem Python fallback davranisinin korunmasi
+- Packaged app artik Python kurulumuna ihtiyac duymadan MarkItDown kullanabilir.
+- Bundled Python runtime eklendi.
+- AI fatura okuma Windows packaged app icinde iyilestirildi.
+- System Status paketli Python ve MarkItDown durumunu gosterir.
+- Node runtime destegi korunur.
+- AppData DB, backup/download ve normal web/dev davranislari degismedi.
 
 ## v2.0.0 - Windows Desktop Release
 

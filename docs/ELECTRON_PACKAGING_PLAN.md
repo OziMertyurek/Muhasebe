@@ -340,6 +340,12 @@ v2.0.0 desktop release hazirliginda guncel urun ciktisi adlari:
 - Portable artifact: `Muhasebe-Takip-Portable-2.0.0.exe`
 - System Status surumu: `2.0.0`
 
+v2.0.1 patch release hazirliginda guncel urun ciktisi adlari:
+
+- Setup artifact: `Muhasebe-Takip-Setup-2.0.1.exe`
+- Portable artifact: `Muhasebe-Takip-Portable-2.0.1.exe`
+- System Status surumu: `2.0.1`
+
 Final release testinde setup/portable build, Node PATH olmadan installed app, AppData DB bootstrap, onboarding, PIN/login, backup ZIP, CSV/PDF export, AI fatura okuma ve uninstall sonrasi AppData veri koruma akislari dogrulanmistir.
 
 ## Desktop Icon Packaging
@@ -399,6 +405,7 @@ Oneri:
 
 Guncel paketli Windows stratejisi:
 
+- v2.0.1 itibariyla packaged Windows app, son kullanici bilgisayarinda sistem Python kurulumu gerektirmeden MarkItDown kullanacak sekilde hazirlanir.
 - `python-worker/` paket icine kaynak olarak dahil edilir.
 - `prepare:bundled-python` build adimi yerel Python runtime'ini ve kurulu MarkItDown bagimliliklarini `build/python` altina hazirlar.
 - `scripts/electron-after-pack.js`, hazirlanan runtime'i packaged app icinde `resources/python` altina kopyalar.
@@ -408,8 +415,8 @@ Guncel paketli Windows stratejisi:
 
 Notlar:
 
-- Paketli Python runtime Git'e alinmaz; `build/python`, `dist/` ve packaged ciktidir.
-- Paket boyutu Python runtime ve MarkItDown bagimliliklari nedeniyle belirgin artar.
+- Paketli Python runtime Git'e alinmaz; `build/python`, `dist/`, `.next` ve packaged ciktilar commit disinda tutulmalidir.
+- Paket boyutu Python runtime ve MarkItDown bagimliliklari nedeniyle belirgin artar; v2.0.1 dogrulamasinda portable exe yaklasik 209 MB, setup exe yaklasik 277 MB olmustur.
 - Python ve ucuncu taraf paket lisanslari release oncesi ayrica gozden gecirilmelidir.
 - Antivirus false-positive riski ve runtime update stratejisi sonraki release testlerinde tekrar izlenmelidir.
 - AI metin cikarma calismasa bile ana muhasebe, fatura, rapor, backup/restore modulleri calismalidir.
