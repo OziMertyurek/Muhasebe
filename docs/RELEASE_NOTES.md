@@ -13,6 +13,13 @@ Bu patch release, Windows packaged uygulama icinde MarkItDown metin cikarma icin
 - Node runtime destegi korunur.
 - AppData DB, backup/download ve normal web/dev davranislari degismedi.
 
+
+### Indirme Notu
+
+- Windows kullanicilari GitHub Release asset olarak `Muhasebe-Takip-v2.0.1-Windows-Release.zip` dosyasini indirmelidir.
+- ZIP icinden onerilen dosya `Muhasebe-Takip-Setup-2.0.1.exe` dosyasidir.
+- `Muhasebe-Takip-Portable-2.0.1.exe` kurulum istemeyen ileri kullanicilar icindir.
+- macOS surumu henuz yayinlanmadi; macOS icin ayri release assetleri daha sonra yayinlanacaktir.
 ## v2.0.0 - Windows Desktop Release
 
 Bu sürüm, Local Muhasebe Takip Sistemi'nin Windows desktop kullanımına hazır ana release sürümüdür.

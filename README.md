@@ -15,6 +15,37 @@ Bu sürüm Windows desktop kullanımı için setup installer ve portable exe pak
 - GitHub sadece kodu saklar; veritabanı ve upload dosyalarını saklamaz.
 - Veritabanı ve upload dosyaları için düzenli yedek alınmalıdır.
 
+
+## Hangi dosyayi indirmeliyim?
+
+Windows 10/11 kullaniyorsaniz GitHub Release sayfasindan su dosyayi indirin:
+
+```text
+Muhasebe-Takip-v2.0.1-Windows-Release.zip
+```
+
+ZIP icinden onerilen kurulum dosyasi:
+
+```text
+Muhasebe-Takip-Setup-2.0.1.exe
+```
+
+Kurulum yapmak istemeyen ileri kullanicilar portable surumu kullanabilir:
+
+```text
+Muhasebe-Takip-Portable-2.0.1.exe
+```
+
+Node.js veya Python kurmaniza gerek yoktur; Windows desktop paketi gerekli runtime'lari beraber getirir. Veriler %APPDATA%/MuhasebeTakip/ altinda saklanir. Duzenli olarak Ayarlar > Yedekleme > Tam Yedek Indir ile tam yedek alinmalidir.
+
+macOS surumu henuz yayinlanmadi. macOS ciktilari hazir oldugunda isletim sistemi ve mimariye gore ayri dosyalar yayinlanacaktir:
+
+```text
+Muhasebe-Takip-v2.x.x-macOS-arm64.dmg
+Muhasebe-Takip-v2.x.x-macOS-x64.dmg
+```
+
+Apple Silicon Mac icin `arm64`, Intel Mac icin `x64` dosyasi indirilmelidir.
 ## Özellikler
 
 - Dashboard gerçek veri özetleri
