@@ -397,18 +397,22 @@ Oneri:
 
 ## Python / MarkItDown Stratejisi
 
-Ilk portable denemede:
+Guncel paketli Windows stratejisi:
 
-- `python-worker/` paket icine kaynak olarak dahil edilebilir.
-- Kullanici sisteminde Python veya `py` launcher bulunmasi varsayilabilir.
-- MarkItDown yoksa mevcut hata akisi ve System Status uyarisi calismaya devam etmelidir.
+- `python-worker/` paket icine kaynak olarak dahil edilir.
+- `prepare:bundled-python` build adimi yerel Python runtime'ini ve kurulu MarkItDown bagimliliklarini `build/python` altina hazirlar.
+- `scripts/electron-after-pack.js`, hazirlanan runtime'i packaged app icinde `resources/python` altina kopyalar.
+- Electron packaged modda standalone server child process ortaminda `BUNDLED_PYTHON_PATH` ve `MARKITDOWN_PYTHON` degerlerini paketli `python.exe` icin set eder.
+- `src/lib/python-runtime-utils.ts` once paketli Python'i, sonra sistem `py` / `python` fallback komutlarini dener.
+- System Status paneli paketli Python ve MarkItDown worker durumunu path veya DATABASE_URL gostermeden raporlar.
+
+Notlar:
+
+- Paketli Python runtime Git'e alinmaz; `build/python`, `dist/` ve packaged ciktidir.
+- Paket boyutu Python runtime ve MarkItDown bagimliliklari nedeniyle belirgin artar.
+- Python ve ucuncu taraf paket lisanslari release oncesi ayrica gozden gecirilmelidir.
+- Antivirus false-positive riski ve runtime update stratejisi sonraki release testlerinde tekrar izlenmelidir.
 - AI metin cikarma calismasa bile ana muhasebe, fatura, rapor, backup/restore modulleri calismalidir.
-
-Sonraki asama:
-
-- Portable Python paketleme degerlendirilebilir.
-- Python ve MarkItDown sidecar olarak eklenirse paket boyutu, lisans, update ve antivirus riskleri ayrica test edilmelidir.
-- System Status paneli Python/MarkItDown durumunu son kullanici icin ana kontrol noktasi olarak kalmalidir.
 
 ## Riskler
 

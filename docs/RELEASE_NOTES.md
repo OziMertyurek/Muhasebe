@@ -1,5 +1,18 @@
 # Release Notes
 
+## v2.0.1 - Bundled Python / MarkItDown Taslak
+
+Bu taslak surum, Windows packaged uygulama icinde MarkItDown metin cikarma icin paketli Python runtime hazirligini kapsar.
+
+### One Cikanlar
+
+- Packaged app icin `resources/python/python.exe` runtime destegi
+- Build sirasinda `prepare:bundled-python` ile `build/python` hazirligi
+- MarkItDown worker icin paketli Python oncelikli resolver
+- Sistem Python yoksa paketli Python ile AI fatura metni cikarma
+- System Status icinde Paketli Python ve MarkItDown worker durumu
+- Normal web/local modda sistem Python fallback davranisinin korunmasi
+
 ## v2.0.0 - Windows Desktop Release
 
 Bu sürüm, Local Muhasebe Takip Sistemi'nin Windows desktop kullanımına hazır ana release sürümüdür.

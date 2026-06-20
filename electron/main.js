@@ -60,6 +60,7 @@ const DESKTOP_MIGRATIONS_PATH = resolveFirstExistingPath([
   path.join(process.resourcesPath || "", "app", "prisma", "migrations"),
 ]);
 const BUNDLED_NODE_PATH = path.join(process.resourcesPath || PROJECT_ROOT, "node", "node.exe");
+const BUNDLED_PYTHON_PATH = path.join(process.resourcesPath || PROJECT_ROOT, "python", "python.exe");
 const STARTUP_LOG_PATH = path.join(DESKTOP_APP_DATA_DIR, "logs", "startup.log");
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
@@ -119,6 +120,11 @@ function buildChildProcessEnv(overrides = {}) {
 
   delete env.ELECTRON_RUN_AS_NODE;
 
+  if (app.isPackaged && fs.existsSync(BUNDLED_PYTHON_PATH)) {
+    env.BUNDLED_PYTHON_PATH = BUNDLED_PYTHON_PATH;
+    env.MARKITDOWN_PYTHON = BUNDLED_PYTHON_PATH;
+  }
+
   return env;
 }
 
@@ -154,6 +160,8 @@ function logStartupSnapshot() {
     bootstrapScriptExists: fs.existsSync(DESKTOP_BOOTSTRAP_SCRIPT_PATH),
     migrationsExists: fs.existsSync(DESKTOP_MIGRATIONS_PATH),
     bundledNodeExists: fs.existsSync(BUNDLED_NODE_PATH),
+    bundledPythonExists: fs.existsSync(BUNDLED_PYTHON_PATH),
+    pythonRuntime: fs.existsSync(BUNDLED_PYTHON_PATH) ? "bundled" : "fallback",
     databaseUrl: redactValue(getServerDatabaseUrl()),
   });
 }

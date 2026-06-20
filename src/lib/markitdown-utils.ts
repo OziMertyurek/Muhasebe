@@ -1,6 +1,7 @@
 import type { FileAttachment } from "@prisma/client";
 import { join } from "node:path";
 import { getPythonWorkerScriptPath, getUploadsDir } from "@/lib/app-paths";
+import { resolvePythonRuntime } from "@/lib/python-runtime-utils";
 
 type MarkItDownFile = Pick<
   FileAttachment,
@@ -56,7 +57,7 @@ export async function extractMarkdownFromFileAttachment(
     return {
       ok: false,
       error:
-        "Bu dosya türü MarkItDown ile metin çıkarma için desteklenmiyor. PDF, PNG, JPG, WebP veya HTML fatura dosyası kullanın.",
+        "Bu dosya turu MarkItDown ile metin cikarma icin desteklenmiyor. PDF, PNG, JPG, WebP veya HTML fatura dosyasi kullanin.",
     };
   }
 
@@ -65,7 +66,7 @@ export async function extractMarkdownFromFileAttachment(
   if (!resolvedFilePath) {
     return {
       ok: false,
-      error: "Dosya yolu güvenli değil veya upload klasörü dışında görünüyor.",
+      error: "Dosya yolu guvenli degil veya upload klasoru disinda gorunuyor.",
     };
   }
 
@@ -77,11 +78,21 @@ export async function extractMarkdownFromFileAttachment(
   } catch {
     return {
       ok: false,
-      error: "Dosya veya MarkItDown worker scripti bulunamadı.",
+      error: "Dosya veya MarkItDown worker scripti bulunamadi.",
     };
   }
 
-  return runMarkItDownWorker(scriptPath, resolvedFilePath);
+  const pythonRuntime = await resolvePythonRuntime();
+
+  if (!pythonRuntime.ok) {
+    return {
+      ok: false,
+      error:
+        "MarkItDown calistirilamadi. Paketli Python bulunamadi ve sistem Python erisilebilir degil.",
+    };
+  }
+
+  return runMarkItDownWorker(pythonRuntime.command, scriptPath, resolvedFilePath);
 }
 
 function resolveUploadPath(filePath: string) {
@@ -113,11 +124,11 @@ function getFileExtension(fileName: string) {
 }
 
 async function runMarkItDownWorker(
+  pythonCommand: string,
   scriptPath: string,
   filePath: string,
 ): Promise<MarkItDownResult> {
   const { execFile } = await import("node:child_process");
-  const pythonCommand = process.env.MARKITDOWN_PYTHON || "python";
 
   return new Promise((resolve) => {
     execFile(
@@ -131,10 +142,10 @@ async function runMarkItDownWorker(
       },
       (error, stdout, stderr) => {
         if (error) {
-          const message = stderr.trim() || error.message;
+          const message = sanitizeWorkerError(stderr.trim() || error.message);
           const timeoutMessage = error.killed
-            ? "MarkItDown işlemi zaman aşımına uğradı."
-            : "MarkItDown çalıştırılamadı. Python ve markitdown paketinin kurulu olduğundan emin olun.";
+            ? "MarkItDown islemi zaman asimina ugradi."
+            : "MarkItDown calistirilamadi. Paketli Python veya markitdown bagimliliklari kontrol edilmeli.";
 
           resolve({
             ok: false,
@@ -148,7 +159,7 @@ async function runMarkItDownWorker(
         if (!text) {
           resolve({
             ok: false,
-            error: "MarkItDown çalıştı ancak dosyadan okunabilir metin çıkarılamadı.",
+            error: "MarkItDown calisti ancak dosyadan okunabilir metin cikarilamadi.",
           });
           return;
         }
@@ -157,4 +168,11 @@ async function runMarkItDownWorker(
       },
     );
   });
+}
+
+function sanitizeWorkerError(message: string) {
+  return message
+    .replace(/[A-Za-z]:\\[^\r\n]+/g, "[path]")
+    .replace(/file:[^\s]+/g, "file:[path]")
+    .slice(0, 800);
 }

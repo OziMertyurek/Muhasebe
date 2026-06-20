@@ -71,6 +71,66 @@ function replaceLinksInTree(rootDir) {
   }
 }
 
+function copyRuntimePackageToStandalone(packageName) {
+  const sourcePackageDir = path.join(projectRoot, "node_modules", ...packageName.split("/"));
+  const targetPackageDir = path.join(standaloneDir, "node_modules", ...packageName.split("/"));
+
+  if (!fs.existsSync(sourcePackageDir)) {
+    throw new Error(`${packageName} runtime paketi bulunamadi. Once npm install calistirin.`);
+  }
+
+  fs.rmSync(targetPackageDir, {
+    recursive: true,
+    force: true,
+  });
+  fs.cpSync(sourcePackageDir, targetPackageDir, {
+    recursive: true,
+    force: true,
+    dereference: true,
+  });
+}
+
+function copyBetterSqliteNativeBinding() {
+  const sourceBindingPath = path.join(
+    projectRoot,
+    "node_modules",
+    "better-sqlite3",
+    "build",
+    "Release",
+    "better_sqlite3.node",
+  );
+
+  if (!fs.existsSync(sourceBindingPath)) {
+    throw new Error("better-sqlite3 native binding bulunamadi. Once npm install calistirin.");
+  }
+
+  const targetBetterSqliteDir = path.join(
+    standaloneDir,
+    "node_modules",
+    "better-sqlite3",
+  );
+  const releaseTargetPath = path.join(
+    targetBetterSqliteDir,
+    "build",
+    "Release",
+    "better_sqlite3.node",
+  );
+  const bindingTargetPath = path.join(
+    targetBetterSqliteDir,
+    "lib",
+    "binding",
+    `node-v${process.versions.modules}-win32-x64`,
+    "better_sqlite3.node",
+  );
+
+  for (const targetPath of [releaseTargetPath, bindingTargetPath]) {
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+    fs.copyFileSync(sourceBindingPath, targetPath);
+  }
+}
+
 cleanForbiddenStandaloneEntries();
 copyStaticAssets();
 replaceLinksInTree(standaloneDir);
+copyRuntimePackageToStandalone("@prisma/client-runtime-utils");
+copyBetterSqliteNativeBinding();

@@ -26,6 +26,14 @@ Packaged Node runtime:
 - Bundled runtime bulunamazsa sistem `node.exe` fallback olarak denenir.
 - Node runtime hic bulunamazsa uygulama sessiz kapanmaz; hata `AppData/Roaming/MuhasebeTakip/logs/startup.log` dosyasina yazilir ve Turkce hata ekrani gosterilir.
 
+Packaged Python / MarkItDown runtime:
+
+- Portable ve installer build sirasinda `prepare:bundled-python`, yerel Python runtime'ini `build/python` altina hazirlar.
+- `scripts/electron-after-pack.js`, bu runtime'i packaged app icinde `resources/python` altina kopyalar.
+- Paketli uygulama AI fatura okuma icin once `resources/python/python.exe` runtime'ini kullanir.
+- Bundled Python bulunamazsa sistem `py` / `python` fallback olarak denenir ve System Status uyari gosterir.
+- `build/python`, `dist/` ve packaged ciktidir; Git'e alinmaz.
+
 Notlar:
 
 - Electron sadece kendi baslattigi Next.js server process'ini kapatir.

@@ -20,11 +20,15 @@ import {
   formatBackupReminderDate,
   getBackupReminderStatus,
 } from "@/lib/backup-reminder-utils";
+import { getDatabaseBackupInfo, getUploadsBackupInfo } from "@/lib/backup-utils";
 import { getDesktopBootstrapStatus } from "@/lib/desktop-bootstrap-utils";
 import { getDesktopMigrationDryRun } from "@/lib/desktop-migration-dry-run-utils";
 import { getDesktopRuntimeSummary } from "@/lib/desktop-runtime-utils";
-import { getDatabaseBackupInfo, getUploadsBackupInfo } from "@/lib/backup-utils";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
+import {
+  resolvePythonRuntime,
+  type PythonRuntimeStatus,
+} from "@/lib/python-runtime-utils";
 import { isLocalPinConfigured } from "@/lib/security-utils";
 
 export type SystemStatusLevel = "healthy" | "warning" | "error" | "unknown";
@@ -59,29 +63,26 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
   const uploads = getUploadsBackupInfo();
   const restoreBackupsPath = getRestoreBackupsDir();
   const desktopChecks = getDesktopPreparationChecks();
+  const desktopMode = isDesktopMode();
 
-  const [
-    onboardingCompleted,
-    pinConfigured,
-    backupReminder,
-    pythonStatus,
-  ] = await Promise.all([
-    isOnboardingCompleted(),
-    isLocalPinConfigured(),
-    getBackupReminderStatus(),
-    checkPythonCommand(),
-  ]);
+  const [onboardingCompleted, pinConfigured, backupReminder, pythonStatus] =
+    await Promise.all([
+      isOnboardingCompleted(),
+      isLocalPinConfigured(),
+      getBackupReminderStatus(),
+      checkPythonCommand(),
+    ]);
 
   const markItDownStatus = await checkMarkItDownWorker(pythonStatus);
   const checks: SystemStatusCheck[] = [
     {
       id: "onboarding",
-      title: "İlk kurulum",
+      title: "Ilk kurulum",
       status: onboardingCompleted ? "healthy" : "warning",
-      label: onboardingCompleted ? "Tamamlandı" : "Tamamlanmadı",
+      label: onboardingCompleted ? "Tamamlandi" : "Tamamlanmadi",
       description: onboardingCompleted
-        ? "İlk kurulum sihirbazı tamamlanmış görünüyor."
-        : "İlk kurulum tamamlanmadan bazı ekranlar kullanıma hazır olmayabilir.",
+        ? "Ilk kurulum sihirbazi tamamlanmis gorunuyor."
+        : "Ilk kurulum tamamlanmadan bazi ekranlar kullanima hazir olmayabilir.",
     },
     {
       id: "pin",
@@ -90,16 +91,16 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
       label: pinConfigured ? "Aktif" : "Pasif",
       description: pinConfigured
         ? "Uygulama local PIN ile korunuyor."
-        : "PIN belirlenmediği için uygulama bu bilgisayarda doğrudan açılabilir.",
-      suggestion: pinConfigured ? undefined : "Güvenlik için PIN belirleyin.",
+        : "PIN belirlenmedigi icin uygulama bu bilgisayarda dogrudan acilabilir.",
+      suggestion: pinConfigured ? undefined : "Guvenlik icin PIN belirleyin.",
     },
     {
       id: "backup-reminder",
-      title: "Yedek hatırlatma",
+      title: "Yedek hatirlatma",
       status: backupReminder.tone === "warning" ? "warning" : "healthy",
-      label: backupReminder.enabled ? `${backupReminder.intervalDays} gün` : "Kapalı",
+      label: backupReminder.enabled ? `${backupReminder.intervalDays} gun` : "Kapali",
       description: backupReminder.message,
-      suggestion: backupReminder.isDue ? "Tam yedek almanız önerilir." : undefined,
+      suggestion: backupReminder.isDue ? "Tam yedek almaniz onerilir." : undefined,
     },
     {
       id: "last-backup",
@@ -108,53 +109,70 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
       label: formatBackupReminderDate(backupReminder.lastFullBackupAt),
       description:
         backupReminder.daysSinceLastBackup === null
-          ? "Henüz kayıtlı tam yedek tarihi yok."
-          : `Son tam yedek üzerinden ${backupReminder.daysSinceLastBackup} gün geçti.`,
+          ? "Henuz kayitli tam yedek tarihi yok."
+          : `Son tam yedek uzerinden ${backupReminder.daysSinceLastBackup} gun gecti.`,
       suggestion: backupReminder.lastFullBackupAt
         ? undefined
-        : "Tam yedek almanız önerilir.",
+        : "Tam yedek almaniz onerilir.",
     },
     {
       id: "database-file",
-      title: "Veritabanı dosyası",
+      title: "Veritabani dosyasi",
       status: database.exists ? "healthy" : "error",
       label: database.exists ? "Var" : "Yok",
       description: database.exists
-        ? "SQLite veritabanı dosyası mevcut."
-        : "SQLite veritabanı dosyası bulunamadı.",
+        ? "SQLite veritabani dosyasi mevcut."
+        : "SQLite veritabani dosyasi bulunamadi.",
       suggestion: database.exists
         ? undefined
-        : "Veritabanı bulunamadı, migration kontrol edilmeli.",
+        : "Veritabani bulunamadi, migration kontrol edilmeli.",
     },
     {
       id: "uploads-folder",
-      title: "Upload klasörü",
+      title: "Upload klasoru",
       status: uploads.exists ? "healthy" : "warning",
       label: uploads.exists ? "Var" : "Yok",
       description: uploads.exists
-        ? "Upload klasörü mevcut."
-        : "Upload klasörü henüz oluşmamış.",
-      suggestion: uploads.exists ? undefined : "Upload klasörü oluşturulmalı.",
+        ? "Upload klasoru mevcut."
+        : "Upload klasoru henuz olusmamis.",
+      suggestion: uploads.exists ? undefined : "Upload klasoru olusturulmali.",
     },
     {
       id: "restore-backups-folder",
-      title: "Restore güvenlik yedeği klasörü",
+      title: "Restore guvenlik yedegi klasoru",
       status: existsSync(restoreBackupsPath) ? "healthy" : "unknown",
-      label: existsSync(restoreBackupsPath) ? "Var" : "Henüz yok",
+      label: existsSync(restoreBackupsPath) ? "Var" : "Henuz yok",
       description: existsSync(restoreBackupsPath)
-        ? "Restore öncesi güvenlik yedeği klasörü mevcut."
-        : "Henüz restore işlemi yapılmadıysa bu klasör oluşmamış olabilir.",
+        ? "Restore oncesi guvenlik yedegi klasoru mevcut."
+        : "Henuz restore islemi yapilmadiysa bu klasor olusmamis olabilir.",
     },
     ...desktopChecks,
+    {
+      id: "bundled-python",
+      title: "Paketli Python",
+      status: pythonStatus.bundledAvailable
+        ? "healthy"
+        : desktopMode
+          ? "warning"
+          : "unknown",
+      label: pythonStatus.bundledAvailable ? "Var" : "Yok",
+      description: pythonStatus.bundledAvailable
+        ? "Packaged Windows uygulamasi icin paketli Python runtime bulundu."
+        : "Paketli Python runtime bulunamadi; normal web modda sistem Python fallback kullanilabilir.",
+      suggestion:
+        desktopMode && !pythonStatus.bundledAvailable
+          ? "Packaged build icin prepare:bundled-python komutu calistirilmali."
+          : undefined,
+    },
     {
       id: "python",
       title: "Python",
       status: pythonStatus.ok ? "healthy" : "warning",
-      label: pythonStatus.ok ? "Çalışıyor" : "Bulunamadı",
+      label: pythonStatus.ok ? "Calisiyor" : "Bulunamadi",
       description: pythonStatus.ok
-        ? `Python komutu çalışıyor: ${pythonStatus.output}`
-        : "Python bulunamadı. MarkItDown ile fatura metni çıkarma çalışmayabilir.",
-      suggestion: pythonStatus.ok ? undefined : "python-worker kurulumu yapılmalı.",
+        ? `${pythonStatus.label} calisiyor: ${pythonStatus.version}`
+        : "Python bulunamadi. MarkItDown ile fatura metni cikarma calismayabilir.",
+      suggestion: pythonStatus.ok ? undefined : "python-worker kurulumu yapilmali.",
     },
     markItDownStatus,
   ];
@@ -334,30 +352,12 @@ function formatDesktopMigrationAction(
   return "Mevcut desktop DB kullanilmali";
 }
 
-async function checkPythonCommand(): Promise<CommandResult> {
-  const configuredCommand = process.env.MARKITDOWN_PYTHON;
-  const candidates = [
-    ...(configuredCommand ? [configuredCommand] : []),
-    "py",
-    "python",
-  ];
-
-  for (const command of Array.from(new Set(candidates))) {
-    const result = await runCommand(command, ["--version"], 5_000);
-
-    if (result.ok) {
-      return result;
-    }
-  }
-
-  return {
-    ok: false,
-    error: "Python komutu bulunamadı.",
-  };
+async function checkPythonCommand(): Promise<PythonRuntimeStatus> {
+  return resolvePythonRuntime();
 }
 
 async function checkMarkItDownWorker(
-  pythonStatus: CommandResult,
+  pythonStatus: PythonRuntimeStatus,
 ): Promise<SystemStatusCheck> {
   if (!pythonStatus.ok) {
     return {
@@ -366,8 +366,8 @@ async function checkMarkItDownWorker(
       status: "warning",
       label: "Kontrol edilemedi",
       description:
-        "Python bulunamadığı için MarkItDown worker testi çalıştırılamadı.",
-      suggestion: "python-worker kurulumu yapılmalı.",
+        "Python bulunamadigi icin MarkItDown worker testi calistirilamadi.",
+      suggestion: "python-worker kurulumu yapilmali.",
     };
   }
 
@@ -379,8 +379,8 @@ async function checkMarkItDownWorker(
       title: "MarkItDown worker",
       status: "error",
       label: "Worker yok",
-      description: "MarkItDown worker scripti bulunamadı.",
-      suggestion: "python-worker klasörü ve extract_markdown.py dosyası kontrol edilmeli.",
+      description: "MarkItDown worker scripti bulunamadi.",
+      suggestion: "python-worker klasoru ve extract_markdown.py dosyasi kontrol edilmeli.",
     };
   }
 
@@ -395,8 +395,8 @@ async function checkMarkItDownWorker(
       id: "markitdown-worker",
       title: "MarkItDown worker",
       status: "healthy",
-      label: "Çalışıyor",
-      description: "MarkItDown worker güvenli test dosyasından metin çıkarabildi.",
+      label: "Calisiyor",
+      description: "MarkItDown worker guvenli test dosyasindan metin cikarabildi.",
     };
   }
 
@@ -406,11 +406,11 @@ async function checkMarkItDownWorker(
     id: "markitdown-worker",
     title: "MarkItDown worker",
     status: "warning",
-    label: "Çalışmıyor",
+    label: "Calismiyor",
     description: isMissingMarkItDownPackage(errorMessage)
-      ? "MarkItDown paketi bulunamadı. python-worker kurulumu yapılmalı."
-      : "MarkItDown worker çalıştırılamadı.",
-    suggestion: "python-worker klasöründe pip install -r requirements.txt çalıştırın.",
+      ? "MarkItDown paketi bulunamadi. python-worker kurulumu yapilmali."
+      : "MarkItDown worker calistirilamadi.",
+    suggestion: "python-worker klasorunde pip install -r requirements.txt calistirin.",
   };
 }
 
@@ -437,7 +437,7 @@ function runCommand(
           resolve({
             ok: false,
             command,
-            error: (stderr || error.message).trim(),
+            error: sanitizeCommandError(stderr || error.message),
           });
           return;
         }
@@ -450,6 +450,13 @@ function runCommand(
       },
     );
   });
+}
+
+function sanitizeCommandError(message: string) {
+  return message
+    .replace(/[A-Za-z]:\\[^\r\n]+/g, "[path]")
+    .replace(/file:[^\s]+/g, "file:[path]")
+    .slice(0, 800);
 }
 
 function isMissingMarkItDownPackage(error: string) {

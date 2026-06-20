@@ -62,6 +62,99 @@ function copyBundledNodeRuntime(context) {
   fs.copyFileSync(sourceNodePath, targetNodePath);
 }
 
+function copyBundledPythonRuntime(context) {
+  if (process.platform !== "win32") {
+    return;
+  }
+
+  const sourcePythonDir = path.join(context.packager.projectDir, "build", "python");
+  const sourcePythonPath = path.join(sourcePythonDir, "python.exe");
+  const targetPythonDir = path.join(context.appOutDir, "resources", "python");
+
+  if (!fs.existsSync(sourcePythonPath)) {
+    console.warn(
+      "Bundled Python runtime bulunamadi. Paket sistem Python fallback kullanabilir; prepare:bundled-python calistirin.",
+    );
+    return;
+  }
+
+  fs.rmSync(targetPythonDir, {
+    recursive: true,
+    force: true,
+  });
+  fs.cpSync(sourcePythonDir, targetPythonDir, {
+    recursive: true,
+    force: true,
+    dereference: true,
+  });
+}
+
+function copyBetterSqliteNativeBinding(context) {
+  const sourceBindingPath = path.join(
+    context.packager.projectDir,
+    "node_modules",
+    "better-sqlite3",
+    "build",
+    "Release",
+    "better_sqlite3.node",
+  );
+
+  if (!fs.existsSync(sourceBindingPath)) {
+    throw new Error("better-sqlite3 native binding bulunamadi. Once npm install calistirin.");
+  }
+
+  const targetBetterSqliteDir = path.join(
+    context.appOutDir,
+    "resources",
+    "standalone",
+    "node_modules",
+    "better-sqlite3",
+  );
+  const releaseTargetPath = path.join(
+    targetBetterSqliteDir,
+    "build",
+    "Release",
+    "better_sqlite3.node",
+  );
+  const bindingTargetPath = path.join(
+    targetBetterSqliteDir,
+    "lib",
+    "binding",
+    `node-v${process.versions.modules}-win32-x64`,
+    "better_sqlite3.node",
+  );
+
+  for (const targetPath of [releaseTargetPath, bindingTargetPath]) {
+    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+    fs.copyFileSync(sourceBindingPath, targetPath);
+  }
+}
+
+function copyRuntimePackageToStandalone(context, packageName) {
+  const sourcePackageDir = path.join(context.packager.projectDir, "node_modules", ...packageName.split("/"));
+  const targetPackageDir = path.join(
+    context.appOutDir,
+    "resources",
+    "standalone",
+    "node_modules",
+    ...packageName.split("/"),
+  );
+
+  if (!fs.existsSync(sourcePackageDir)) {
+    throw new Error(`${packageName} runtime paketi bulunamadi. Once npm install calistirin.`);
+  }
+
+  fs.rmSync(targetPackageDir, {
+    recursive: true,
+    force: true,
+  });
+  fs.cpSync(sourcePackageDir, targetPackageDir, {
+    recursive: true,
+    force: true,
+    dereference: true,
+  });
+}
+
 exports.default = async function afterPack(context) {
   const sourceStandaloneDir = path.join(context.packager.projectDir, ".next", "standalone");
   const targetStandaloneDir = path.join(context.appOutDir, "resources", "standalone");
@@ -82,6 +175,9 @@ exports.default = async function afterPack(context) {
   });
 
   removeForbiddenEntries(targetStandaloneDir);
+  copyRuntimePackageToStandalone(context, "@prisma/client-runtime-utils");
+  copyBetterSqliteNativeBinding(context);
   ensureElectronEntrypoint(context);
   copyBundledNodeRuntime(context);
+  copyBundledPythonRuntime(context);
 };
