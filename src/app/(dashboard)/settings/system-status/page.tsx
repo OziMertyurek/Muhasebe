@@ -16,6 +16,7 @@ import {
   type SystemStatusCheck,
   type SystemStatusLevel,
 } from "@/lib/system-status-utils";
+import { SupportToolsCard } from "@/components/settings/support-tools-card";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +134,8 @@ export default async function SystemStatusPage() {
           ))}
         </div>
       </section>
+
+      <SupportToolsCard />
 
       <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
         <div className="flex items-start gap-3">

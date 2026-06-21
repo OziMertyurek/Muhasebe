@@ -1,5 +1,18 @@
 # Release Notes
 
+## v2.0.2 - Taslak / Destek Araclari
+
+Bu taslak not, sonraki release icin desktop destek araclari hazirligini izler.
+
+### Planlananlar
+
+- System Status ekraninda Destek Araclari karti.
+- Veri klasorunu acma.
+- Log klasorunu acma.
+- Guvenli hata raporu disa aktarma.
+- Windows/macOS/Linux desktop veri klasoru standardiyla uyumlu destek akisi.
+- Hata raporunda `.env`, gercek `DATABASE_URL`, tam local path, upload/fatura dosyasi, `dev.db` ve backup ZIP iceriginin yer almamasi.
+
 ## v2.0.1 - Bundled Python / MarkItDown
 
 Bu patch release, Windows packaged uygulama icinde MarkItDown metin cikarma icin paketli Python runtime destegini tamamlar.

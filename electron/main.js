@@ -31,7 +31,7 @@ if (!electron.app) {
   process.exit(1);
 }
 
-const { app, BrowserWindow, shell } = electron;
+const { app, BrowserWindow, shell, ipcMain } = electron;
 app.setName(APP_NAME);
 
 const APP_URL = process.env.ELECTRON_START_URL || "http://localhost:3000";
@@ -338,6 +338,180 @@ function wait(milliseconds) {
 
 function getDownloadsDirectory() {
   return path.join(app.getPath("downloads"), DOWNLOADS_FOLDER_NAME);
+}
+
+function getDesktopLogsDirectory() {
+  return path.join(DESKTOP_APP_DATA_DIR, "logs");
+}
+
+function getDiagnosticsReportPath() {
+  const downloadsDir = getDownloadsDirectory();
+  fs.mkdirSync(downloadsDir, { recursive: true });
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  return getUniqueDownloadPath(downloadsDir, `muhasebe-diagnostics-${timestamp}.txt`);
+}
+
+function readAppSettingValue(key) {
+  if (!fs.existsSync(DESKTOP_DATABASE_PATH)) {
+    return null;
+  }
+
+  let database = null;
+
+  try {
+    const Database = require("better-sqlite3");
+    database = new Database(DESKTOP_DATABASE_PATH, {
+      readonly: true,
+      fileMustExist: true,
+    });
+    const row = database
+      .prepare('SELECT value FROM "AppSetting" WHERE key = ? LIMIT 1')
+      .get(key);
+    return row?.value ?? null;
+  } catch {
+    return null;
+  } finally {
+    try {
+      database?.close();
+    } catch {
+      // Diagnostics must stay best-effort.
+    }
+  }
+}
+
+function runDiagnosticsCommand(command, args) {
+  if (!command || !fs.existsSync(command)) {
+    return "missing";
+  }
+
+  try {
+    const output = execFileSync(command, args, {
+      cwd: PROJECT_ROOT,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 10000,
+      windowsHide: true,
+    });
+
+    return output.trim().split(/\r?\n/)[0] || "ok";
+  } catch {
+    return "error";
+  }
+}
+
+function sanitizeDiagnosticsText(value) {
+  return String(value || "")
+    .replace(/[A-Za-z]:\\[^\r\n\t ]+/g, "[path]")
+    .replace(/\/Users\/[^\r\n\t ]+/g, "[path]")
+    .replace(/\/home\/[^\r\n\t ]+/g, "[path]")
+    .replace(/file:[^\s\r\n]+/g, "file:[masked]")
+    .replace(/DATABASE_URL=[^\s\r\n]+/g, "DATABASE_URL=[masked]")
+    .replace(/databaseUrl=[^\s\r\n]+/g, "databaseUrl=[masked]")
+    .replace(/appPath=[^\r\n]+/g, "appPath=[masked]")
+    .replace(/resourcesPath=[^\r\n]+/g, "resourcesPath=[masked]")
+    .replace(/userData=[^\r\n]+/g, "userData=[masked]")
+    .replace(/cwd=[^\r\n]+/g, "cwd=[masked]");
+}
+
+function readStartupLogSummary() {
+  if (!fs.existsSync(STARTUP_LOG_PATH)) {
+    return "startup.log bulunamadi.";
+  }
+
+  try {
+    const lines = fs.readFileSync(STARTUP_LOG_PATH, "utf8").split(/\r?\n/);
+    return sanitizeDiagnosticsText(lines.slice(-80).join("\n")).slice(0, 12000);
+  } catch {
+    return "startup.log okunamadi.";
+  }
+}
+
+function buildDiagnosticsReport() {
+  const onboardingCompleted =
+    readAppSettingValue("app.onboardingCompleted") === "true";
+  const pinConfigured = Boolean(readAppSettingValue("security.localPinHash"));
+  const lastFullBackupAt = readAppSettingValue("backup.lastFullBackupAt");
+  const backupReminderEnabled = readAppSettingValue("backup.reminderEnabled");
+  const backupReminderIntervalDays = readAppSettingValue(
+    "backup.reminderIntervalDays",
+  );
+  const bundledPythonAvailable = fs.existsSync(BUNDLED_PYTHON_PATH);
+  const bundledNodeAvailable = fs.existsSync(BUNDLED_NODE_PATH);
+  const pythonVersion = runDiagnosticsCommand(BUNDLED_PYTHON_PATH, ["--version"]);
+  const markItDownStatus = runDiagnosticsCommand(BUNDLED_PYTHON_PATH, [
+    "-c",
+    "import markitdown, markdownify; print('ok')",
+  ]);
+  const databaseUrlStatus = getServerDatabaseUrl() ? "[set]" : "[missing]";
+  const report = [
+    "Muhasebe Takip Diagnostics Report",
+    `Olusturulma zamani: ${new Date().toISOString()}`,
+    "",
+    "Uygulama",
+    `- Surum: ${app.getVersion()}`,
+    `- Platform: ${process.platform}`,
+    `- Mimari: ${process.arch}`,
+    `- Packaged: ${app.isPackaged ? "evet" : "hayir"}`,
+    `- Desktop mode: ${getServerAppMode() === "desktop" ? "aktif" : "pasif"}`,
+    `- DATABASE_URL: ${databaseUrlStatus}`,
+    "",
+    "Kurulum ve guvenlik",
+    `- Onboarding tamamlandi: ${onboardingCompleted ? "evet" : "hayir"}`,
+    `- PIN var: ${pinConfigured ? "evet" : "hayir"}`,
+    "",
+    "Dosya sistemi",
+    `- Desktop DB dosyasi var: ${fs.existsSync(DESKTOP_DATABASE_PATH) ? "evet" : "hayir"}`,
+    `- Upload klasoru var: ${fs.existsSync(path.join(DESKTOP_APP_DATA_DIR, "uploads")) ? "evet" : "hayir"}`,
+    `- Backup klasoru var: ${fs.existsSync(path.join(DESKTOP_APP_DATA_DIR, "backups")) ? "evet" : "hayir"}`,
+    `- Log klasoru var: ${fs.existsSync(getDesktopLogsDirectory()) ? "evet" : "hayir"}`,
+    "",
+    "Yedekleme",
+    `- Son tam yedek: ${lastFullBackupAt ? "[set]" : "[missing]"}`,
+    `- Hatirlatma aktif: ${backupReminderEnabled ?? "[missing]"}`,
+    `- Hatirlatma araligi gun: ${backupReminderIntervalDays ?? "[missing]"}`,
+    "",
+    "Runtime",
+    `- Bundled Node var: ${bundledNodeAvailable ? "evet" : "hayir"}`,
+    `- Bundled Python var: ${bundledPythonAvailable ? "evet" : "hayir"}`,
+    `- Bundled Python version: ${sanitizeDiagnosticsText(pythonVersion)}`,
+    `- MarkItDown durumu: ${markItDownStatus === "ok" ? "calisiyor" : markItDownStatus}`,
+    "",
+    "Startup log ozeti",
+    readStartupLogSummary(),
+    "",
+  ].join("\n");
+
+  return sanitizeDiagnosticsText(report);
+}
+
+async function openSupportFolder(folderPath) {
+  fs.mkdirSync(folderPath, { recursive: true });
+  const result = await shell.openPath(folderPath);
+
+  if (result) {
+    throw new Error("Klasor acilamadi.");
+  }
+
+  return { ok: true };
+}
+
+function registerSupportActions() {
+  ipcMain.handle("support:open-data-folder", async () =>
+    openSupportFolder(DESKTOP_APP_DATA_DIR),
+  );
+
+  ipcMain.handle("support:open-logs-folder", async () =>
+    openSupportFolder(getDesktopLogsDirectory()),
+  );
+
+  ipcMain.handle("support:export-diagnostics-report", async () => {
+    const reportPath = getDiagnosticsReportPath();
+    fs.writeFileSync(reportPath, buildDiagnosticsReport(), "utf8");
+    return {
+      ok: true,
+      fileName: path.basename(reportPath),
+    };
+  });
 }
 
 function sanitizeDownloadFileName(fileName) {
@@ -781,6 +955,8 @@ function cleanupNextServer() {
 
 process.on("uncaughtException", handleFatalStartupError);
 process.on("unhandledRejection", handleFatalStartupError);
+
+registerSupportActions();
 
 app.on("render-process-gone", (_event, _webContents, details) => {
   writeStartupLog("render-process-gone", {

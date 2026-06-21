@@ -190,6 +190,16 @@ Bu komut `dist/Muhasebe-Takip-Setup-2.0.1.exe` çıktısını üretir. Installer
 
 Desktop build çıktıları `dist/` altında oluşur ve Git'e alınmaz. Son kullanıcıya dosya vermeden önce `Ayarlar > Yedekleme > Tam Yedek İndir` akışı ile tam yedek alma alışkanlığı korunmalıdır.
 
+## Destek Araclari
+
+Desktop uygulama icinde `Ayarlar > Sistem Durumu` sayfasinda destek araclari bulunur:
+
+- Veri klasorunu ac
+- Log klasorunu ac
+- Hata raporu disa aktar
+
+Bu araclar sadece Electron masaustu uygulamasinda calisir. Normal tarayici/local web modunda butonlar pasif gorunur. Hata raporu Downloads/MuhasebeTakip altina guvenli bir TXT dosyasi olarak yazilir; `.env`, gercek `DATABASE_URL`, tam AppData/DB pathleri, kullanici upload dosyalari, fatura dosyalari ve backup ZIP dosyalari rapora eklenmez.
+
 ## Ortam Değişkenleri
 
 `.env.example` dosyasına göre local `.env` dosyası oluşturun.

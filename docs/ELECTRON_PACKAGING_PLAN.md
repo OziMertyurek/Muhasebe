@@ -441,6 +441,33 @@ Download smoke testte kontrol edilecekler:
 - En az bir CSV export ve bir PDF export diskte olusur.
 - Test indirme dosyalari Git adayina girmez ve test sonunda temizlenir.
 
+## Desktop Support Tools
+
+Packaged Electron uygulamasinda System Status ekranina destek araclari eklenmistir:
+
+- Veri klasorunu ac.
+- Log klasorunu ac.
+- Guvenli hata raporu disa aktar.
+
+Bu islemler Electron main process tarafinda guvenli IPC handler'lariyla calisir. Renderer tarafina Node.js API'si acilmaz; `nodeIntegration` kapali, `contextIsolation` acik ve sandbox davranisi korunur.
+
+Cross-platform hedef klasorler:
+
+- Windows: `%APPDATA%/MuhasebeTakip/`
+- macOS: `~/Library/Application Support/MuhasebeTakip/`
+- Linux/test fallback: `~/.local/share/MuhasebeTakip/`
+
+Hata raporu kullanicinin `Downloads/MuhasebeTakip` klasorune TXT olarak yazilir. Rapor yalnizca guvenli durum bilgileri icerir: surum, platform, desktop mode, onboarding/PIN durumu, DB/upload/log klasoru var/yok bilgisi, backup hatirlatma durumu, bundled Node/Python/MarkItDown durumu ve maskelenmis startup log ozeti.
+
+Rapora kesinlikle dahil edilmemesi gerekenler:
+
+- `.env` veya `.env.local` icerigi.
+- Gercek `DATABASE_URL`.
+- Tam DB/AppData pathleri.
+- Kullanici upload dosyalari veya gercek fatura dosyalari.
+- `prisma/dev.db`.
+- Backup ZIP dosyalari.
+
 ## Prisma Stratejisi
 
 Prisma icin dikkat edilmesi gerekenler:

@@ -274,6 +274,16 @@ Kontrol edilmesi gerekenler:
 - Ayni dosya adi varsa benzersiz ad uretiliyor mu?
 - ZIP icinde `.env`, `.next`, `node_modules`, app bundle veya cache dosyalari yok mu?
 
+## Support Tools
+
+macOS packaged uygulamada System Status ekranindaki destek araclari su davranisi korumalidir:
+
+- Veri klasorunu ac: `~/Library/Application Support/MuhasebeTakip/` klasorunu `shell.openPath` ile acar.
+- Log klasorunu ac: ayni root altindaki `logs/` klasorunu acar.
+- Hata raporu disa aktar: `~/Downloads/MuhasebeTakip/` altina guvenli TXT raporu yazar.
+
+Rapor `.env`, gercek `DATABASE_URL`, tam App Support/DB pathleri, upload dosyalari, gercek fatura dosyalari, `dev.db` veya backup ZIP icermez. Gatekeeper/sandbox ve macOS izin davranislari ilk fiziksel Mac smoke testinde ayrica dogrulanmalidir.
+
 ## Riskler
 
 - macOS App Support klasoru yanlis hesaplanirsa veri app bundle icine veya gecici klasore yazilabilir.
