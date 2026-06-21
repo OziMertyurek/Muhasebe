@@ -154,6 +154,14 @@ Ilk hedefler:
 - `mac` zip: hizli smoke test icin.
 - `dmg`: kullanici dagitimi icin.
 
+Durum notu:
+
+- electron-builder macOS target hazirligi eklendi.
+- `dist:mac`, `dist:mac:arm64` ve `dist:mac:x64` scriptleri Mac uzerinde calistirilmak uzere hazirlandi.
+- `dmg` ve `zip` targetlari tanimlandi.
+- `assets/icon.icns` macOS icon dosyasi olarak beklenir; henuz repo icinde yoksa PNG/ICO kaynagindan Mac uzerinde uretilmelidir.
+- Bu hazirlik macOS runtime bundle eklemez; bundled Node ve bundled Python icin macOS x64/arm64 runtime dosyalari sonraki asamada hazirlanmalidir.
+
 Mimari secenekleri:
 
 - Ayri x64 ve arm64 build:
@@ -171,6 +179,7 @@ macOS build icin onerilen ortam:
 - Apple Silicon Mac varsa once arm64 build.
 - Intel kullanicilar hedeflenecekse ayri x64 build.
 - Windows uzerinden macOS release build hedeflenmemeli; native dependency ve signing adimlari risklidir.
+- Code signing/notarization henuz yapilmadi; unsigned build Gatekeeper uyarisi verebilir.
 
 ## Signing ve Notarization Plani
 

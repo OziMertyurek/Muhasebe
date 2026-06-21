@@ -38,6 +38,26 @@ Her platformda ic yapi aynidir: `database/dev.db`, `uploads/`, `restore-backups/
 
 Normal web/local modda mevcut davranis degismez; DB `prisma/dev.db`, upload dosyalari `storage/uploads/` ve restore backup dosyalari `storage/restore-backups/` altinda kalir.
 
+## macOS Build Config Hazirligi
+
+Windows build akisi aktif kalir:
+
+- `dist:portable`
+- `dist:installer`
+- `dist:win`
+
+macOS build scriptleri Mac uzerinde calistirilmak uzere hazirlanmistir:
+
+- `dist:mac`
+- `dist:mac:arm64`
+- `dist:mac:x64`
+
+macOS electron-builder targetlari `dmg` ve `zip` olarak tanimlanmistir. Apple Silicon icin `arm64`, Intel Mac icin `x64` ayri test edilmelidir.
+
+`assets/icon.icns` macOS icon dosyasi olarak beklenir. Repo icinde henuz `icon.icns` yoksa mevcut PNG/ICO kaynagindan Mac uzerinde uretilmeli ve sonraki asamada eklenmelidir.
+
+macOS bundled Node ve bundled Python runtime dosyalari bu asamada eklenmedi. Windows `node.exe` ve Windows Python runtime macOS'ta kullanilamaz; macOS runtime bundle sonraki teknik asamadir.
+
 ## Mevcut Production Yapisi Paketlenince Calisir Mi?
 
 Bugunku `electron:prod` script'i su mantiga dayanir:
