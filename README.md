@@ -46,6 +46,8 @@ Muhasebe-Takip-v2.x.x-macOS-x64.dmg
 ```
 
 Apple Silicon Mac icin `arm64`, Intel Mac icin `x64` dosyasi indirilmelidir.
+
+macOS build denemeleri GitHub Actions uzerinden manuel workflow ile yapilir. Bu denemeler henuz macOS release yayinlandigi anlamina gelmez; DMG/ZIP ciktilari once artifact olarak dogrulanir.
 ## Özellikler
 
 - Dashboard gerçek veri özetleri

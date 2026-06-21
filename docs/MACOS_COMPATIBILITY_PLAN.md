@@ -195,6 +195,43 @@ macOS build icin onerilen ortam:
 - Windows uzerinden macOS release build hedeflenmemeli; native dependency ve signing adimlari risklidir.
 - Code signing/notarization henuz yapilmadi; unsigned build Gatekeeper uyarisi verebilir.
 
+## GitHub Actions macOS Build Denemesi
+
+Manuel calistirilabilir GitHub Actions workflow'u hazirlandi:
+
+```text
+.github/workflows/macos-build.yml
+```
+
+Workflow `workflow_dispatch` ile elle tetiklenir ve release yayinlamaz. Amaci sadece macOS runner uzerinde build denemesi yapmak ve ciktilari artifact olarak saklamaktir.
+
+Calisan kontroller:
+
+- `npm ci`
+- `npm run prisma:generate`
+- `npm run lint`
+- `npm run build`
+- `npm run dist:mac:arm64`
+- `npm run dist:mac:x64`
+
+Runner hedefleri:
+
+- `arm64`: `macos-26`
+- `x64`: `macos-26-intel`
+
+Artifact adlari:
+
+- `macos-arm64-build`
+- `macos-x64-build`
+
+Signing ve notarization bu asamada kapali tutulur:
+
+```text
+CSC_IDENTITY_AUTO_DISCOVERY=false
+```
+
+Workflow `.env`, local DB, storage veya kullanici verisi kullanmaz. DMG/ZIP ciktilari sadece Actions artifact olarak saklanir; GitHub Release asset'i olusturulmaz ve tag publish yapilmaz.
+
 ## Signing ve Notarization Plani
 
 macOS dagitiminda en buyuk dagitim riski Gatekeeper'dir.
