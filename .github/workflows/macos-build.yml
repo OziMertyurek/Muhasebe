@@ -66,7 +66,7 @@ jobs:
         run: npm run build
 
       - name: Build macOS ${{ matrix.arch }} package
-        run: npm run ${{ matrix.build_script }}
+        run: npm run ${{ matrix.build_script }} -- --publish never
 
       - name: Upload macOS artifacts
         uses: actions/upload-artifact@v4
