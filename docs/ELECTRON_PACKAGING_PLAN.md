@@ -54,9 +54,38 @@ macOS build scriptleri Mac uzerinde calistirilmak uzere hazirlanmistir:
 
 macOS electron-builder targetlari `dmg` ve `zip` olarak tanimlanmistir. Apple Silicon icin `arm64`, Intel Mac icin `x64` ayri test edilmelidir.
 
-`assets/icon.icns` macOS icon dosyasi olarak beklenir. Repo icinde henuz `icon.icns` yoksa mevcut PNG/ICO kaynagindan Mac uzerinde uretilmeli ve sonraki asamada eklenmelidir.
+`assets/icon.icns` macOS icon dosyasi olarak eklendi. DMG/ZIP build sirasinda bu dosya kullanilacaktir.
 
 macOS bundled Node ve bundled Python runtime dosyalari bu asamada eklenmedi. Windows `node.exe` ve Windows Python runtime macOS'ta kullanilamaz; macOS runtime bundle sonraki teknik asamadir.
+
+## Bundled Runtime Path Standardi
+
+Windows paketli runtime mevcut davranisini korur:
+
+```text
+resources/node/node.exe
+resources/python/python.exe
+```
+
+macOS icin beklenen runtime klasorleri:
+
+```text
+resources/node/darwin-arm64/bin/node
+resources/node/darwin-x64/bin/node
+resources/python/darwin-arm64/bin/python3
+resources/python/darwin-x64/bin/python3
+```
+
+Linux/test fallback icin ayni model kullanilir:
+
+```text
+resources/node/linux-x64/bin/node
+resources/python/linux-x64/bin/python3
+```
+
+Packaged Electron once platform/arch uyumlu bundled runtime'i arar. Bulamazsa sistem runtime fallback denenir; Node hic bulunamazsa Turkce hata ekrani gosterilir. UI'da tam path, `DATABASE_URL` veya `.env` icerigi gosterilmez.
+
+`scripts/electron-after-pack.js` Windows buildlerinde Windows runtime'i, macOS buildlerinde hedef arch'e uygun `darwin-arm64` veya `darwin-x64` runtime klasorunu kullanacak sekilde hazirlanmistir. macOS runtime dosyalari henuz bu Windows makinede uretilmez; Mac uzerinde hazirlanip test edilmelidir.
 
 ## Mevcut Production Yapisi Paketlenince Calisir Mi?
 
@@ -388,7 +417,8 @@ Electron desktop paketlerinde ikon kaynagi `assets/icon.ico` dosyasidir:
 - electron-builder `icon` ve Windows `win.icon` ayarlari ayni dosyayi kullanir.
 - Portable exe, NSIS setup installer, masaustu kisayolu ve Start Menu kisayolu bu ikonu kullanir.
 - `assets/icon.png` yalnizca kaynak/preview dosyasidir.
-- Gercek marka ikonu hazirlandiginda `assets/icon.ico` ve `assets/icon.png` ayni dosya adlariyla degistirilebilir.
+- macOS build icin electron-builder `mac.icon` ayari `assets/icon.icns` dosyasini kullanir.
+- Gercek marka ikonu hazirlandiginda `assets/icon.ico`, `assets/icon.png` ve `assets/icon.icns` ayni dosya adlariyla degistirilebilir.
 
 ## Packaged Download Handling
 

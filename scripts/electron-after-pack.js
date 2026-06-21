@@ -9,6 +9,49 @@ const forbiddenEntries = [
   path.join("prisma", "dev.db-journal"),
 ];
 
+function getTargetPlatform(context) {
+  return context.electronPlatformName || process.platform;
+}
+
+function getTargetArch(context) {
+  const arch = context.arch;
+
+  if (typeof arch === "string") {
+    return arch;
+  }
+
+  const archMap = new Map([
+    [0, "ia32"],
+    [1, "x64"],
+    [2, "armv7l"],
+    [3, "arm64"],
+  ]);
+
+  return archMap.get(arch) || process.arch;
+}
+
+function getPlatformArchKey(context) {
+  return `${getTargetPlatform(context)}-${getTargetArch(context)}`;
+}
+
+function getResourcesDir(context) {
+  const platform = getTargetPlatform(context);
+
+  if (platform !== "darwin") {
+    return path.join(context.appOutDir, "resources");
+  }
+
+  const appInfo = context.packager.appInfo;
+  const appFileName = appInfo?.productFilename || appInfo?.productName || "Muhasebe Takip";
+  const candidates = [
+    path.join(context.appOutDir, `${appFileName}.app`, "Contents", "Resources"),
+    path.join(context.appOutDir, "Muhasebe Takip.app", "Contents", "Resources"),
+    path.join(context.appOutDir, "Contents", "Resources"),
+  ];
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) || candidates[0];
+}
+
 function removeForbiddenEntries(targetDir) {
   for (const entry of forbiddenEntries) {
     fs.rmSync(path.join(targetDir, entry), {
@@ -20,7 +63,7 @@ function removeForbiddenEntries(targetDir) {
 
 function ensureElectronEntrypoint(context) {
   const sourcePackagePath = path.join(context.packager.projectDir, "package.json");
-  const targetPackagePath = path.join(context.appOutDir, "resources", "app", "package.json");
+  const targetPackagePath = path.join(getResourcesDir(context), "app", "package.json");
 
   if (!fs.existsSync(targetPackagePath)) {
     throw new Error("Packaged app package.json bulunamadi.");
@@ -40,16 +83,27 @@ function ensureElectronEntrypoint(context) {
 }
 
 function copyBundledNodeRuntime(context) {
-  if (process.platform !== "win32") {
-    return;
-  }
-
-  const sourceNodePath = process.execPath;
-  const targetNodeDir = path.join(context.appOutDir, "resources", "node");
-  const targetNodePath = path.join(targetNodeDir, "node.exe");
+  const targetPlatform = getTargetPlatform(context);
+  const targetArch = getTargetArch(context);
+  const platformArchKey = getPlatformArchKey(context);
+  const envSourceKey = `NODE_BUNDLE_SOURCE_${platformArchKey.toUpperCase().replace(/[^A-Z0-9]/g, "_")}`;
+  const configuredSource = process.env[envSourceKey] || process.env.NODE_BUNDLE_SOURCE;
+  const sourceNodePath =
+    configuredSource ||
+    (process.platform === targetPlatform && process.arch === targetArch
+      ? process.execPath
+      : "");
+  const targetNodeDir =
+    targetPlatform === "win32"
+      ? path.join(getResourcesDir(context), "node")
+      : path.join(getResourcesDir(context), "node", platformArchKey, "bin");
+  const targetNodePath = path.join(targetNodeDir, targetPlatform === "win32" ? "node.exe" : "node");
 
   if (!fs.existsSync(sourceNodePath)) {
-    throw new Error("Node runtime bulunamadi. Portable paket icin node.exe kopyalanamadi.");
+    console.warn(
+      `Bundled Node runtime bulunamadi (${platformArchKey}). Paket sistem Node fallback kullanabilir; ${envSourceKey} ayarlayin.`,
+    );
+    return;
   }
 
   fs.rmSync(targetNodeDir, {
@@ -63,17 +117,24 @@ function copyBundledNodeRuntime(context) {
 }
 
 function copyBundledPythonRuntime(context) {
-  if (process.platform !== "win32") {
-    return;
-  }
-
-  const sourcePythonDir = path.join(context.packager.projectDir, "build", "python");
-  const sourcePythonPath = path.join(sourcePythonDir, "python.exe");
-  const targetPythonDir = path.join(context.appOutDir, "resources", "python");
+  const targetPlatform = getTargetPlatform(context);
+  const platformArchKey = getPlatformArchKey(context);
+  const sourcePythonDir =
+    targetPlatform === "win32"
+      ? path.join(context.packager.projectDir, "build", "python")
+      : path.join(context.packager.projectDir, "build", "python", platformArchKey);
+  const sourcePythonPath = path.join(
+    sourcePythonDir,
+    ...(targetPlatform === "win32" ? ["python.exe"] : ["bin", "python3"]),
+  );
+  const targetPythonDir =
+    targetPlatform === "win32"
+      ? path.join(getResourcesDir(context), "python")
+      : path.join(getResourcesDir(context), "python", platformArchKey);
 
   if (!fs.existsSync(sourcePythonPath)) {
     console.warn(
-      "Bundled Python runtime bulunamadi. Paket sistem Python fallback kullanabilir; prepare:bundled-python calistirin.",
+      `Bundled Python runtime bulunamadi (${platformArchKey}). Paket sistem Python fallback kullanabilir; prepare:bundled-python calistirin.`,
     );
     return;
   }
@@ -104,8 +165,7 @@ function copyBetterSqliteNativeBinding(context) {
   }
 
   const targetBetterSqliteDir = path.join(
-    context.appOutDir,
-    "resources",
+    getResourcesDir(context),
     "standalone",
     "node_modules",
     "better-sqlite3",
@@ -120,7 +180,7 @@ function copyBetterSqliteNativeBinding(context) {
     targetBetterSqliteDir,
     "lib",
     "binding",
-    `node-v${process.versions.modules}-win32-x64`,
+    `node-v${process.versions.modules}-${getPlatformArchKey(context)}`,
     "better_sqlite3.node",
   );
 
@@ -133,8 +193,7 @@ function copyBetterSqliteNativeBinding(context) {
 function copyRuntimePackageToStandalone(context, packageName) {
   const sourcePackageDir = path.join(context.packager.projectDir, "node_modules", ...packageName.split("/"));
   const targetPackageDir = path.join(
-    context.appOutDir,
-    "resources",
+    getResourcesDir(context),
     "standalone",
     "node_modules",
     ...packageName.split("/"),
@@ -157,7 +216,7 @@ function copyRuntimePackageToStandalone(context, packageName) {
 
 exports.default = async function afterPack(context) {
   const sourceStandaloneDir = path.join(context.packager.projectDir, ".next", "standalone");
-  const targetStandaloneDir = path.join(context.appOutDir, "resources", "standalone");
+  const targetStandaloneDir = path.join(getResourcesDir(context), "standalone");
 
   if (!fs.existsSync(sourceStandaloneDir)) {
     throw new Error("Standalone build bulunamadi. Once npm run build calistirin.");

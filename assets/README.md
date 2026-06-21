@@ -4,5 +4,6 @@ Bu klasor Electron desktop paketleri icin uygulama ikonlarini icerir.
 
 - `icon.ico`: Windows exe, installer, masaustu ve Start Menu kisayol ikonu.
 - `icon.png`: Kaynak/preview ikon dosyasi.
+- `icon.icns`: macOS app, DMG/ZIP ve Dock ikonu.
 
-Bu ikon gecici ama temiz bir `MT` uygulama ikonudur. Final marka ikonu hazirlandiginda ayni dosya adlari korunarak degistirilebilir.
+`icon.icns`, `icon.png` dosyasindan uretilmistir. Mevcut kaynak 256x256 oldugu icin macOS icns icindeki buyuk boyutlar upscale edilmis olabilir. Final marka ikonu hazirlandiginda `icon.ico`, `icon.png` ve `icon.icns` ayni dosya adlari korunarak degistirilebilir.

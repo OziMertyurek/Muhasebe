@@ -59,8 +59,8 @@ const DESKTOP_MIGRATIONS_PATH = resolveFirstExistingPath([
   path.join(PROJECT_ROOT, "prisma", "migrations"),
   path.join(process.resourcesPath || "", "app", "prisma", "migrations"),
 ]);
-const BUNDLED_NODE_PATH = path.join(process.resourcesPath || PROJECT_ROOT, "node", "node.exe");
-const BUNDLED_PYTHON_PATH = path.join(process.resourcesPath || PROJECT_ROOT, "python", "python.exe");
+const BUNDLED_NODE_PATH = resolveFirstExistingPath(getBundledNodeCandidates());
+const BUNDLED_PYTHON_PATH = resolveFirstExistingPath(getBundledPythonCandidates());
 const STARTUP_LOG_PATH = path.join(DESKTOP_APP_DATA_DIR, "logs", "startup.log");
 const SERVER_CHECK_TIMEOUT_MS = 2500;
 const SERVER_START_TIMEOUT_MS = 60000;
@@ -77,6 +77,44 @@ let desktopRuntimePrepared = false;
 
 function resolveFirstExistingPath(candidates) {
   return candidates.find((candidate) => candidate && fs.existsSync(candidate)) || candidates[0];
+}
+
+function getPlatformArchKey() {
+  return `${process.platform}-${process.arch}`;
+}
+
+function getBundledNodeCandidates() {
+  const resourcesRoot = process.resourcesPath || PROJECT_ROOT;
+
+  if (process.platform === "win32") {
+    return [
+      path.join(resourcesRoot, "node", "node.exe"),
+      path.join(resourcesRoot, "node", "win32-x64", "node.exe"),
+    ];
+  }
+
+  if (process.platform === "darwin") {
+    return [path.join(resourcesRoot, "node", getPlatformArchKey(), "bin", "node")];
+  }
+
+  return [path.join(resourcesRoot, "node", getPlatformArchKey(), "bin", "node")];
+}
+
+function getBundledPythonCandidates() {
+  const resourcesRoot = process.resourcesPath || PROJECT_ROOT;
+
+  if (process.platform === "win32") {
+    return [
+      path.join(resourcesRoot, "python", "python.exe"),
+      path.join(resourcesRoot, "python", "win32-x64", "python.exe"),
+    ];
+  }
+
+  if (process.platform === "darwin") {
+    return [path.join(resourcesRoot, "python", getPlatformArchKey(), "bin", "python3")];
+  }
+
+  return [path.join(resourcesRoot, "python", getPlatformArchKey(), "bin", "python3")];
 }
 
 function redactValue(value) {
@@ -125,11 +163,15 @@ function buildChildProcessEnv(overrides = {}) {
     env.MARKITDOWN_PYTHON = BUNDLED_PYTHON_PATH;
   }
 
+  if (app.isPackaged && fs.existsSync(BUNDLED_NODE_PATH)) {
+    env.BUNDLED_NODE_PATH = BUNDLED_NODE_PATH;
+  }
+
   return env;
 }
 
 function getNodeRuntimeCommand() {
-  if (app.isPackaged && process.platform === "win32" && fs.existsSync(BUNDLED_NODE_PATH)) {
+  if (app.isPackaged && fs.existsSync(BUNDLED_NODE_PATH)) {
     return {
       command: BUNDLED_NODE_PATH,
       label: "bundled-node",
@@ -156,11 +198,14 @@ function logStartupSnapshot() {
     appPath: app.getAppPath(),
     resourcesPath: process.resourcesPath,
     userData: app.getPath("userData"),
+    platform: process.platform,
+    arch: process.arch,
     standaloneServerExists: fs.existsSync(STANDALONE_SERVER_PATH),
     bootstrapScriptExists: fs.existsSync(DESKTOP_BOOTSTRAP_SCRIPT_PATH),
     migrationsExists: fs.existsSync(DESKTOP_MIGRATIONS_PATH),
     bundledNodeExists: fs.existsSync(BUNDLED_NODE_PATH),
     bundledPythonExists: fs.existsSync(BUNDLED_PYTHON_PATH),
+    nodeRuntime: fs.existsSync(BUNDLED_NODE_PATH) ? "bundled" : "fallback",
     pythonRuntime: fs.existsSync(BUNDLED_PYTHON_PATH) ? "bundled" : "fallback",
     databaseUrl: redactValue(getServerDatabaseUrl()),
   });

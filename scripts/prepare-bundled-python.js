@@ -4,8 +4,29 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const projectDir = path.join(__dirname, "..");
-const targetDir = path.join(projectDir, "build", "python");
 const requirementsPath = path.join(projectDir, "python-worker", "requirements.txt");
+
+function getPlatformArchKey(platform = process.platform, arch = process.arch) {
+  return `${platform}-${arch}`;
+}
+
+function getTargetDir() {
+  if (process.platform === "win32") {
+    return path.join(projectDir, "build", "python");
+  }
+
+  return path.join(projectDir, "build", "python", getPlatformArchKey());
+}
+
+function getPythonExecutablePath(root) {
+  if (process.platform === "win32") {
+    return path.join(root, "python.exe");
+  }
+
+  return path.join(root, "bin", "python3");
+}
+
+const targetDir = getTargetDir();
 
 function runJson(command, args) {
   const output = execFileSync(command, args, {
@@ -30,18 +51,25 @@ function findPythonRuntime() {
   const configured = process.env.PYTHON_BUNDLE_SOURCE;
 
   if (configured) {
-    const executable = path.join(configured, "python.exe");
+    const configuredIsFile = fs.existsSync(configured) && fs.statSync(configured).isFile();
+    const executable = configuredIsFile ? configured : getPythonExecutablePath(configured);
     if (!fs.existsSync(executable)) {
-      throw new Error("PYTHON_BUNDLE_SOURCE icinde python.exe bulunamadi.");
+      throw new Error("PYTHON_BUNDLE_SOURCE icinde Python executable bulunamadi.");
     }
 
     return {
-      root: configured,
+      root: configuredIsFile
+        ? process.platform === "win32"
+          ? path.dirname(configured)
+          : path.dirname(path.dirname(configured))
+        : configured,
       executable,
     };
   }
 
-  for (const command of ["py", "python"]) {
+  const commands = process.platform === "win32" ? ["py", "python"] : ["python3", "python"];
+
+  for (const command of commands) {
     try {
       const result = runJson(command, ["-c", script]);
       return {
@@ -104,7 +132,10 @@ function copyFiltered(source, target) {
 }
 
 function verifyPreparedRuntime() {
-  const targetPython = path.join(targetDir, "python.exe");
+  const targetPython =
+    process.platform === "win32"
+      ? path.join(targetDir, "python.exe")
+      : path.join(targetDir, "bin", "python3");
   execFileSync(targetPython, ["--version"], {
     cwd: projectDir,
     stdio: "inherit",
@@ -124,4 +155,4 @@ fs.rmSync(targetDir, { recursive: true, force: true });
 copyFiltered(runtime.root, targetDir);
 verifyPreparedRuntime();
 
-console.log("Bundled Python runtime hazirlandi: build/python");
+console.log(`Bundled Python runtime hazirlandi: ${path.relative(projectDir, targetDir)}`);

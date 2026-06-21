@@ -26,6 +26,21 @@ Packaged Node runtime:
 - Bundled runtime bulunamazsa sistem `node.exe` fallback olarak denenir.
 - Node runtime hic bulunamazsa uygulama sessiz kapanmaz; hata `AppData/Roaming/MuhasebeTakip/logs/startup.log` dosyasina yazilir ve Turkce hata ekrani gosterilir.
 
+Runtime resolver onceligi:
+
+1. Platform/arch uyumlu bundled runtime
+2. Sistem runtime fallback
+3. Turkce hata/uyari
+
+Beklenen Node runtime pathleri:
+
+```text
+Windows: resources/node/node.exe
+macOS arm64: resources/node/darwin-arm64/bin/node
+macOS x64: resources/node/darwin-x64/bin/node
+Linux fallback: resources/node/linux-x64/bin/node
+```
+
 Packaged Python / MarkItDown runtime:
 
 - Portable ve installer build sirasinda `prepare:bundled-python`, yerel Python runtime'ini `build/python` altina hazirlar.
@@ -33,6 +48,17 @@ Packaged Python / MarkItDown runtime:
 - Paketli uygulama AI fatura okuma icin once `resources/python/python.exe` runtime'ini kullanir.
 - Bundled Python bulunamazsa sistem `py` / `python` fallback olarak denenir ve System Status uyari gosterir.
 - `build/python`, `dist/` ve packaged ciktidir; Git'e alinmaz.
+
+Beklenen Python runtime pathleri:
+
+```text
+Windows: resources/python/python.exe
+macOS arm64: resources/python/darwin-arm64/bin/python3
+macOS x64: resources/python/darwin-x64/bin/python3
+Linux fallback: resources/python/linux-x64/bin/python3
+```
+
+Windows `node.exe` ve Windows Python runtime macOS paketlerinde kullanilamaz. macOS arm64 ve x64 runtime dosyalari Mac uzerinde ayri hazirlanip test edilmelidir.
 
 Notlar:
 

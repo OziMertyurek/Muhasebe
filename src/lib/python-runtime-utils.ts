@@ -9,6 +9,7 @@ export type PythonRuntimeSource =
   | "configured"
   | "bundled"
   | "system-py"
+  | "system-python3"
   | "system-python";
 
 export type PythonRuntimeStatus =
@@ -37,22 +38,45 @@ type PythonRuntimeCandidate = {
 
 const pythonVersionTimeoutMs = 5_000;
 
+function getBundledPythonRelativePath(
+  platform = process.platform,
+  arch = process.arch,
+) {
+  if (platform === "win32") {
+    return join("python", "python.exe");
+  }
+
+  if (platform === "darwin") {
+    return join("python", `darwin-${arch}`, "bin", "python3");
+  }
+
+  return join("python", `linux-${arch}`, "bin", "python3");
+}
+
 export function getBundledPythonPath() {
   const projectRoot = getProjectRoot();
+  const bundledPythonRelativePath = getBundledPythonRelativePath();
   const candidates = [
     process.env.BUNDLED_PYTHON_PATH,
-    join(/* turbopackIgnore: true */ projectRoot, "..", "python", "python.exe"),
-    join(/* turbopackIgnore: true */ projectRoot, "build", "python", "python.exe"),
-    join(/* turbopackIgnore: true */ projectRoot, "dist", "bundled-python", "python.exe"),
+    join(/* turbopackIgnore: true */ projectRoot, "..", bundledPythonRelativePath),
+    join(/* turbopackIgnore: true */ projectRoot, "build", bundledPythonRelativePath),
+    join(/* turbopackIgnore: true */ projectRoot, "dist", "bundled-python", bundledPythonRelativePath),
   ].filter((candidate): candidate is string => Boolean(candidate));
 
-  return candidates.find((candidate) => existsSync(candidate)) ?? candidates[0] ?? "";
+  return (
+    candidates.find((candidate) => existsSync(/* turbopackIgnore: true */ candidate)) ??
+    candidates[0] ??
+    ""
+  );
 }
 
 export function isBundledPythonAvailable() {
   const bundledPythonPath = getBundledPythonPath();
 
-  return Boolean(bundledPythonPath && existsSync(bundledPythonPath));
+  return Boolean(
+    bundledPythonPath &&
+      existsSync(/* turbopackIgnore: true */ bundledPythonPath),
+  );
 }
 
 export async function resolvePythonRuntime(): Promise<PythonRuntimeStatus> {
@@ -60,7 +84,10 @@ export async function resolvePythonRuntime(): Promise<PythonRuntimeStatus> {
   const candidates = getPythonRuntimeCandidates();
 
   for (const candidate of candidates) {
-    if (isFileSystemCommand(candidate.command) && !existsSync(candidate.command)) {
+    if (
+      isFileSystemCommand(candidate.command) &&
+      !existsSync(/* turbopackIgnore: true */ candidate.command)
+    ) {
       continue;
     }
 
@@ -100,7 +127,10 @@ function getPythonRuntimeCandidates(): PythonRuntimeCandidate[] {
   }
 
   const bundledPythonPath = getBundledPythonPath();
-  if (bundledPythonPath && existsSync(bundledPythonPath)) {
+  if (
+    bundledPythonPath &&
+    existsSync(/* turbopackIgnore: true */ bundledPythonPath)
+  ) {
     candidates.push({
       command: bundledPythonPath,
       source: "bundled",
@@ -108,18 +138,33 @@ function getPythonRuntimeCandidates(): PythonRuntimeCandidate[] {
     });
   }
 
-  candidates.push(
-    {
-      command: "py",
-      source: "system-py",
-      label: "Sistem py launcher",
-    },
-    {
-      command: "python",
-      source: "system-python",
-      label: "Sistem Python",
-    },
-  );
+  if (process.platform === "win32") {
+    candidates.push(
+      {
+        command: "py",
+        source: "system-py",
+        label: "Sistem py launcher",
+      },
+      {
+        command: "python",
+        source: "system-python",
+        label: "Sistem Python",
+      },
+    );
+  } else {
+    candidates.push(
+      {
+        command: "python3",
+        source: "system-python3",
+        label: "Sistem Python 3",
+      },
+      {
+        command: "python",
+        source: "system-python",
+        label: "Sistem Python",
+      },
+    );
+  }
 
   const seen = new Set<string>();
   return candidates.filter((candidate) => {

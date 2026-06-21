@@ -6,6 +6,7 @@ const projectRoot = process.cwd();
 const standaloneDir = path.join(projectRoot, ".next", "standalone");
 const staticSourceDir = path.join(projectRoot, ".next", "static");
 const staticTargetDir = path.join(standaloneDir, ".next", "static");
+const nativePlatformArch = `${process.platform}-${process.arch}`;
 
 const forbiddenStandaloneEntries = [
   "dist",
@@ -119,7 +120,7 @@ function copyBetterSqliteNativeBinding() {
     targetBetterSqliteDir,
     "lib",
     "binding",
-    `node-v${process.versions.modules}-win32-x64`,
+    `node-v${process.versions.modules}-${nativePlatformArch}`,
     "better_sqlite3.node",
   );
 

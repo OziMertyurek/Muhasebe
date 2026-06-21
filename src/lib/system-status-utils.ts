@@ -24,6 +24,7 @@ import { getDatabaseBackupInfo, getUploadsBackupInfo } from "@/lib/backup-utils"
 import { getDesktopBootstrapStatus } from "@/lib/desktop-bootstrap-utils";
 import { getDesktopMigrationDryRun } from "@/lib/desktop-migration-dry-run-utils";
 import { getDesktopRuntimeSummary } from "@/lib/desktop-runtime-utils";
+import { getNodeRuntimeStatus } from "@/lib/node-runtime-utils";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
 import {
   resolvePythonRuntime,
@@ -64,6 +65,7 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
   const restoreBackupsPath = getRestoreBackupsDir();
   const desktopChecks = getDesktopPreparationChecks();
   const desktopMode = isDesktopMode();
+  const nodeRuntimeStatus = getNodeRuntimeStatus();
 
   const [onboardingCompleted, pinConfigured, backupReminder, pythonStatus] =
     await Promise.all([
@@ -148,6 +150,23 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
     },
     ...desktopChecks,
     {
+      id: "bundled-node",
+      title: "Paketli Node",
+      status: nodeRuntimeStatus.bundledAvailable
+        ? "healthy"
+        : desktopMode
+          ? "warning"
+          : "unknown",
+      label: nodeRuntimeStatus.bundledAvailable ? "Var" : "Yok",
+      description: nodeRuntimeStatus.bundledAvailable
+        ? `${formatDesktopPlatform(nodeRuntimeStatus.platform)} ${nodeRuntimeStatus.arch} icin paketli Node runtime bulundu.`
+        : "Paketli Node runtime bulunamadi; normal web modda sistem Node kullanilabilir.",
+      suggestion:
+        desktopMode && !nodeRuntimeStatus.bundledAvailable
+          ? "Packaged build icin platforma uygun bundled Node runtime hazirlanmali."
+          : undefined,
+    },
+    {
       id: "bundled-python",
       title: "Paketli Python",
       status: pythonStatus.bundledAvailable
@@ -157,7 +176,7 @@ export async function getSystemStatus(): Promise<SystemStatusSummary> {
           : "unknown",
       label: pythonStatus.bundledAvailable ? "Var" : "Yok",
       description: pythonStatus.bundledAvailable
-        ? "Packaged Windows uygulamasi icin paketli Python runtime bulundu."
+        ? "Packaged uygulama icin platforma uygun paketli Python runtime bulundu."
         : "Paketli Python runtime bulunamadi; normal web modda sistem Python fallback kullanilabilir.",
       suggestion:
         desktopMode && !pythonStatus.bundledAvailable

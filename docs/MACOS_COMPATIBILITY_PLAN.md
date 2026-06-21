@@ -100,10 +100,16 @@ Onerilen paket yapisi:
 
 ```text
 resources/
-  node/
-    darwin-x64/node
-    darwin-arm64/node
+  node/darwin-arm64/bin/node
+  node/darwin-x64/bin/node
 ```
+
+Durum notu:
+
+- Electron packaged runtime resolver macOS path standardini taniyacak sekilde hazirlandi.
+- Resolver onceligi: platform/arch uyumlu bundled Node, sonra sistem Node fallback, sonra Turkce hata ekrani.
+- Windows path standardi `resources/node/node.exe` olarak korunur.
+- macOS runtime binary'leri henuz bu Windows makinede uretilmedi; gercek test Mac uzerinde yapilmalidir.
 
 Ilk macOS POC icin tek mimari secilebilir. Gelistirme makinesi Apple Silicon ise once arm64 build denenmelidir.
 
@@ -122,11 +128,18 @@ Onerilen paket yapisi:
 
 ```text
 resources/
-  python/
-    darwin-x64/
-    darwin-arm64/
+  python/darwin-arm64/bin/python3
+  python/darwin-x64/bin/python3
   app/python-worker/
 ```
+
+Durum notu:
+
+- Python runtime resolver macOS path standardini taniyacak sekilde hazirlandi.
+- Resolver onceligi: `MARKITDOWN_PYTHON`, platform/arch uyumlu bundled Python, sonra sistem `python3`/`python` fallback.
+- Windows path standardi `resources/python/python.exe` olarak korunur.
+- `prepare:bundled-python` Mac uzerinde calistiginda `build/python/darwin-<arch>/` yapisini hazirlayacak sekilde genisletildi.
+- macOS MarkItDown runtime gercek testi Mac uzerinde yapilmalidir.
 
 Ilk POC icin sistem Python fallback korunabilir, ancak release hedefinde bundled Python oncelikli olmalidir.
 
@@ -159,7 +172,8 @@ Durum notu:
 - electron-builder macOS target hazirligi eklendi.
 - `dist:mac`, `dist:mac:arm64` ve `dist:mac:x64` scriptleri Mac uzerinde calistirilmak uzere hazirlandi.
 - `dmg` ve `zip` targetlari tanimlandi.
-- `assets/icon.icns` macOS icon dosyasi olarak beklenir; henuz repo icinde yoksa PNG/ICO kaynagindan Mac uzerinde uretilmelidir.
+- `assets/icon.icns` macOS icon dosyasi olarak eklendi; DMG/ZIP build sirasinda kullanilacaktir.
+- Mevcut `icon.icns`, `assets/icon.png` kaynagindan uretilmistir; final marka ikonu hazirlandiginda ayni dosya adiyla degistirilebilir.
 - Bu hazirlik macOS runtime bundle eklemez; bundled Node ve bundled Python icin macOS x64/arm64 runtime dosyalari sonraki asamada hazirlanmalidir.
 
 Mimari secenekleri:
