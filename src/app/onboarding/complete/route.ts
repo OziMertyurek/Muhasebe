@@ -14,11 +14,18 @@ import {
   getPinConfiguredCookieOptions,
   hashLocalPin,
   pinConfiguredCookieName,
+  requireLocalRequestOrigin,
   requireRequestLocalAuth,
   saveLocalPinHash,
 } from "@/lib/security-utils";
 
 export async function POST(request: Request) {
+  const localOriginResponse = requireLocalRequestOrigin(request);
+
+  if (localOriginResponse) {
+    return localOriginResponse;
+  }
+
   const existingPinHash = await getLocalPinHash();
 
   if (existingPinHash) {

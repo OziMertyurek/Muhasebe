@@ -21,6 +21,19 @@ const hashVersion = "scrypt-v1";
 const keyLength = 64;
 const sessionVersion = "session-v1";
 const sessionMaxAgeSeconds = 60 * 60 * 12;
+const maxFailedPinAttempts = 5;
+const pinLockoutMs = 5 * 60 * 1000;
+const localRequestBlockedMessage = "Bu istek yalnızca yerel uygulama üzerinden yapılabilir.";
+const pinLockoutMessage = "Çok fazla hatalı PIN denemesi yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.";
+
+type PinAttemptState = {
+  failedAttempts: number;
+  lockedUntil: number;
+};
+
+type PinAttemptStore = {
+  __muhasebePinAttempts?: PinAttemptState;
+};
 
 const authCookieOptions = {
   httpOnly: true,
@@ -76,6 +89,58 @@ export async function verifyLocalPin(pin: string, storedHash: string) {
 
 export async function saveLocalPinHash(hash: string) {
   await upsertAppSetting(pinHashSettingKey, hash);
+}
+
+function getPinAttemptState() {
+  const store = globalThis as typeof globalThis & PinAttemptStore;
+
+  if (!store.__muhasebePinAttempts) {
+    store.__muhasebePinAttempts = { failedAttempts: 0, lockedUntil: 0 };
+  }
+
+  return store.__muhasebePinAttempts;
+}
+
+export function getPinRateLimitStatus(now = Date.now()) {
+  const state = getPinAttemptState();
+
+  if (state.lockedUntil > now) {
+    return {
+      locked: true,
+      retryAfterSeconds: Math.ceil((state.lockedUntil - now) / 1000),
+    };
+  }
+
+  return {
+    locked: false,
+    retryAfterSeconds: 0,
+  };
+}
+
+export function recordFailedPinAttempt(now = Date.now()) {
+  const state = getPinAttemptState();
+
+  if (state.lockedUntil <= now) {
+    state.lockedUntil = 0;
+  }
+
+  state.failedAttempts += 1;
+
+  if (state.failedAttempts >= maxFailedPinAttempts) {
+    state.lockedUntil = now + pinLockoutMs;
+  }
+
+  return getPinRateLimitStatus(now);
+}
+
+export function clearFailedPinAttempts() {
+  const state = getPinAttemptState();
+  state.failedAttempts = 0;
+  state.lockedUntil = 0;
+}
+
+export function getPinLockoutMessage() {
+  return pinLockoutMessage;
 }
 
 export async function setLocalPin(pin: string) {
@@ -156,7 +221,57 @@ export async function clearLocalAuthCookie() {
   cookieStore.delete(authCookieName);
 }
 
+export function requireLocalRequestOrigin(request: Request) {
+  const requestUrl = new URL(request.url);
+  const hostHeader = request.headers.get("host") || requestUrl.host;
+
+  if (!isLocalHostValue(hostHeader)) {
+    return new Response(localRequestBlockedMessage, {
+      status: 403,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
+
+  if (!isStateChangingMethod(request.method)) {
+    return null;
+  }
+
+  const originHeader = request.headers.get("origin");
+  const refererHeader = request.headers.get("referer");
+  const sourceHeader = originHeader || refererHeader;
+
+  if (!sourceHeader) {
+    return null;
+  }
+
+  let sourceUrl: URL;
+
+  try {
+    sourceUrl = new URL(sourceHeader);
+  } catch {
+    return new Response(localRequestBlockedMessage, {
+      status: 403,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
+
+  if (!isLocalHostValue(sourceUrl.host) || sourceUrl.host !== requestUrl.host) {
+    return new Response(localRequestBlockedMessage, {
+      status: 403,
+      headers: { "content-type": "text/plain; charset=utf-8" },
+    });
+  }
+
+  return null;
+}
+
 export async function requireRequestLocalAuth(request: Request) {
+  const localOriginResponse = requireLocalRequestOrigin(request);
+
+  if (localOriginResponse) {
+    return localOriginResponse;
+  }
+
   const storedHash = await getLocalPinHash();
 
   if (!storedHash) {
@@ -185,6 +300,19 @@ export function getSafeRedirectPath(value: FormDataEntryValue | string | null | 
   }
 
   return value;
+}
+
+function isStateChangingMethod(method: string) {
+  return ["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase());
+}
+
+function isLocalHostValue(value: string) {
+  const host = value.trim().toLowerCase();
+  const hostname = host.startsWith("[")
+    ? host.slice(1, host.indexOf("]"))
+    : host.split(":")[0];
+
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
 }
 
 function getCookieFromHeader(cookieHeader: string | null, name: string) {
