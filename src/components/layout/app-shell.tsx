@@ -3,7 +3,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f6f7f4] text-[#16201b]">
+    <div className="min-h-screen bg-[#f4f6f3] text-[#16201b]">
       <Suspense fallback={<SidebarFallback />}>
         <Sidebar />
       </Suspense>

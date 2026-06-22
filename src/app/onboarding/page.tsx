@@ -49,7 +49,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
   const errorMessage = params?.error ? errorMessages[params.error] : null;
 
   return (
-    <main className="min-h-screen bg-[#f6f7f4] px-4 py-8 text-[#16201b]">
+    <main className="min-h-screen bg-[#f4f6f3] px-4 py-8 text-[#16201b]">
       <div className="mx-auto max-w-5xl space-y-6">
         <section className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-[#607167]">İlk kurulum</p>
@@ -202,7 +202,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
             title="Yedekleme uyarısı"
             description="Verileriniz local bilgisayarınızda saklanır. Düzenli tam yedek almak önemlidir."
           >
-            <div className="rounded-md border border-[#f0d9a2] bg-[#fffaf0] p-4 text-sm leading-6 text-[#745214]">
+            <div className="rounded-md border border-[#ead7a8] bg-[#fffaf0] p-4 text-sm leading-6 text-[#745214]">
               <p>GitHub sadece kodu saklar.</p>
               <p>SQLite veritabanı ve upload dosyaları local bilgisayarınızda durur.</p>
               <p>Düzenli olarak Ayarlar &gt; Yedekleme üzerinden “Tam Yedek” alınmalıdır.</p>
@@ -219,7 +219,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
             </label>
           </Step>
 
-          <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+          <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm transition hover:shadow-md">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 text-[#1f6f54]" />
@@ -269,7 +269,7 @@ function Step({
   return (
     <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
       <div className="mb-5 flex items-start gap-3">
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
+        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f] shadow-sm">
           <Icon className="h-5 w-5" />
         </span>
         <div>

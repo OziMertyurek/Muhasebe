@@ -43,14 +43,26 @@ export function StatCard({
   const toneClass = toneClasses[tone];
 
   return (
-    <article className={clsx("relative overflow-hidden rounded-lg border bg-white p-5 shadow-sm", toneClass.card)}>
+    <article
+      className={clsx(
+        "relative min-h-40 overflow-hidden rounded-lg border bg-white p-5 shadow-sm transition hover:shadow-md",
+        toneClass.card,
+      )}
+    >
       <span className={clsx("absolute inset-x-0 top-0 h-1", toneClass.accent)} />
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-medium text-[#647067]">{title}</p>
-          <p className="mt-3 text-2xl font-semibold leading-tight tracking-normal text-[#16201b]">{value}</p>
+          <p className="mt-3 text-2xl font-semibold leading-tight tracking-normal text-[#16201b]">
+            {value}
+          </p>
         </div>
-        <div className={clsx("flex h-10 w-10 shrink-0 items-center justify-center rounded-md", toneClass.icon)}>
+        <div
+          className={clsx(
+            "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
+            toneClass.icon,
+          )}
+        >
           <Icon className="h-5 w-5" />
         </div>
       </div>

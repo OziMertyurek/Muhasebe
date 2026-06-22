@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -9,6 +10,7 @@ import {
   FileWarning,
   Plus,
   ReceiptText,
+  Inbox,
   WalletCards,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
@@ -86,10 +88,14 @@ function SmallMoneyLines({
   );
 }
 
-function EmptyState({ text }: { text: string }) {
+function EmptyState({ text, action }: { text: string; action?: ReactNode }) {
   return (
-    <div className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-5 text-sm text-[#647067]">
-      {text}
+    <div className="flex min-h-32 flex-col items-center justify-center rounded-md border border-dashed border-[#d8e0d9] bg-[#fbfcfa] px-5 py-7 text-center">
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#eef4ef] text-[#607167]">
+        <Inbox className="h-4 w-4" />
+      </span>
+      <p className="mt-3 text-sm font-semibold text-[#223028]">{text}</p>
+      {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );
 }
@@ -185,7 +191,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6 lg:flex-row lg:items-end lg:justify-between">
+      <section className="rounded-xl border border-[#dce2dc] bg-white p-6 shadow-sm lg:flex lg:items-end lg:justify-between lg:gap-6">
         <div>
           <p className="text-sm font-medium text-[#607167]">Genel bakış</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
@@ -194,8 +200,13 @@ export default async function DashboardPage() {
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
             Fatura, tahsilat, ödeme, gider ve hatırlatmaları gerçek kayıtlarınızla takip edin.
           </p>
+          <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-[#607167]">
+            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">Yerel veritabanı</span>
+            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">PIN korumalı</span>
+            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">Tam yedek önerilir</span>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="mt-5 flex flex-wrap gap-2 lg:mt-0">
           <Link
             href="/payments/new"
             className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
@@ -335,7 +346,17 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold text-[#16201b]">Son 5 fatura</h2>
           <div className="mt-5 space-y-3">
             {lists.recentInvoices.length === 0 ? (
-              <EmptyState text="Kayıt yok" />
+              <EmptyState
+                text="Henüz fatura kaydı yok"
+                action={
+                  <Link
+                    href="/invoices/new"
+                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                  >
+                    İlk faturayı ekle
+                  </Link>
+                }
+              />
             ) : (
               lists.recentInvoices.map((invoice) => (
                 <Link
@@ -368,7 +389,17 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold text-[#16201b]">Son 5 ödeme/tahsilat</h2>
           <div className="mt-5 space-y-3">
             {lists.recentPayments.length === 0 ? (
-              <EmptyState text="Kayıt yok" />
+              <EmptyState
+                text="Henüz ödeme veya tahsilat yok"
+                action={
+                  <Link
+                    href="/payments/new"
+                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                  >
+                    İlk hareketi ekle
+                  </Link>
+                }
+              />
             ) : (
               lists.recentPayments.map((payment) => (
                 <Link
@@ -402,7 +433,17 @@ export default async function DashboardPage() {
           <h2 className="text-lg font-semibold text-[#16201b]">Son 5 gider</h2>
           <div className="mt-5 space-y-3">
             {lists.recentExpenses.length === 0 ? (
-              <EmptyState text="Kayıt yok" />
+              <EmptyState
+                text="Henüz gider kaydı yok"
+                action={
+                  <Link
+                    href="/expenses/new"
+                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                  >
+                    İlk gideri ekle
+                  </Link>
+                }
+              />
             ) : (
               lists.recentExpenses.map((expense) => (
                 <Link
@@ -452,7 +493,17 @@ export default async function DashboardPage() {
           </div>
           <div className="mt-5 space-y-3">
             {lists.upcomingImportantDates.length === 0 ? (
-              <EmptyState text="Yaklaşan hatırlatma yok" />
+              <EmptyState
+                text="Yaklaşan hatırlatma yok"
+                action={
+                  <Link
+                    href="/important-dates/new"
+                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                  >
+                    Hatırlatma ekle
+                  </Link>
+                }
+              />
             ) : (
               lists.upcomingImportantDates.map((item) => (
                 <Link

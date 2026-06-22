@@ -7,6 +7,28 @@ import { clsx } from "clsx";
 import { navigationItems } from "@/lib/navigation";
 import { appInfo } from "@/lib/app-info";
 
+const navigationGroups = [
+  {
+    title: "Genel",
+    hrefs: ["/", "/companies", "/invoices", "/payments", "/expenses"],
+  },
+  {
+    title: "Operasyon",
+    hrefs: [
+      "/recurring-expenses",
+      "/accounts",
+      "/accounts?type=CREDIT_CARD",
+      "/important-dates",
+      "/files",
+      "/ai-extraction",
+    ],
+  },
+  {
+    title: "Analiz",
+    hrefs: ["/reports", "/settings"],
+  },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -47,7 +69,7 @@ export function Sidebar() {
     <aside className="border-b border-[#dce2dc] bg-white md:fixed md:inset-y-0 md:left-0 md:w-64 md:border-b-0 md:border-r">
       <div className="flex h-full flex-col">
         <div className="flex h-16 items-center gap-3 border-b border-[#dce2dc] px-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#1f6f54] text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#1f6f54] text-white shadow-sm">
             <Building2 className="h-5 w-5" />
           </div>
           <div>
@@ -58,33 +80,50 @@ export function Sidebar() {
 
         <nav
           aria-label="Ana menü"
-          className="flex gap-1 overflow-x-auto px-3 py-3 md:flex-1 md:flex-col md:overflow-y-auto"
+          className="flex gap-2 overflow-x-auto px-3 py-3 md:flex-1 md:flex-col md:gap-4 md:overflow-y-auto"
         >
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = isItemActive(item.href);
+          {navigationGroups.map((group) => (
+            <div key={group.title} className="flex gap-1 md:flex-col">
+              <p className="hidden px-3 text-[11px] font-semibold uppercase tracking-normal text-[#8a978d] md:block">
+                {group.title}
+              </p>
+              {navigationItems
+                .filter((item) => group.hrefs.includes(item.href))
+                .map((item) => {
+                  const Icon = item.icon;
+                  const isActive = isItemActive(item.href);
 
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={clsx(
-                  "flex h-11 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition",
-                  isActive
-                    ? "bg-[#e8f2ed] text-[#14543f]"
-                    : "text-[#46534b] hover:bg-[#f1f4f1] hover:text-[#16201b]",
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span className="whitespace-nowrap">{item.label}</span>
-                {"badge" in item ? (
-                  <span className="ml-auto rounded-sm border border-[#cfd8cf] px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-normal text-[#607167]">
-                    {item.badge}
-                  </span>
-                ) : null}
-              </Link>
-            );
-          })}
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      aria-current={isActive ? "page" : undefined}
+                      className={clsx(
+                        "group relative flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition md:h-10",
+                        isActive
+                          ? "bg-[#e8f2ed] text-[#14543f] shadow-[inset_3px_0_0_#1f6f54]"
+                          : "text-[#46534b] hover:bg-[#f1f4f1] hover:text-[#16201b]",
+                      )}
+                    >
+                      <Icon
+                        className={clsx(
+                          "h-4 w-4 shrink-0",
+                          isActive
+                            ? "text-[#1f6f54]"
+                            : "text-[#647067] group-hover:text-[#46534b]",
+                        )}
+                      />
+                      <span className="whitespace-nowrap">{item.label}</span>
+                      {"badge" in item ? (
+                        <span className="ml-auto rounded-sm border border-[#cfd8cf] bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-normal text-[#607167]">
+                          {item.badge}
+                        </span>
+                      ) : null}
+                    </Link>
+                  );
+                })}
+            </div>
+          ))}
           <Link
             href="/cikis"
             className="flex h-11 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium text-[#46534b] transition hover:bg-[#f1f4f1] hover:text-[#16201b] md:hidden"
