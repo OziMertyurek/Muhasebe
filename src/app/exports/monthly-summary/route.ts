@@ -7,6 +7,7 @@ import {
   parseExportMonth,
 } from "@/lib/export-utils";
 import { getMonthlySummaryReport } from "@/lib/report-utils";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 function toCurrencyMap(items: Array<{ currency: string; amount: Prisma.Decimal }>) {
   return new Map(items.map((item) => [item.currency, item.amount]));
@@ -17,6 +18,12 @@ function amountFor(map: Map<string, Prisma.Decimal>, currency: string) {
 }
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const parsed = parseExportMonth(searchParams.get("month"));
   const report = await getMonthlySummaryReport(String(parsed.month), String(parsed.year));

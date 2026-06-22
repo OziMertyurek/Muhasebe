@@ -614,6 +614,10 @@ function startNextServer() {
     cwd: SERVER_MODE === "production" ? STANDALONE_ROOT : PROJECT_ROOT,
     databaseUrl: redactValue(getServerDatabaseUrl()),
   });
+  const serverHostEnv = SERVER_MODE === "production"
+    ? { HOSTNAME: "127.0.0.1", HOST: "127.0.0.1" }
+    : {};
+
   const child = spawn(serverCommand.command, serverCommand.args, {
     cwd: SERVER_MODE === "production" ? STANDALONE_ROOT : PROJECT_ROOT,
     env: buildChildProcessEnv({
@@ -621,6 +625,7 @@ function startNextServer() {
       APP_MODE: getServerAppMode(),
       DATABASE_URL: getServerDatabaseUrl(),
       NODE_ENV: SERVER_MODE === "production" ? "production" : process.env.NODE_ENV,
+      ...serverHostEnv,
       ...serverCommand.env,
     }),
     shell: false,

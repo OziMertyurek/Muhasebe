@@ -10,6 +10,7 @@ import {
 } from "@/lib/export-utils";
 import { expenseStatusLabels } from "@/lib/expense-utils";
 import { prisma } from "@/lib/prisma";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 function getExpenseStatus(value?: string | null) {
   if (value && Object.values(ExpenseStatus).includes(value as ExpenseStatus)) {
@@ -20,6 +21,12 @@ function getExpenseStatus(value?: string | null) {
 }
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q")?.trim() ?? "";
   const categoryId = searchParams.get("categoryId")?.trim() || undefined;

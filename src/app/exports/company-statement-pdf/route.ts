@@ -16,6 +16,7 @@ import {
   formatPdfMoney,
   formatPdfSignedMoney,
 } from "@/lib/pdf-utils";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 function buildSummary(
   movements: Array<{
@@ -49,6 +50,12 @@ function buildSummary(
 }
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const companyId = searchParams.get("companyId")?.trim();
 

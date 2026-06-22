@@ -9,6 +9,7 @@ import {
   formatPdfMoney,
 } from "@/lib/pdf-utils";
 import { getDueInvoicesReport } from "@/lib/report-utils";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 function dayLabel(dayDiff: number) {
   if (dayDiff < 0) {
@@ -23,6 +24,12 @@ function dayLabel(dayDiff: number) {
 }
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const report = await getDueInvoicesReport({
     view: searchParams.get("view") ?? undefined,

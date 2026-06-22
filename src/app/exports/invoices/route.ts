@@ -2,6 +2,7 @@ import { InvoiceStatus, InvoiceType } from "@prisma/client";
 import { formatCsvDate, formatCsvNumber, formatTodayForFileName, createCsv, createCsvResponse } from "@/lib/export-utils";
 import { invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { prisma } from "@/lib/prisma";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 function getInvoiceType(value?: string | null) {
   if (value && Object.values(InvoiceType).includes(value as InvoiceType)) {
@@ -20,6 +21,12 @@ function getInvoiceStatus(value?: string | null) {
 }
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q")?.trim() ?? "";
   const type = getInvoiceType(searchParams.get("type"));

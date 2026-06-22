@@ -8,6 +8,7 @@ import {
   formatTodayForFileName,
 } from "@/lib/export-utils";
 import { prisma } from "@/lib/prisma";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 function getCompanyType(value?: string | null) {
   if (value && Object.values(CompanyType).includes(value as CompanyType)) {
@@ -18,6 +19,12 @@ function getCompanyType(value?: string | null) {
 }
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q")?.trim() ?? "";
   const type = getCompanyType(searchParams.get("type"));

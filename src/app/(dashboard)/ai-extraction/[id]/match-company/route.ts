@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { matchCompanyFromExtractedJson } from "@/lib/company-matcher";
 import { prisma } from "@/lib/prisma";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +13,12 @@ type MatchCompanyRouteContext = {
 };
 
 export async function POST(request: Request, { params }: MatchCompanyRouteContext) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { id } = await params;
   const detailUrl = new URL(`/ai-extraction/${id}`, request.url);
   const job = await prisma.aiExtractionJob.findUnique({

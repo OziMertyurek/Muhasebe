@@ -10,6 +10,7 @@ import {
 } from "@/lib/export-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
 import { prisma } from "@/lib/prisma";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 function getPaymentType(value?: string | null) {
   if (value && Object.values(PaymentType).includes(value as PaymentType)) {
@@ -28,6 +29,12 @@ function getPaymentMethod(value?: string | null) {
 }
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const query = searchParams.get("q")?.trim() ?? "";
   const type = getPaymentType(searchParams.get("type"));

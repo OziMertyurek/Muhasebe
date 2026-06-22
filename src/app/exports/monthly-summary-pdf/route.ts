@@ -13,8 +13,15 @@ import {
   formatPdfMoney,
   moneyItemsToText,
 } from "@/lib/pdf-utils";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const parsed = parseExportMonth(searchParams.get("month"));
   const report = await getMonthlySummaryReport(String(parsed.month), String(parsed.year));

@@ -12,8 +12,15 @@ import {
   formatTodayForFileName,
   slugifyFileNamePart,
 } from "@/lib/export-utils";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export async function GET(request: Request) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { searchParams } = new URL(request.url);
   const companyId = searchParams.get("companyId")?.trim();
 

@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { parseInvoiceText } from "@/lib/invoice-parser";
 import { prisma } from "@/lib/prisma";
+import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +13,12 @@ type ParseRouteContext = {
 };
 
 export async function POST(request: Request, { params }: ParseRouteContext) {
+  const authResponse = await requireRequestLocalAuth(request);
+
+  if (authResponse) {
+    return authResponse;
+  }
+
   const { id } = await params;
   const detailUrl = new URL(`/ai-extraction/${id}`, request.url);
   const job = await prisma.aiExtractionJob.findUnique({
