@@ -1,5 +1,33 @@
 # Release Notes
 
+## v2.1.0 - UI/UX Desktop Release
+
+Bu release, Muhasebe Takip uygulamasinin masaustu kullanima daha hazir ve satisa sunulabilir hissettirmesi icin yapilan UI/UX yenilemesini tamamlar. Teknik cekirdek, veritabani semasi, AppData veri davranisi, backup/restore, Electron runtime ve Python/MarkItDown akislari korunmustur.
+
+### One Cikanlar
+
+- Satisa hazir UI/UX yenilemesi tamamlandi.
+- Dashboard daha okunakli ve profesyonel hale getirildi.
+- Sidebar/navigation aktif sayfa algisi ve masaustu uygulama hissi iyilestirildi.
+- Login/PIN ve onboarding ekranlari daha sade, guven veren bir yapida cilalandi.
+- Cariler, faturalar, tahsilat/odeme, giderler, sabit giderler ve onemli tarihler ekranlari iyilestirildi.
+- Liste, tablo, form, bos durum ve status badge gorunumleri daha tutarli hale getirildi.
+- AI fatura okuma akisi daha anlasilir hale getirildi.
+- Backup/restore ekrani guven odakli iyilestirildi.
+- System Status ve Destek Araclari gelistirildi.
+- Veri klasorunu acma, log klasorunu acma ve guvenli hata raporu disa aktarma akisi desteklenir.
+- Windows packaged app dogrulamalari gecti.
+- macOS arm64/x64 build altyapisi hazir; macOS build unsigned/notarized degildir ve gercek Mac cihaz testi ayrica yapilacaktir.
+
+### Indirme Notu
+
+- Windows kullanicilari icin onerilen dosya: `Muhasebe-Takip-Setup-2.1.0.exe`.
+- Kurulum istemeyen kullanicilar icin portable dosya: `Muhasebe-Takip-Portable-2.1.0.exe`.
+- Apple Silicon Mac kullanicilari `arm64`, Intel Mac kullanicilari `x64` macOS dosyasini indirmelidir.
+- macOS uygulamasi henuz Apple Developer ID ile signed/notarized degildir; Gatekeeper uyarisi gorulebilir.
+- Node.js ve Python ayrica kurulmaz; desktop paketleri gerekli runtime altyapisini beraber getirir.
+- Veriler yerel bilgisayarda saklanir. Duzenli olarak Tam Yedek alinmalidir.
+
 ## v2.0.2 - Taslak / Destek Araclari
 
 Bu taslak not, sonraki release icin desktop destek araclari hazirligini izler.
