@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   DatabaseBackup,
   Download,
+  FileArchive,
   FolderArchive,
   PackageCheck,
   ShieldAlert,
@@ -159,7 +160,7 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
       </section>
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-lg border border-[#bfd8cc] bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-[#bfd8cc] bg-[#fbfffc] p-5 shadow-sm ring-1 ring-[#e2f1e7]">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
@@ -177,14 +178,19 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
             </div>
           </div>
 
-          <div className="mt-5 space-y-2 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-4 text-sm text-[#46534b]">
-            <InfoLine label="ZIP içeriği" value="database/dev.db, uploads/, backup-info.json" />
-            <InfoLine
-              label="Upload klasörü"
-              value={uploads.exists ? "Tam yedeğe dahil edilir" : "Boş klasör olarak ele alınır"}
+          <div className="mt-5 grid gap-3 text-sm text-[#46534b] md:grid-cols-3">
+            <BackupFeature icon={DatabaseBackup} label="Veritabanı" value="database/dev.db" />
+            <BackupFeature
+              icon={FolderArchive}
+              label="Yüklenen dosyalar"
+              value={uploads.exists ? "Tam yedeğe dahil" : "Klasör boş olabilir"}
             />
-            <InfoLine label="Gizli dosyalar" value=".env ve .env.local dahil edilmez" />
+            <BackupFeature icon={FileArchive} label="Yedek bilgisi" value="backup-info.json" />
           </div>
+          <p className="mt-4 rounded-md border border-[#e5e9e5] bg-white px-3 py-2 text-xs leading-5 text-[#647067]">
+            Gizli ayar dosyaları, node_modules ve build çıktıları tam yedeğe eklenmez. ZIP
+            yalnızca uygulama verisini taşımak için hazırlanır.
+          </p>
 
           {database.exists ? (
             <a
@@ -252,10 +258,13 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
             </div>
           </div>
           <div className="mt-5 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-4 text-sm text-[#46534b]">
-            <p className="text-xs font-medium text-[#647067]">Klasör yolu</p>
-            <p className="mt-1 break-all font-semibold text-[#16201b]">{uploads.uploadsPath}</p>
-            <p className="mt-3 text-sm text-[#647067]">
-              Durum: {uploads.exists ? "Klasör mevcut" : "Klasör henüz oluşmamış"}
+            <p className="text-xs font-medium text-[#647067]">Yerel upload arşivi</p>
+            <p className="mt-1 font-semibold text-[#16201b]">
+              {uploads.exists ? "Klasör hazır" : "Klasör henüz oluşmamış"}
+            </p>
+            <p className="mt-3 text-sm leading-6 text-[#647067]">
+              Tam dosya yolu ekranda gösterilmez; yüklenen dosyalar tam yedek ZIP dosyasına
+              güvenli biçimde eklenir.
             </p>
           </div>
         </article>
@@ -292,6 +301,26 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function BackupFeature({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: typeof DatabaseBackup;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="rounded-md border border-[#dce2dc] bg-white px-3 py-3">
+      <div className="flex items-center gap-2 text-[#14543f]">
+        <Icon className="h-4 w-4" />
+        <p className="text-xs font-semibold uppercase tracking-normal">{label}</p>
+      </div>
+      <p className="mt-2 font-semibold text-[#16201b]">{value}</p>
     </div>
   );
 }

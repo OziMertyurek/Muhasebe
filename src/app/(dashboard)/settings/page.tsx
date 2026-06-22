@@ -98,7 +98,8 @@ export default async function SettingsPage() {
           Sistem ayarları
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-          Şirket bilgileri, uygulama durumu ve yerel yedekleme adımlarını buradan yönetin.
+          Şirket bilgileri, güvenlik, yedekleme, sistem sağlığı ve destek araçlarını tek yerden
+          yönetin.
         </p>
       </section>
 
@@ -129,7 +130,7 @@ export default async function SettingsPage() {
         </section>
       ) : null}
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {settingCards.map((card) => {
           const Icon = card.icon;
 
@@ -137,7 +138,7 @@ export default async function SettingsPage() {
             <Link
               key={card.title}
               href={card.href}
-              className="group flex min-h-44 flex-col justify-between rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm transition hover:border-[#8ea99b]"
+              className="group flex min-h-44 flex-col justify-between rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm transition hover:border-[#8ea99b] hover:bg-[#fbfcfa]"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
                 <Icon className="h-5 w-5" />

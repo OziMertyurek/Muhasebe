@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Eye, Search } from "lucide-react";
+import { Eye, History, Search } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   auditActionOptions,
   auditEntityTypeOptions,
@@ -90,7 +91,7 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
             defaultValue={params?.dateTo ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           />
-          <button className="inline-flex h-10 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] focus:outline-none focus:ring-2 focus:ring-[#d8eadf]">
             Filtrele
           </button>
         </div>
@@ -98,12 +99,11 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
 
       <section className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {logs.length === 0 ? (
-          <div className="px-6 py-12 text-center">
-            <h2 className="text-lg font-semibold text-[#16201b]">Henüz işlem kaydı yok</h2>
-            <p className="mt-2 text-sm text-[#647067]">
-              Bu aşamadan sonra yapılan önemli işlemler burada listelenecek.
-            </p>
-          </div>
+          <EmptyState
+            title="Henüz işlem kaydı yok"
+            description="Yedekleme, geri yükleme, kayıt oluşturma ve önemli değişiklikler yapıldıkça burada listelenir."
+            icon={History}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] w-full border-collapse text-left text-sm">

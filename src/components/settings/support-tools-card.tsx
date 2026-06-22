@@ -39,14 +39,14 @@ export function SupportToolsCard() {
   );
   const [isBusy, setIsBusy] = useState<SupportAction | null>(null);
   const [message, setMessage] = useState(
-    "Bu araclar masaustu uygulamasinda kullanilabilir.",
+    "Bu araçlar masaüstü uygulamasında kullanılabilir.",
   );
 
   async function runAction(action: SupportAction) {
     const api = window.muhasebeSupport;
 
     if (!api) {
-      setMessage("Bu araclar masaustu uygulamasinda kullanilabilir.");
+      setMessage("Bu araçlar masaüstü uygulamasında kullanılabilir.");
       return;
     }
 
@@ -55,20 +55,20 @@ export function SupportToolsCard() {
     try {
       if (action === "data") {
         await api.openDataFolder();
-        setMessage("Veri klasoru acildi.");
+        setMessage("Veri klasörü açıldı.");
       } else if (action === "logs") {
         await api.openLogsFolder();
-        setMessage("Log klasoru acildi.");
+        setMessage("Log klasörü açıldı.");
       } else {
         const result = await api.exportDiagnosticsReport();
         setMessage(
           result.fileName
-            ? `Hata raporu indirildi: ${result.fileName}`
-            : "Hata raporu indirildi.",
+            ? `Hata raporu dışa aktarıldı: ${result.fileName}`
+            : "Hata raporu dışa aktarıldı.",
         );
       }
     } catch {
-      setMessage("Islem tamamlanamadi. Lutfen uygulama loglarini kontrol edin.");
+      setMessage("İşlem tamamlanamadı. Lütfen uygulama loglarını kontrol edin.");
     } finally {
       setIsBusy(null);
     }
@@ -81,31 +81,45 @@ export function SupportToolsCard() {
           <LifeBuoy className="h-5 w-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-lg font-semibold text-[#16201b]">Destek Araclari</h2>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-normal text-[#607167]">
+                Masaüstü destek
+              </p>
+              <h2 className="mt-1 text-lg font-semibold text-[#16201b]">Destek Araçları</h2>
+            </div>
+            <span className="inline-flex w-fit rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-2.5 py-1 text-xs font-semibold text-[#607167]">
+              {isAvailable ? "Hazır" : "Sadece masaüstü"}
+            </span>
+          </div>
           <p className="mt-2 text-sm leading-6 text-[#647067]">
-            Veri klasoru, log klasoru ve guvenli hata raporu islemleri sadece
-            masaustu uygulamasinda calisir.
+            Veri klasörü, log klasörü ve güvenli hata raporu işlemleri masaüstü uygulamasında
+            tek tıkla çalışır.
+          </p>
+          <p className="mt-3 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-3 py-2 text-xs leading-5 text-[#647067]">
+            Hata raporu .env, DATABASE_URL, tam dosya yolu, fatura dosyası veya yedek içeriği
+            eklemeden maskeli sistem özeti üretir.
           </p>
 
           <div className="mt-4 flex flex-wrap gap-3">
             <SupportButton
               disabled={!isAvailable || Boolean(isBusy)}
               icon={FolderOpen}
-              label="Veri Klasorunu Ac"
+              label="Veri Klasörünü Aç"
               loading={isBusy === "data"}
               onClick={() => runAction("data")}
             />
             <SupportButton
               disabled={!isAvailable || Boolean(isBusy)}
               icon={FolderOpen}
-              label="Log Klasorunu Ac"
+              label="Log Klasörünü Aç"
               loading={isBusy === "logs"}
               onClick={() => runAction("logs")}
             />
             <SupportButton
               disabled={!isAvailable || Boolean(isBusy)}
               icon={FileDown}
-              label="Hata Raporu Disa Aktar"
+              label="Hata Raporu Dışa Aktar"
               loading={isBusy === "diagnostics"}
               onClick={() => runAction("diagnostics")}
             />
@@ -138,10 +152,10 @@ function SupportButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#cbd8cf] bg-white px-4 py-2 text-sm font-semibold text-[#1f6f54] shadow-sm transition hover:border-[#9fbead] hover:bg-[#f2faf5] disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#cbd8cf] bg-white px-4 py-2 text-sm font-semibold text-[#1f6f54] shadow-sm transition hover:border-[#9fbead] hover:bg-[#f2faf5] focus:outline-none focus:ring-2 focus:ring-[#d8eadf] disabled:cursor-not-allowed disabled:opacity-50"
     >
       <Icon className="h-4 w-4" />
-      {loading ? "Isleniyor..." : label}
+      {loading ? "İşleniyor..." : label}
     </button>
   );
 }

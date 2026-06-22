@@ -199,9 +199,9 @@ export function RestoreValidationForm() {
             Yedek kontrolü ve içeri aktarma
           </h2>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-[#647067]">
-            Eski bilgisayardan aldığınız tam yedek ZIP dosyasını buradan kontrol edebilir ve son
-            onaydan sonra içeri aktarabilirsiniz. Restore işlemi mevcut local veritabanını ve
-            upload dosyalarını değiştirir.
+            Eski bilgisayardan aldığınız tam yedek ZIP dosyasını önce güvenli şekilde kontrol
+            edin. Geri yükleme yalnızca son onaydan sonra çalışır ve mevcut yerel verileri seçilen
+            yedekle değiştirir.
           </p>
         </div>
       </div>
@@ -216,7 +216,7 @@ export function RestoreValidationForm() {
             onChange={(event) => handleFileChange(event.target.files?.[0] ?? null)}
             className="mt-2 block w-full rounded-md border border-[#cfd8cf] bg-white px-3 py-2 text-sm text-[#16201b] file:mr-4 file:rounded-md file:border-0 file:bg-[#e8f2ed] file:px-3 file:py-2 file:text-sm file:font-semibold file:text-[#14543f] hover:file:bg-[#dcece4]"
           />
-          <span className="mt-2 block text-xs text-[#647067]">Maksimum dosya boyutu 500 MB.</span>
+          <span className="mt-2 block text-xs text-[#647067]">Maksimum dosya boyutu 500 MB. Sadece tam yedek ZIP dosyaları kabul edilir.</span>
         </label>
 
         <button
@@ -345,7 +345,7 @@ export function RestoreValidationForm() {
             />
             <InfoItem
               label="Otomatik güvenlik yedeği"
-              value={restoreResult.safetyBackupPath}
+              value={restoreResult.safetyBackupPath ? "Oluşturuldu" : "-"}
             />
           </div>
           {restoreResult.warnings.length > 0 ? (
@@ -362,9 +362,10 @@ export function RestoreValidationForm() {
         </div>
       ) : null}
 
-      <p className="mt-5 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-3 text-sm text-[#647067]">
-        Restore işleminde sadece `database/dev.db`, `uploads/` ve `backup-info.json` okunur.
-        Gizli dosyalar, node_modules, .next ve Git dosyaları geri yüklenmez.
+      <p className="mt-5 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-3 text-sm leading-6 text-[#647067]">
+        Geri yükleme sırasında sadece `database/dev.db`, `uploads/` ve `backup-info.json` okunur.
+        Gizli dosyalar, node_modules, .next ve Git dosyaları geri yüklenmez; tam yerel dosya
+        yolları ekranda gösterilmez.
       </p>
     </section>
   );

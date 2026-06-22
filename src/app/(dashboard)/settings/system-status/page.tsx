@@ -157,7 +157,8 @@ export default async function SystemStatusPage() {
               </div>
             ) : (
               <p className="mt-2 text-sm leading-6 text-[#647067]">
-                Şu anda kritik bir öneri yok.
+                Şu anda kritik bir öneri yok. Destek gerektiğinde aşağıdaki Destek Araçları ile
+                güvenli hata raporu dışa aktarabilirsiniz.
               </p>
             )}
           </div>
@@ -172,7 +173,7 @@ function StatusCheckCard({ check }: { check: SystemStatusCheck }) {
   const Icon = style.icon;
 
   return (
-    <article className="rounded-lg border border-[#e5e9e5] bg-[#fbfcfa] p-4">
+    <article className="rounded-lg border border-[#e5e9e5] bg-[#fbfcfa] p-4 transition hover:border-[#cfd8cf] hover:bg-white">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-base font-semibold text-[#16201b]">{check.title}</h3>
@@ -205,7 +206,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+    <div className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm transition hover:border-[#cfd8cf]">
       <div className="flex items-center gap-3">
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
           <Icon className="h-5 w-5" />

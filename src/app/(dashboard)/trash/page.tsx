@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArchiveRestore, Ban, ExternalLink, Info, Trash2 } from "lucide-react";
+import { EmptyState } from "@/components/ui/empty-state";
 import { restoreTrashRecordAction } from "@/app/(dashboard)/trash/actions";
 import {
   formatDeletedRecord,
@@ -97,20 +98,15 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
 
       <section className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {formattedRecords.length === 0 ? (
-          <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
-            <span className="inline-flex h-12 w-12 items-center justify-center rounded-md bg-[#f1f4f1] text-[#607167]">
-              <Trash2 className="h-6 w-6" />
-            </span>
-            <h2 className="mt-4 text-lg font-semibold text-[#16201b]">
-              {selectedType
+          <EmptyState
+            title={
+              selectedType
                 ? `${getTrashTypeLabel(selectedType)} için silinen kayıt yok`
-                : "Çöp kutusunda kayıt yok"}
-            </h2>
-            <p className="mt-2 max-w-md text-sm leading-6 text-[#647067]">
-              Silinen kayıtlar normal listelerden gizlenir ve burada geri
-              yüklenebilir şekilde saklanır.
-            </p>
-          </div>
+                : "Çöp kutusunda kayıt yok"
+            }
+            description="Silinen kayıtlar normal listelerden gizlenir ve gerektiğinde buradan geri yüklenebilir."
+            icon={Trash2}
+          />
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[920px] w-full border-collapse text-left text-sm">
@@ -125,7 +121,7 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
               </thead>
               <tbody>
                 {formattedRecords.map((record) => (
-                  <tr key={`${record.type}-${record.id}`} className="border-t border-[#e5e9e5]">
+                  <tr key={`${record.type}-${record.id}`} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-[#edf2ef] px-2.5 py-1 text-xs font-semibold text-[#46534b]">
                         {record.typeLabel}
@@ -150,7 +146,7 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
                         ) : null}
                         {record.canRestore ? (
                           <form action={restoreTrashRecordAction.bind(null, record.type, record.id)}>
-                            <button className="inline-flex h-9 items-center gap-2 rounded-md border border-[#b8d9c8] px-3 text-sm font-semibold text-[#14543f] transition hover:border-[#8ebf9f]">
+                            <button className="inline-flex h-9 items-center gap-2 rounded-md border border-[#b8d9c8] bg-[#f4fbf6] px-3 text-sm font-semibold text-[#14543f] transition hover:border-[#8ebf9f]">
                               <ArchiveRestore className="h-4 w-4" />
                               Geri Yükle
                             </button>

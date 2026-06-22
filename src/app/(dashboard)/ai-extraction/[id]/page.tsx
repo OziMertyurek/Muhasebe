@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AiExtractionStatus, type CompanyType } from "@prisma/client";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, FileText, Pencil } from "lucide-react";
+import { ArrowLeft, CheckCircle2, ExternalLink, FileText, Pencil, ScanText } from "lucide-react";
 import {
   getAiInvoiceCreatedInvoiceId,
   getAiInvoiceDefaultCompanyId,
@@ -39,6 +39,26 @@ type ActiveCompanyOption = {
   type: CompanyType;
   taxNumber: string | null;
 };
+
+function ProcessHint({
+  icon: Icon,
+  title,
+  description,
+}: {
+  icon: typeof FileText;
+  title: string;
+  description: string;
+}) {
+  return (
+    <article className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
+        <Icon className="h-5 w-5" />
+      </span>
+      <h2 className="mt-3 text-sm font-semibold text-[#16201b]">{title}</h2>
+      <p className="mt-1 text-sm leading-6 text-[#647067]">{description}</p>
+    </article>
+  );
+}
 
 function InfoItem({ label, value }: { label: string; value: string }) {
   return (
@@ -676,6 +696,12 @@ export default async function AiExtractionDetailPage({
         </div>
       </section>
 
+      <section className="grid gap-3 md:grid-cols-3">
+        <ProcessHint icon={FileText} title="Metin çıkar" description="Dosyadan okunabilir metin üretin." />
+        <ProcessHint icon={ScanText} title="Alanları kontrol et" description="Fatura no, tarih, tutar ve KDV alanlarını doğrulayın." />
+        <ProcessHint icon={CheckCircle2} title="Onayla" description="Cari eşleşmesini ve kayıt oluşturma adımını siz tamamlayın." />
+      </section>
+
       {query?.error === "status" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
           Durum güncellenirken bir hata oluştu.
@@ -684,7 +710,7 @@ export default async function AiExtractionDetailPage({
 
       {query?.error === "markitdown" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
-          MarkItDown çalıştırılamadı. Python ve markitdown paketinin kurulu olduğundan emin olun.
+          Fatura metni okunamadı. Dosya formatını kontrol edin veya farklı bir dosya ile tekrar deneyin.
         </div>
       ) : null}
 
@@ -765,7 +791,7 @@ export default async function AiExtractionDetailPage({
               label="İlişki tipi"
               value={fileRelatedTypeLabels[job.fileAttachment.relatedType]}
             />
-            <InfoItem label="Dosya yolu" value={job.fileAttachment.filePath} />
+            <InfoItem label="Dosya konumu" value="Güvenli yerel arşiv" />
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AiExtractionStatus, FileRelatedType } from "@prisma/client";
-import { Eye, FileSearch, Pencil, Plus, Search } from "lucide-react";
+import { CheckCircle2, Eye, FileSearch, FileUp, Pencil, Plus, ScanText, Search } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -37,6 +37,12 @@ function getRelatedType(value?: string) {
 
   return undefined;
 }
+
+const aiFlowSteps = [
+  { title: "Dosya yükle", description: "PDF veya görsel faturayı arşive ekleyin.", icon: FileUp },
+  { title: "Metin çıkar", description: "MarkItDown ile okunabilir metin oluşturun.", icon: ScanText },
+  { title: "Kontrol et", description: "Alanları, cari eşleşmesini ve tutarı onaylayın.", icon: CheckCircle2 },
+];
 
 function getAiStatusTone(status: AiExtractionStatus) {
   if (status === "COMPLETED" || status === "REVIEWED") {
@@ -88,8 +94,8 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
             AI analiz kayıtları
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Dosya Arşivi’ndeki PDF ve görseller için ileride çalışacak AI/OCR analiz
-            kayıtlarını takip edin.
+PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve cari
+            eşleşmesini güvenle onaylayın.
           </p>
         </div>
         <Link
@@ -99,6 +105,25 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
           <Plus className="h-4 w-4" />
           Yeni Analiz Kaydı
         </Link>
+      </section>
+
+      <section className="grid gap-3 md:grid-cols-3">
+        {aiFlowSteps.map((step) => {
+          const Icon = step.icon;
+
+          return (
+            <article
+              key={step.title}
+              className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm"
+            >
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
+                <Icon className="h-5 w-5" />
+              </span>
+              <h2 className="mt-3 text-sm font-semibold text-[#16201b]">{step.title}</h2>
+              <p className="mt-1 text-sm leading-6 text-[#647067]">{step.description}</p>
+            </article>
+          );
+        })}
       </section>
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
@@ -136,7 +161,7 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
               </option>
             ))}
           </select>
-          <button className="inline-flex h-10 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] focus:outline-none focus:ring-2 focus:ring-[#d8eadf]">
             Filtrele
           </button>
         </div>
@@ -146,7 +171,7 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
         {jobs.length === 0 ? (
           <EmptyState
             title="Henüz AI analiz kaydı yok"
-            description="İlk kaydı Yeni Analiz Kaydı butonuyla oluşturabilirsiniz."
+            description="Dosya arşivindeki ilk faturayı seçerek metin çıkarma ve alan kontrolü akışını başlatabilirsiniz."
             actionHref="/ai-extraction/new"
             actionLabel="Yeni Analiz Kaydı"
             icon={FileSearch}
