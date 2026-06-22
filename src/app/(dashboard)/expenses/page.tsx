@@ -144,7 +144,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         </div>
       </section>
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
         <div className="grid gap-3 xl:grid-cols-[1fr_190px_160px_150px_150px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -152,13 +152,13 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
               name="q"
               defaultValue={query}
               placeholder="Başlık, açıklama veya firma ara"
-              className="h-10 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54]"
+              className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
           <select
             name="categoryId"
             defaultValue={categoryId ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm kategoriler</option>
             {categories.map((category) => (
@@ -170,7 +170,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
           <select
             name="status"
             defaultValue={status ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm durumlar</option>
             {expenseStatusOptions.map((option) => (
@@ -183,21 +183,21 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
             name="dateFrom"
             type="date"
             defaultValue={params?.dateFrom ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           />
           <input
             name="dateTo"
             type="date"
             defaultValue={params?.dateTo ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           />
-          <button className="inline-flex h-10 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]">
             Filtrele
           </button>
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {expenses.length === 0 ? (
           <EmptyState
             title="Henüz gider eklenmedi"
@@ -208,7 +208,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] w-full border-collapse text-left text-sm">
-              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+              <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
                   <th className="px-4 py-3">Gider başlığı</th>
@@ -223,7 +223,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
               </thead>
               <tbody>
                 {expenses.map((expense) => (
-                  <tr key={expense.id} className="border-t border-[#e5e9e5]">
+                  <tr key={expense.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 text-[#46534b]">{formatDate(expense.expenseDate)}</td>
                     <td className="px-4 py-3 font-semibold text-[#16201b]">{expense.title}</td>
                     <td className="px-4 py-3 text-[#46534b]">
@@ -246,21 +246,21 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/expenses/${expense.id}`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
                           title="Detay"
                         >
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
                           href={`/expenses/${expense.id}/edit`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
                           title="Düzenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteExpenseAction.bind(null, expense.id)}>
                           <ConfirmSubmitButton
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] text-[#8b2f28] transition hover:border-[#c79a92]"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
                             message="Bu gider kaydını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
                             title="Sil"
                           >

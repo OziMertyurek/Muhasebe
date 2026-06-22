@@ -49,7 +49,7 @@ function MoneyList({
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-5 text-sm text-[#647067]">
+    <div className="rounded-lg border border-dashed border-[#cfd8cf] bg-[#fbfcfa] px-4 py-5 text-sm text-[#647067]">
       {text}
     </div>
   );
@@ -128,27 +128,27 @@ export default async function CompanyStatementPage({
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Kalan alacak</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.remainingReceivable} />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Kalan borç</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.remainingPayable} />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Net bakiye</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.netBalance} signed />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Gider toplamı</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.totalExpenses} />
           </p>
         </div>
@@ -160,18 +160,18 @@ export default async function CompanyStatementPage({
             name="dateFrom"
             type="date"
             defaultValue={query?.dateFrom ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           />
           <input
             name="dateTo"
             type="date"
             defaultValue={query?.dateTo ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           />
           <select
             name="type"
             defaultValue={movementType ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm hareketler</option>
             <option value="invoices">Faturalar</option>
@@ -181,7 +181,7 @@ export default async function CompanyStatementPage({
           <select
             name="currency"
             defaultValue={currency ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm para birimleri</option>
             {statement.currencies.map((item) => (
@@ -190,7 +190,7 @@ export default async function CompanyStatementPage({
               </option>
             ))}
           </select>
-          <button className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]">
+          <button className="inline-flex h-11 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]">
             <Search className="h-4 w-4" />
             Filtrele
           </button>
@@ -205,7 +205,7 @@ export default async function CompanyStatementPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] w-full border-collapse text-left text-sm">
-              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+              <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
                   <th className="px-4 py-3">İşlem tipi</th>
@@ -220,7 +220,7 @@ export default async function CompanyStatementPage({
               </thead>
               <tbody>
                 {statement.movements.map((movement) => (
-                  <tr key={movement.id} className="border-t border-[#e5e9e5]">
+                  <tr key={movement.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 text-[#46534b]">{formatDate(movement.date)}</td>
                     <td className="px-4 py-3 font-semibold text-[#16201b]">{movement.label}</td>
                     <td className="px-4 py-3 text-[#46534b]">{movement.reference}</td>
@@ -242,7 +242,7 @@ export default async function CompanyStatementPage({
                     <td className="px-4 py-3 text-right">
                       <Link
                         href={movement.href}
-                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
+                        className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
                         title="Detay"
                       >
                         <ExternalLink className="h-4 w-4" />

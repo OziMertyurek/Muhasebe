@@ -35,14 +35,14 @@ const initialState: RecurringExpenseFormState = {};
 
 function fieldClass(hasError?: boolean) {
   return [
-    "mt-2 h-10 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] outline-none transition",
+    "mt-2 h-11 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
 
 function textareaClass(hasError?: boolean) {
   return [
-    "mt-2 min-h-28 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] outline-none transition",
+    "mt-2 min-h-32 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
@@ -52,7 +52,7 @@ function FieldError({ message }: { message?: string }) {
     return null;
   }
 
-  return <p className="mt-1 text-xs font-medium text-[#b9473d]">{message}</p>;
+  return <p className="mt-1.5 text-xs font-medium text-[#b9473d]">{message}</p>;
 }
 
 export function RecurringExpenseForm({
@@ -66,18 +66,18 @@ export function RecurringExpenseForm({
   return (
     <form action={formAction} className="space-y-6">
       {state.message ? (
-        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+        <div className="rounded-lg border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
           {state.message}
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">Sabit gider bilgileri</h2>
+      <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+        <h2 className="text-base font-semibold text-[#16201b]">Sabit gider bilgileri</h2>
         <p className="mt-2 text-sm leading-6 text-[#647067]">
           Aktif sabit giderler için aylık hatırlatma oluşturulur.
         </p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Gider adı
             <input
               name="title"
@@ -88,7 +88,7 @@ export function RecurringExpenseForm({
             <FieldError message={state.errors?.title} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Kategori
             <select
               name="categoryId"
@@ -105,7 +105,7 @@ export function RecurringExpenseForm({
             <FieldError message={state.errors?.categoryId} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Tutar
             <input
               name="amount"
@@ -119,7 +119,7 @@ export function RecurringExpenseForm({
             <FieldError message={state.errors?.amount} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Para birimi
             <input
               name="currency"
@@ -129,7 +129,7 @@ export function RecurringExpenseForm({
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Ayın günü
             <input
               name="dayOfMonth"
@@ -144,7 +144,7 @@ export function RecurringExpenseForm({
             <FieldError message={state.errors?.dayOfMonth} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Başlangıç tarihi
             <input
               name="startDate"
@@ -156,7 +156,7 @@ export function RecurringExpenseForm({
             <FieldError message={state.errors?.startDate} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Bitiş tarihi
             <input
               name="endDate"
@@ -178,7 +178,7 @@ export function RecurringExpenseForm({
           </label>
         </div>
 
-        <label className="mt-4 block text-sm font-medium text-[#46534b]">
+        <label className="mt-5 block text-sm font-semibold text-[#46534b]">
           Açıklama
           <textarea
             name="description"
@@ -197,7 +197,7 @@ export function RecurringExpenseForm({
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-65"
+          className="inline-flex h-11 items-center gap-2 rounded-md bg-[#1f6f54] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] focus:outline-none focus:ring-2 focus:ring-[#8ea99b] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Kaydediliyor" : submitLabel}

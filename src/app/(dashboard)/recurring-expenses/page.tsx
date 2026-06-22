@@ -131,7 +131,7 @@ export default async function RecurringExpensesPage({
         </div>
       </section>
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
         <div className="grid gap-3 lg:grid-cols-[1fr_220px_180px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -139,13 +139,13 @@ export default async function RecurringExpensesPage({
               name="q"
               defaultValue={query}
               placeholder="Gider adı veya açıklama ara"
-              className="h-10 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54]"
+              className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
           <select
             name="categoryId"
             defaultValue={categoryId ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm kategoriler</option>
             {categories.map((category) => (
@@ -157,19 +157,19 @@ export default async function RecurringExpensesPage({
           <select
             name="status"
             defaultValue={params?.status ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm durumlar</option>
             <option value="active">Aktif</option>
             <option value="passive">Pasif</option>
           </select>
-          <button className="inline-flex h-10 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]">
             Filtrele
           </button>
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {recurringExpenses.length === 0 ? (
           <EmptyState
             title="Henüz sabit gider eklenmedi"
@@ -180,7 +180,7 @@ export default async function RecurringExpensesPage({
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1080px] w-full border-collapse text-left text-sm">
-              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+              <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Gider adı</th>
                   <th className="px-4 py-3">Kategori</th>
@@ -195,7 +195,7 @@ export default async function RecurringExpensesPage({
               </thead>
               <tbody>
                 {recurringExpenses.map((recurringExpense) => (
-                  <tr key={recurringExpense.id} className="border-t border-[#e5e9e5]">
+                  <tr key={recurringExpense.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 font-semibold text-[#16201b]">
                       {recurringExpense.title}
                     </td>
@@ -226,21 +226,21 @@ export default async function RecurringExpensesPage({
                       <div className="flex justify-end gap-2">
                         <Link
                           href={`/recurring-expenses/${recurringExpense.id}`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
                           title="Detay"
                         >
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
                           href={`/recurring-expenses/${recurringExpense.id}/edit`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
                           title="Düzenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteRecurringExpenseAction.bind(null, recurringExpense.id)}>
                           <ConfirmSubmitButton
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] text-[#8b2f28] transition hover:border-[#c79a92]"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
                             message="Bu sabit gider tanımını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
                             title="Sil"
                           >

@@ -58,14 +58,14 @@ const categoryNotes: Partial<Record<ImportantDateCategory, string>> = {
 
 function fieldClass(hasError?: boolean) {
   return [
-    "mt-2 h-10 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] outline-none transition",
+    "mt-2 h-11 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
 
 function textareaClass(hasError?: boolean) {
   return [
-    "mt-2 min-h-28 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] outline-none transition",
+    "mt-2 min-h-32 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
@@ -75,7 +75,7 @@ function FieldError({ message }: { message?: string }) {
     return null;
   }
 
-  return <p className="mt-1 text-xs font-medium text-[#b9473d]">{message}</p>;
+  return <p className="mt-1.5 text-xs font-medium text-[#b9473d]">{message}</p>;
 }
 
 export function ImportantDateForm({
@@ -96,15 +96,15 @@ export function ImportantDateForm({
   return (
     <form action={formAction} className="space-y-6">
       {state.message ? (
-        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+        <div className="rounded-lg border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
           {state.message}
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">Hatırlatma bilgileri</h2>
+      <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+        <h2 className="text-base font-semibold text-[#16201b]">Hatırlatma bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Başlık
             <input
               name="title"
@@ -115,7 +115,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.title} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Kategori
             <select
               name="category"
@@ -135,7 +135,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.category} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Tarih
             <input
               name="date"
@@ -147,7 +147,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.date} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Saat
             <input
               name="time"
@@ -158,7 +158,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.time} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Tekrar tipi
             <select
               name="repeatType"
@@ -173,7 +173,7 @@ export function ImportantDateForm({
             </select>
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Kaç gün önce hatırlatılsın
             <input
               name="reminderDaysBefore"
@@ -186,7 +186,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.reminderDaysBefore} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Öncelik
             <select
               name="priority"
@@ -201,7 +201,7 @@ export function ImportantDateForm({
             </select>
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Durum
             <select
               name="status"
@@ -223,7 +223,7 @@ export function ImportantDateForm({
           </div>
         ) : null}
 
-        <label className="mt-4 block text-sm font-medium text-[#46534b]">
+        <label className="mt-5 block text-sm font-semibold text-[#46534b]">
           Açıklama
           <textarea
             name="description"
@@ -233,10 +233,10 @@ export function ImportantDateForm({
         </label>
       </div>
 
-      <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">İlişkili kayıtlar</h2>
+      <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+        <h2 className="text-base font-semibold text-[#16201b]">İlişkili kayıtlar</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Cari firma
             <select
               name="companyId"
@@ -253,7 +253,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.companyId} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Fatura
             <select
               name="invoiceId"
@@ -270,7 +270,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.invoiceId} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Gider
             <select
               name="expenseId"
@@ -287,7 +287,7 @@ export function ImportantDateForm({
             <FieldError message={state.errors?.expenseId} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Finansal hesap
             <select
               name="financialAccountId"
@@ -310,7 +310,7 @@ export function ImportantDateForm({
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-65"
+          className="inline-flex h-11 items-center gap-2 rounded-md bg-[#1f6f54] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] focus:outline-none focus:ring-2 focus:ring-[#8ea99b] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Kaydediliyor" : submitLabel}

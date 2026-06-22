@@ -32,14 +32,14 @@ const initialState: CompanyFormState = {};
 
 function fieldClass(hasError?: boolean) {
   return [
-    "mt-2 h-10 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] outline-none transition",
+    "mt-2 h-11 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
 
 function textareaClass(hasError?: boolean) {
   return [
-    "mt-2 min-h-28 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] outline-none transition",
+    "mt-2 min-h-32 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
@@ -49,7 +49,7 @@ function FieldError({ message }: { message?: string }) {
     return null;
   }
 
-  return <p className="mt-1 text-xs font-medium text-[#b9473d]">{message}</p>;
+  return <p className="mt-1.5 text-xs font-medium text-[#b9473d]">{message}</p>;
 }
 
 export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormProps) {
@@ -58,15 +58,15 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
   return (
     <form action={formAction} className="space-y-6">
       {state.message ? (
-        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+        <div className="rounded-lg border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
           {state.message}
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">Cari bilgileri</h2>
+      <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+        <h2 className="text-base font-semibold text-[#16201b]">Cari bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Firma adı
             <input
               name="name"
@@ -77,7 +77,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             <FieldError message={state.errors?.name} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Cari tipi
             <select
               name="type"
@@ -95,7 +95,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             <FieldError message={state.errors?.type} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Vergi no
             <input
               name="taxNumber"
@@ -104,7 +104,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Vergi dairesi
             <input
               name="taxOffice"
@@ -113,7 +113,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             E-posta
             <input
               name="email"
@@ -124,7 +124,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             <FieldError message={state.errors?.email} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Telefon
             <input
               name="phone"
@@ -133,7 +133,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Ülke
             <input
               name="country"
@@ -142,7 +142,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Şehir
             <input
               name="city"
@@ -151,7 +151,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Varsayılan para birimi
             <input
               name="defaultCurrency"
@@ -161,7 +161,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Risk limiti
             <input
               name="riskLimit"
@@ -174,7 +174,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
             <FieldError message={state.errors?.riskLimit} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Vade günü
             <input
               name="paymentTermDays"
@@ -188,7 +188,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
           </label>
         </div>
 
-        <label className="mt-4 block text-sm font-medium text-[#46534b]">
+        <label className="mt-5 block text-sm font-semibold text-[#46534b]">
           Adres
           <textarea
             name="address"
@@ -197,7 +197,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
           />
         </label>
 
-        <label className="mt-4 block text-sm font-medium text-[#46534b]">
+        <label className="mt-5 block text-sm font-semibold text-[#46534b]">
           Notlar
           <textarea
             name="notes"
@@ -211,7 +211,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-65"
+          className="inline-flex h-11 items-center gap-2 rounded-md bg-[#1f6f54] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] focus:outline-none focus:ring-2 focus:ring-[#8ea99b] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Kaydediliyor" : submitLabel}

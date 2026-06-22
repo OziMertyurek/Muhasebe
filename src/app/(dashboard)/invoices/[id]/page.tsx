@@ -82,14 +82,14 @@ export default async function InvoiceDetailPage({
         <div className="flex gap-2">
           <Link
             href={`/invoices/${invoice.id}/edit`}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <Pencil className="h-4 w-4" />
             Düzenle
           </Link>
           <form action={deleteInvoiceAction.bind(null, invoice.id)}>
             <ConfirmSubmitButton
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
               message="Bu faturayı silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı ödeme durumu etkilenebilir."
             >
               <Trash2 className="h-4 w-4" />
@@ -106,8 +106,8 @@ export default async function InvoiceDetailPage({
       ) : null}
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Fatura ana bilgileri</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Fatura ana bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="Fatura no" value={invoice.invoiceNumber} />
             <InfoItem label="Fatura tipi" value={invoiceTypeLabels[invoice.type]} />
@@ -121,8 +121,8 @@ export default async function InvoiceDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Cari firma</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Cari firma</h2>
           <Link
             href={`/companies/${invoice.company.id}`}
             className="mt-5 flex items-center gap-3 rounded-md border border-[#dce2dc] bg-[#fbfcfa] p-4 transition hover:border-[#aebdae]"
@@ -139,8 +139,8 @@ export default async function InvoiceDetailPage({
           </Link>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Tutar bilgileri</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Tutar bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="Ara toplam" value={formatMoney(invoice.subtotal, invoice.currency)} />
             <InfoItem label="KDV tutarı" value={formatMoney(invoice.vatAmount, invoice.currency)} />
@@ -160,18 +160,18 @@ export default async function InvoiceDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Notlar</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Notlar</h2>
           <p className="mt-5 text-sm leading-6 text-[#223028]">
             {formatPlainValue(invoice.notes)}
           </p>
         </div>
       </section>
 
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-[#16201b]">
+            <h2 className="text-base font-semibold text-[#16201b]">
               Tahsilat / ödeme hareketleri
             </h2>
             <p className="mt-1 text-sm text-[#647067]">
@@ -193,7 +193,7 @@ export default async function InvoiceDetailPage({
         ) : (
           <div className="mt-5 overflow-x-auto">
             <table className="min-w-[760px] w-full border-collapse text-left text-sm">
-              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+              <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
                   <th className="px-4 py-3">İşlem tipi</th>
@@ -204,7 +204,7 @@ export default async function InvoiceDetailPage({
               </thead>
               <tbody>
                 {invoice.payments.map((payment) => (
-                  <tr key={payment.id} className="border-t border-[#e5e9e5]">
+                  <tr key={payment.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 text-[#46534b]">{formatDate(payment.paymentDate)}</td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {paymentTypeLabels[payment.type]}

@@ -61,7 +61,7 @@ function MoneyList({
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-5 text-sm text-[#647067]">
+    <div className="rounded-lg border border-dashed border-[#cfd8cf] bg-[#fbfcfa] px-4 py-5 text-sm text-[#647067]">
       {text}
     </div>
   );
@@ -112,14 +112,14 @@ export default async function CompanyDetailPage({
         <div className="flex gap-2">
           <Link
             href={`/companies/${company.id}/edit`}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <Pencil className="h-4 w-4" />
             Düzenle
           </Link>
           <form action={deleteCompanyAction.bind(null, company.id)}>
             <ConfirmSubmitButton
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
               message="Bu cariyi silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı faturalar, ödemeler ve giderler geçmiş kayıtlarda etkilenebilir."
             >
               <Trash2 className="h-4 w-4" />
@@ -136,8 +136,8 @@ export default async function CompanyDetailPage({
       ) : null}
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Firma bilgileri</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Firma bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="Firma adı" value={company.name} />
             <InfoItem label="Cari tipi" value={companyTypeLabels[company.type]} />
@@ -153,16 +153,16 @@ export default async function CompanyDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Vergi bilgileri</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Vergi bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="Vergi no" value={formatPlainValue(company.taxNumber)} />
             <InfoItem label="Vergi dairesi" value={formatPlainValue(company.taxOffice)} />
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">İletişim bilgileri</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">İletişim bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="E-posta" value={formatPlainValue(company.email)} />
             <InfoItem label="Telefon" value={formatPlainValue(company.phone)} />
@@ -171,8 +171,8 @@ export default async function CompanyDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Adres ve notlar</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Adres ve notlar</h2>
           <div className="mt-5 space-y-4">
             <InfoItem label="Adres" value={formatPlainValue(company.address)} />
             <InfoItem label="Notlar" value={formatPlainValue(company.notes)} />
@@ -181,37 +181,37 @@ export default async function CompanyDetailPage({
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Toplam satış faturası</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.totalSales} />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Toplam alış faturası</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.totalPurchases} />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Net bakiye</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.netBalance} signed />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Toplam tahsilat</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.totalCollections} />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Toplam ödeme</p>
-          <p className="mt-3 text-lg font-semibold text-[#16201b]">
+          <p className="mt-3 text-base font-semibold text-[#16201b]">
             <MoneyList items={statement.summary.totalPayments} />
           </p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <p className="text-sm font-medium text-[#607167]">Kalan alacak / borç</p>
           <div className="mt-3 text-sm font-semibold leading-6 text-[#16201b]">
             <p>
@@ -225,8 +225,8 @@ export default async function CompanyDetailPage({
       </section>
 
       <section className="grid gap-5 xl:grid-cols-3">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Son faturalar</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Son faturalar</h2>
           <div className="mt-5 space-y-3">
             {statement.recentInvoices.length === 0 ? (
               <EmptyState text="Bu cariye ait fatura bulunamadı" />
@@ -256,8 +256,8 @@ export default async function CompanyDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">
             Son tahsilat / ödeme hareketleri
           </h2>
           <div className="mt-5 space-y-3">
@@ -290,8 +290,8 @@ export default async function CompanyDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Son giderler</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Son giderler</h2>
           <div className="mt-5 space-y-3">
             {statement.recentExpenses.length === 0 ? (
               <EmptyState text="Bu cariye ait gider bulunamadı" />
@@ -321,10 +321,10 @@ export default async function CompanyDetailPage({
         </div>
       </section>
 
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-[#16201b]">Cari Ekstre</h2>
+            <h2 className="text-base font-semibold text-[#16201b]">Cari Ekstre</h2>
             <p className="mt-1 text-sm text-[#647067]">
               Son hareketler para birimi bazında ayrı bakiye ile hesaplanır.
             </p>
@@ -342,7 +342,7 @@ export default async function CompanyDetailPage({
             <EmptyState text="Bu cariye ait hareket bulunamadı" />
           ) : (
             <table className="min-w-[820px] w-full border-collapse text-left text-sm">
-              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+              <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
                   <th className="px-4 py-3">İşlem</th>
@@ -355,7 +355,7 @@ export default async function CompanyDetailPage({
               </thead>
               <tbody>
                 {statement.movements.slice(-5).map((movement) => (
-                  <tr key={movement.id} className="border-t border-[#e5e9e5]">
+                  <tr key={movement.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 text-[#46534b]">{formatDate(movement.date)}</td>
                     <td className="px-4 py-3 font-semibold text-[#16201b]">{movement.label}</td>
                     <td className="px-4 py-3 text-[#46534b]">{movement.reference}</td>

@@ -71,14 +71,14 @@ export default async function PaymentDetailPage({
         <div className="flex gap-2">
           <Link
             href={`/payments/${payment.id}/edit`}
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <Pencil className="h-4 w-4" />
             Düzenle
           </Link>
           <form action={deletePaymentAction.bind(null, payment.id)}>
             <ConfirmSubmitButton
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
               message="Bu tahsilat / ödeme hareketini silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve bağlı fatura durumu etkilenebilir."
             >
               <Trash2 className="h-4 w-4" />
@@ -95,8 +95,8 @@ export default async function PaymentDetailPage({
       ) : null}
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">İşlem ana bilgileri</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">İşlem ana bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="Tarih" value={formatDate(payment.paymentDate)} />
             <InfoItem label="İşlem tipi" value={paymentTypeLabels[payment.type]} />
@@ -113,8 +113,8 @@ export default async function PaymentDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Bağlantılar</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+          <h2 className="text-base font-semibold text-[#16201b]">Bağlantılar</h2>
           <div className="mt-5 space-y-3">
             {payment.company ? (
               <Link
@@ -175,8 +175,8 @@ export default async function PaymentDetailPage({
           </div>
         </div>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm lg:col-span-2">
-          <h2 className="text-lg font-semibold text-[#16201b]">Açıklama</h2>
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0 lg:col-span-2">
+          <h2 className="text-base font-semibold text-[#16201b]">Açıklama</h2>
           <p className="mt-5 text-sm leading-6 text-[#223028]">
             {formatPlainValue(payment.description)}
           </p>

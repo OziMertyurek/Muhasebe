@@ -176,7 +176,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
         </div>
       </section>
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
         <div className="grid gap-3 xl:grid-cols-[1fr_170px_150px_150px_150px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -184,13 +184,13 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
               name="q"
               defaultValue={query}
               placeholder="Başlık veya açıklama ara"
-              className="h-10 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54]"
+              className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
           <select
             name="category"
             defaultValue={category ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm kategoriler</option>
             {importantDateCategoryOptions.map((option) => (
@@ -202,7 +202,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
           <select
             name="status"
             defaultValue={status ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm durumlar</option>
             {reminderStatusOptions.map((option) => (
@@ -214,7 +214,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
           <select
             name="priority"
             defaultValue={priority ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tüm öncelikler</option>
             {priorityOptions.map((option) => (
@@ -226,7 +226,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
           <select
             name="upcoming"
             defaultValue={params?.upcoming ?? ""}
-            className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
+            className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <option value="">Tümü</option>
             <option value="today">Bugün</option>
@@ -234,13 +234,13 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
             <option value="month">Bu ay</option>
             <option value="past">Geçmiş</option>
           </select>
-          <button className="inline-flex h-10 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]">
             Filtrele
           </button>
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {importantDates.length === 0 ? (
           <EmptyState
             title="Henüz önemli tarih eklenmedi"
@@ -251,7 +251,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
         ) : (
           <div className="overflow-x-auto">
             <table className="min-w-[1120px] w-full border-collapse text-left text-sm">
-              <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
+              <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
                   <th className="px-4 py-3">Saat</th>
@@ -266,7 +266,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
               </thead>
               <tbody>
                 {importantDates.map((importantDate) => (
-                  <tr key={importantDate.id} className="border-t border-[#e5e9e5]">
+                  <tr key={importantDate.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatDate(importantDate.date)}
                     </td>
@@ -318,21 +318,21 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
                         ) : null}
                         <Link
                           href={`/important-dates/${importantDate.id}`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
                           title="Detay"
                         >
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
                           href={`/important-dates/${importantDate.id}/edit`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
                           title="Düzenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteImportantDateAction.bind(null, importantDate.id)}>
                           <ConfirmSubmitButton
-                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] text-[#8b2f28] transition hover:border-[#c79a92]"
+                            className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
                             message="Bu önemli tarih / hatırlatma kaydını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
                             title="Sil"
                           >

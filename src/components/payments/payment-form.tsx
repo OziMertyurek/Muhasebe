@@ -50,14 +50,14 @@ const initialState: PaymentFormState = {};
 
 function fieldClass(hasError?: boolean) {
   return [
-    "mt-2 h-10 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] outline-none transition",
+    "mt-2 h-11 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
 
 function textareaClass(hasError?: boolean) {
   return [
-    "mt-2 min-h-28 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] outline-none transition",
+    "mt-2 min-h-32 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] shadow-sm outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
@@ -67,7 +67,7 @@ function FieldError({ message }: { message?: string }) {
     return null;
   }
 
-  return <p className="mt-1 text-xs font-medium text-[#b9473d]">{message}</p>;
+  return <p className="mt-1.5 text-xs font-medium text-[#b9473d]">{message}</p>;
 }
 
 export function PaymentForm({
@@ -100,15 +100,15 @@ export function PaymentForm({
   return (
     <form action={formAction} className="space-y-6">
       {state.message ? (
-        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+        <div className="rounded-lg border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
           {state.message}
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">Para hareketi bilgileri</h2>
+      <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+        <h2 className="text-base font-semibold text-[#16201b]">Para hareketi bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             İşlem tipi
             <select
               name="type"
@@ -127,7 +127,7 @@ export function PaymentForm({
             <FieldError message={state.errors?.type} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Cari firma
             <select
               name="companyId"
@@ -154,7 +154,7 @@ export function PaymentForm({
             <FieldError message={state.errors?.companyId} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             İlgili fatura
             <select
               name="invoiceId"
@@ -184,7 +184,7 @@ export function PaymentForm({
             ) : null}
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Finansal hesap
             <select
               name="financialAccountId"
@@ -201,7 +201,7 @@ export function PaymentForm({
             <FieldError message={state.errors?.financialAccountId} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Tutar
             <input
               name="amount"
@@ -215,7 +215,7 @@ export function PaymentForm({
             <FieldError message={state.errors?.amount} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Para birimi
             <input
               name="currency"
@@ -225,7 +225,7 @@ export function PaymentForm({
             />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Tarih
             <input
               name="paymentDate"
@@ -237,7 +237,7 @@ export function PaymentForm({
             <FieldError message={state.errors?.paymentDate} />
           </label>
 
-          <label className="block text-sm font-medium text-[#46534b]">
+          <label className="block text-sm font-semibold text-[#46534b]">
             Ödeme yöntemi
             <select
               name="method"
@@ -263,7 +263,7 @@ export function PaymentForm({
           </div>
         ) : null}
 
-        <label className="mt-4 block text-sm font-medium text-[#46534b]">
+        <label className="mt-5 block text-sm font-semibold text-[#46534b]">
           Açıklama
           <textarea
             name="description"
@@ -277,7 +277,7 @@ export function PaymentForm({
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-65"
+          className="inline-flex h-11 items-center gap-2 rounded-md bg-[#1f6f54] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] focus:outline-none focus:ring-2 focus:ring-[#8ea99b] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Kaydediliyor" : submitLabel}
