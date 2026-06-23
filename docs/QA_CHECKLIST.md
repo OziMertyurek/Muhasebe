@@ -54,4 +54,4 @@ Bu kontrol listesi v2.1.0 release oncesi yapilan genel urun QA kapsamini ozetler
 - [x] Packaged/production server `127.0.0.1` dinler.
 - [x] `0.0.0.0:3000` listener gorunmez.
 - [x] Diagnostics raporu `.env`, gercek `DATABASE_URL`, tam AppData/DB path, upload/fatura/backup dosyasi icermez.
-- [x] `npm audit` bulgulari incelendi; critical bulgu yoktur.
+- [x] `npm audit` temiz: `found 0 vulnerabilities`.

@@ -13,14 +13,14 @@ Bu taslak release, v2.1.0 sonrasinda genis dagitim oncesi yapilan guvenlik sikil
 - 5 hatali PIN denemesinden sonra 5 dakika gecici kilit uygulanir.
 - Local Host/Origin/Referer kontrolu eklendi.
 - Diagnostics/log gizliligi korunur; hata raporu `.env`, gercek `DATABASE_URL`, tam path veya kullanici dosyasi icermez.
-- `npm audit` bulgulari incelendi; critical bulgu yoktur.
+- `npm audit` bulgulari giderildi; son durumda `found 0 vulnerabilities` sonucunu verir.
 
 ### Audit Notu
 
-- `npm audit` sonucu 0 critical, 1 high, 5 moderate bulgu verdi.
-- High bulgu `hono` transitive dependency zincirinden gelir ve uygulama Hono static server olarak calismadigi icin packaged runtime yuzeyinde dogrudan risk olarak degerlendirilmedi.
-- Otomatik audit fix onerileri Next/Prisma gibi cekirdek paketlerde riskli major/downgrade hareketi oneriyor; v2.1.1 kapsaminda uygulanmadi.
-- Dependency guncellemeleri ayri test branch uzerinde ele alinmalidir.
+- `npm audit` son durumda temizdir: `found 0 vulnerabilities`.
+- `npm audit fix --force` kullanilmadi.
+- `hono`, `@hono/node-server` ve `postcss` transitive audit bulgulari kontrollu lockfile/override duzeltmeleriyle kapatildi.
+- Dependency degisiklikleri lint, build, Prisma, portable ve installer build kontrollerinden gecirildi.
 
 ## v2.1.0 - UI/UX Desktop Release
 
