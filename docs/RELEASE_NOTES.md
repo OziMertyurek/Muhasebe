@@ -1,26 +1,33 @@
 # Release Notes
 
-## v2.1.1 - Taslak / Security Hardening
+## v2.1.1 - Security Hardening Release
 
-Bu taslak release, v2.1.0 sonrasinda genis dagitim oncesi yapilan guvenlik sikilastirmalarini ozetler.
+Bu patch release, v2.1.0 uzerine guvenlik duzeltmeleri ve dependency audit temizligi getirir. Yeni ozellik, DB schema degisikligi, signing/notarization veya SQLite encryption bu release kapsaminda yoktur.
 
 ### One Cikanlar
 
 - Export CSV/PDF route'larina local PIN auth korumasi eklendi.
 - AI extraction POST route'larina local PIN auth korumasi eklendi.
-- Desktop production/packaged server localhost/`127.0.0.1` ile sinirlandirildi.
+- Desktop production/packaged server `127.0.0.1` localhost ile sinirlandirildi.
 - PIN cok deneme korumasi eklendi.
 - 5 hatali PIN denemesinden sonra 5 dakika gecici kilit uygulanir.
 - Local Host/Origin/Referer kontrolu eklendi.
-- Diagnostics/log gizliligi korunur; hata raporu `.env`, gercek `DATABASE_URL`, tam path veya kullanici dosyasi icermez.
 - `npm audit` bulgulari giderildi; son durumda `found 0 vulnerabilities` sonucunu verir.
+- Diagnostics/log gizliligi korunur; hata raporu `.env`, gercek `DATABASE_URL`, tam path veya kullanici dosyasi icermez.
 
-### Audit Notu
+### Kapsam Disi Kalanlar
 
-- `npm audit` son durumda temizdir: `found 0 vulnerabilities`.
-- `npm audit fix --force` kullanilmadi.
-- `hono`, `@hono/node-server` ve `postcss` transitive audit bulgulari kontrollu lockfile/override duzeltmeleriyle kapatildi.
-- Dependency degisiklikleri lint, build, Prisma, portable ve installer build kontrollerinden gecirildi.
+- Windows code signing bu release kapsaminda degildir.
+- macOS signing/notarization bu release kapsaminda degildir; Gatekeeper uyarisi gorulebilir.
+- SQLite DB encryption sonraki plan olarak durur.
+
+### Indirme Notu
+
+- Windows kullanicilari icin onerilen dosya: `Muhasebe-Takip-Setup-2.1.1.exe`.
+- Kurulum istemeyen kullanicilar icin portable dosya: `Muhasebe-Takip-Portable-2.1.1.exe`.
+- Apple Silicon Mac kullanicilari `arm64`, Intel Mac kullanicilari `x64` macOS dosyasini indirmelidir.
+- Node.js ve Python ayrica kurulmaz; desktop paketleri gerekli runtime altyapisini beraber getirir.
+- Veriler yerel bilgisayarda saklanir. Duzenli olarak Tam Yedek alinmalidir.
 
 ## v2.1.0 - UI/UX Desktop Release
 
