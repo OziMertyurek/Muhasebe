@@ -9,6 +9,7 @@ import {
   PackageCheck,
   ShieldAlert,
 } from "lucide-react";
+import { HelpHint } from "@/components/ui/help-hint";
 import {
   formatBackupReminderDate,
   getBackupReminderStatus,
@@ -65,6 +66,16 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
           olarak tam yedek alınmalıdır.
         </p>
       </section>
+
+      <HelpHint
+        title="Yedekleme ve geri yukleme icin ipucu"
+        items={[
+          "Duzenli olarak Tam Yedek Indir kullanin.",
+          "Restore islemi mevcut verileri etkileyebilir.",
+          "Bilinmeyen yedek dosyalarini kullanmayin.",
+        ]}
+        href="/help#yedekleme"
+      />
 
       {params?.reminderSaved === "1" ? (
         <div className="rounded-md border border-[#b9d8c7] bg-[#f1faf4] px-4 py-3 text-sm font-medium text-[#14543f]">

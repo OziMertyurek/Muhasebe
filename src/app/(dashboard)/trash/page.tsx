@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArchiveRestore, Ban, ExternalLink, Info, Trash2 } from "lucide-react";
+import { HelpHint } from "@/components/ui/help-hint";
 import { EmptyState } from "@/components/ui/empty-state";
 import { restoreTrashRecordAction } from "@/app/(dashboard)/trash/actions";
 import {
@@ -48,6 +49,15 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
           Ayarlara dön
         </Link>
       </section>
+
+      <HelpHint
+        title="Cop kutusu icin ipucu"
+        items={[
+          "Silinen kayitlari burada inceleyebilirsiniz.",
+          "Geri yuklemeden once kaydin tipini ve tarihini kontrol edin.",
+          "Kalici temizlik islemlerinde dikkatli olun.",
+        ]}
+      />
 
       {params?.restored === "1" ? (
         <div className="rounded-md border border-[#b8d9c8] bg-[#f0faf4] px-4 py-3 text-sm font-medium text-[#14543f]">

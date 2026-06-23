@@ -4,6 +4,7 @@ import { ArrowLeft, ExternalLink, Pencil, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
 import { RelatedFilesCard } from "@/components/files/related-files-card";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
+import { HelpHint } from "@/components/ui/help-hint";
 import {
   companyTypeLabels,
   formatDate,
@@ -128,6 +129,16 @@ export default async function CompanyDetailPage({
           </form>
         </div>
       </section>
+
+      <HelpHint
+        title="Cari detay icin ipucu"
+        items={[
+          "Bakiye, toplam borc/alacak ve son hareketleri birlikte kontrol edin.",
+          "Tam ekstreye gecerek tarih ve para birimi bazinda inceleme yapabilirsiniz.",
+          "Dosya ekleri ve notlar cari takibini kolaylastirir.",
+        ]}
+        href="/help#cariler"
+      />
 
       {query?.error === "delete" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">

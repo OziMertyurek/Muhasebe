@@ -12,6 +12,7 @@ import {
   markImportantDatePendingAction,
 } from "@/app/(dashboard)/important-dates/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpHint } from "@/components/ui/help-hint";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
@@ -156,6 +157,16 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
           Hatırlatma Ekle
         </Link>
       </section>
+
+      <HelpHint
+        title="Hatirlatmalar icin ipucu"
+        items={[
+          "Vergi, vade, sozlesme ve kart tarihlerini buradan takip edin.",
+          "Oncelik ve durum alanlarini guncel tutun.",
+          "Geciken bekleyenleri duzenli kontrol edin.",
+        ]}
+        href="/help#baslangic"
+      />
 
       <section className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">

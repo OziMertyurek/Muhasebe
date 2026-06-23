@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Eye, History, Search } from "lucide-react";
+import { HelpHint } from "@/components/ui/help-hint";
 import { EmptyState } from "@/components/ui/empty-state";
 import {
   auditActionOptions,
@@ -43,6 +44,15 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
           hareketlerini ve kayıt değişikliklerini buradan takip edin.
         </p>
       </section>
+
+      <HelpHint
+        title="Islem gecmisi icin ipucu"
+        items={[
+          "Onemli kayit, yedekleme ve restore islemlerini buradan izleyin.",
+          "Filtrelerle belirli islem tiplerini daha hizli bulun.",
+          "Supheli bir durumda son hareketleri kontrol edin.",
+        ]}
+      />
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
         <div className="grid gap-3 lg:grid-cols-[1fr_190px_190px_150px_150px_auto]">

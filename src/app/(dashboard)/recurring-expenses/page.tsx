@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteRecurringExpenseAction } from "@/app/(dashboard)/recurring-expenses/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpHint } from "@/components/ui/help-hint";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
@@ -105,6 +106,16 @@ export default async function RecurringExpensesPage({
           Yeni Sabit Gider
         </Link>
       </section>
+
+      <HelpHint
+        title="Sabit giderler icin ipucu"
+        items={[
+          "Tekrar eden kira, abonelik ve duzenli odemeleri sablon olarak tutun.",
+          "Ay gunu ve aktif/pasif durumunu net belirleyin.",
+          "Aylik toplam sabit gideri kontrol edin.",
+        ]}
+        href="/help#giderler"
+      />
 
       <section className="grid gap-4 md:grid-cols-3">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">

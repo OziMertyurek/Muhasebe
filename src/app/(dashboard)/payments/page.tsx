@@ -3,6 +3,7 @@ import { PaymentMethod, PaymentType } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deletePaymentAction } from "@/app/(dashboard)/payments/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpHint } from "@/components/ui/help-hint";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
@@ -133,6 +134,16 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
           </Link>
         </div>
       </section>
+
+      <HelpHint
+        title="Tahsilat ve odeme icin ipucu"
+        items={[
+          "Cari hareketlerinize tahsilat veya odeme kaydi ekleyin.",
+          "Dogru cari ve tutar sectiginizden emin olun.",
+          "Ilgili faturayi secmek durumu daha net takip ettirir.",
+        ]}
+        href="/help#tahsilat-odeme"
+      />
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
         <div className="grid gap-3 xl:grid-cols-[1fr_180px_180px_150px_150px_auto]">

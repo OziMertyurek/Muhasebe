@@ -5,6 +5,7 @@ import { ArrowLeft, Building2, Pencil, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { RelatedFilesCard } from "@/components/files/related-files-card";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
+import { HelpHint } from "@/components/ui/help-hint";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
@@ -98,6 +99,16 @@ export default async function InvoiceDetailPage({
           </form>
         </div>
       </section>
+
+      <HelpHint
+        title="Fatura detay icin ipucu"
+        items={[
+          "Cari, tarih, vade ve toplam tutar bilgilerini birlikte kontrol edin.",
+          "Bagli tahsilat/odeme hareketleri kalan tutari etkiler.",
+          "Fatura dosyalarini eklerde saklayabilirsiniz.",
+        ]}
+        href="/help#faturalar"
+      />
 
       {query?.error === "delete" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">

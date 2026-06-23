@@ -3,6 +3,7 @@ import { CompanyType } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpHint } from "@/components/ui/help-hint";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { companyTypeLabels, companyTypeOptions, formatDate } from "@/lib/company-utils";
 import { buildExportHref } from "@/lib/export-utils";
@@ -69,6 +70,16 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
           </Link>
         </div>
       </section>
+
+      <HelpHint
+        title="Cari kayitlari icin ipucu"
+        items={[
+          "Musteri ve tedarikcilerinizi buradan yonetin.",
+          "Her cari icin bakiye ve hareketleri takip edebilirsiniz.",
+          "Ilk kayit icin Yeni Cari ile baslayin.",
+        ]}
+        href="/help#cariler"
+      />
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
         <div className="grid gap-3 md:grid-cols-[1fr_220px_auto]">

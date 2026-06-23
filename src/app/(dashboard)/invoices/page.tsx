@@ -3,6 +3,7 @@ import { InvoiceStatus, InvoiceType } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpHint } from "@/components/ui/help-hint";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
@@ -130,6 +131,16 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
           </Link>
         </div>
       </section>
+
+      <HelpHint
+        title="Fatura takibi icin ipucu"
+        items={[
+          "Satis ve alis faturalarinizi buradan takip edin.",
+          "Vade, odeme durumu ve cari bilgilerini kontrol edin.",
+          "Kaydetmeden once tutar ve tarih bilgilerini dogrulayin.",
+        ]}
+        href="/help#faturalar"
+      />
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
         <div className="grid gap-3 lg:grid-cols-[1fr_220px_180px_auto]">

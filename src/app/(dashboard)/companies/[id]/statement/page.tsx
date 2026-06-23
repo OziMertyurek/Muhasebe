@@ -11,6 +11,7 @@ import {
   parseStatementDateFilter,
 } from "@/lib/company-statement-utils";
 import { buildExportHref } from "@/lib/export-utils";
+import { HelpHint } from "@/components/ui/help-hint";
 
 type CompanyStatementPageProps = {
   params: Promise<{ id: string }>;
@@ -126,6 +127,16 @@ export default async function CompanyStatementPage({
           </a>
         </div>
       </section>
+
+      <HelpHint
+        title="Cari ekstre icin ipucu"
+        items={[
+          "Hareketler tarih sirasiyla borc, alacak ve bakiye olarak listelenir.",
+          "Filtrelerle belirli tarih araligi veya hareket tipine odaklanin.",
+          "CSV/PDF ciktilarini paylasmadan once bilgileri kontrol edin.",
+        ]}
+        href="/help#cariler"
+      />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">

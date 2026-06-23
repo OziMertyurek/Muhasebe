@@ -11,6 +11,7 @@ import {
   Terminal,
   XCircle,
 } from "lucide-react";
+import { HelpHint } from "@/components/ui/help-hint";
 import {
   getSystemStatus,
   type SystemStatusCheck,
@@ -80,6 +81,16 @@ export default async function SystemStatusPage() {
           altyapısının genel sağlık durumunu kontrol edin.
         </p>
       </section>
+
+      <HelpHint
+        title="Sistem kontrolu icin ipucu"
+        items={[
+          "Uygulama, veritabani, yedek ve destek durumunu buradan kontrol edin.",
+          "Sorun halinde hata raporu disa aktarabilirsiniz.",
+          "Hata raporu hassas veri icermeyecek sekilde tasarlanmistir.",
+        ]}
+        href="/help#destek"
+      />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <InfoCard icon={Activity} label="Uygulama" value={status.appName} />

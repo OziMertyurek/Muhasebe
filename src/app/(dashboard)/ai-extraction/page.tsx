@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AiExtractionStatus, FileRelatedType } from "@prisma/client";
 import { CheckCircle2, Eye, FileSearch, FileUp, Pencil, Plus, ScanText, Search } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpHint } from "@/components/ui/help-hint";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   aiExtractionRelatedTypeLabels,
@@ -106,6 +107,16 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
           Yeni Analiz Kaydı
         </Link>
       </section>
+
+      <HelpHint
+        title="AI fatura okuma icin ipucu"
+        items={[
+          "Fatura dosyasini yukleyin.",
+          "Sistem bilgileri cikardiktan sonra mutlaka kontrol edin.",
+          "Cari eslesmesini ve tutari onaylamadan kaydetmeyin.",
+        ]}
+        href="/help#ai"
+      />
 
       <section className="grid gap-3 md:grid-cols-3">
         {aiFlowSteps.map((step) => {

@@ -3,6 +3,7 @@ import { ExpenseStatus } from "@prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteExpenseAction } from "@/app/(dashboard)/expenses/actions";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HelpHint } from "@/components/ui/help-hint";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatDate } from "@/lib/company-utils";
@@ -143,6 +144,16 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
           </Link>
         </div>
       </section>
+
+      <HelpHint
+        title="Gider kaydi icin ipucu"
+        items={[
+          "Isletme giderlerinizi duzenli olarak kaydedin.",
+          "Kategori ve tarih bilgisi raporlarin dogrulugu icin onemlidir.",
+          "Odendi / Odenmedi durumunu guncel tutun.",
+        ]}
+        href="/help#giderler"
+      />
 
       <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
         <div className="grid gap-3 xl:grid-cols-[1fr_190px_160px_150px_150px_auto]">

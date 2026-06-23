@@ -9,6 +9,7 @@ import {
   PieChart,
   WalletCards,
 } from "lucide-react";
+import { HelpHint } from "@/components/ui/help-hint";
 
 const reports = [
   {
@@ -56,6 +57,16 @@ export default function ReportsPage() {
           listeleri CSV veya PDF olarak dışa aktarın.
         </p>
       </section>
+
+      <HelpHint
+        title="Raporlari okurken"
+        items={[
+          "Finansal ozetleri buradan inceleyin.",
+          "Raporlar kayitli verilere gore olusur.",
+          "Bos gorunuyorsa once cari, fatura ve gider kayitlarini kontrol edin.",
+        ]}
+        href="/help#raporlar"
+      />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {reports.map((report) => {

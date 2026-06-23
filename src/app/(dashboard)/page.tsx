@@ -14,6 +14,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
+import { HelpHint } from "@/components/ui/help-hint";
 import {
   formatBackupReminderDate,
   getBackupReminderStatus,
@@ -223,6 +224,16 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </section>
+
+      <HelpHint
+        title="Bu sayfada neye bakmaliyim?"
+        items={[
+          "Genel durumunuzu buradan takip edin.",
+          "Yaklasan vadeleri ve son hareketleri kontrol edin.",
+          "Duzenli olarak tam yedek almayi unutmayin.",
+        ]}
+        href="/help#baslangic"
+      />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {dashboardStats.map((stat) => (
