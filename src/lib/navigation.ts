@@ -5,6 +5,7 @@ import {
   CreditCard,
   FolderArchive,
   FileText,
+  HelpCircle,
   Home,
   Landmark,
   Receipt,
@@ -75,6 +76,11 @@ export const navigationItems = [
     label: "Raporlar",
     href: "/reports",
     icon: BarChart3,
+  },
+  {
+    label: "Yardim",
+    href: "/help",
+    icon: HelpCircle,
   },
   {
     label: "Ayarlar",

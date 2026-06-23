@@ -325,3 +325,7 @@ npm run lint
 npm run prisma:generate
 npx prisma migrate dev
 ```
+
+## Musteri Kullanim Rehberi
+
+Uygulamayi kullanmaya baslayan musteriler icin temel akislari anlatan yazili rehber [docs/USER_GUIDE.md](docs/USER_GUIDE.md) dosyasindadir. Uygulama icinde ayni bilgilerin kisa ozeti sol menudeki `Yardim` sayfasindan acilabilir.

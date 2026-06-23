@@ -25,7 +25,7 @@ const navigationGroups = [
   },
   {
     title: "Analiz",
-    hrefs: ["/reports", "/settings"],
+    hrefs: ["/reports", "/help", "/settings"],
   },
 ];
 
