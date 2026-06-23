@@ -66,7 +66,10 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="border-b border-[#dce2dc] bg-white md:fixed md:inset-y-0 md:left-0 md:w-64 md:border-b-0 md:border-r">
+    <aside
+      data-tour="sidebar"
+      className="border-b border-[#dce2dc] bg-white md:fixed md:inset-y-0 md:left-0 md:w-64 md:border-b-0 md:border-r"
+    >
       <div className="flex h-full flex-col">
         <div className="flex h-16 items-center gap-3 border-b border-[#dce2dc] px-5">
           <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#1f6f54] text-white shadow-sm">
@@ -97,6 +100,19 @@ export function Sidebar() {
                     <Link
                       key={item.href}
                       href={item.href}
+                      data-tour={
+                        item.href === "/companies"
+                          ? "companies"
+                          : item.href === "/invoices"
+                            ? "invoices"
+                            : item.href === "/ai-extraction"
+                              ? "ai-extraction"
+                              : item.href === "/settings"
+                                ? "system-status"
+                                : item.href === "/help"
+                                  ? "help"
+                                  : undefined
+                      }
                       aria-current={isActive ? "page" : undefined}
                       className={clsx(
                         "group relative flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition md:h-10",

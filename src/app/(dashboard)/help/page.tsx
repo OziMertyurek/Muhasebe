@@ -14,6 +14,7 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
+import { GuidedTourButton } from "@/components/ui/guided-tour";
 
 export const dynamic = "force-dynamic";
 
@@ -259,6 +260,22 @@ export default function HelpPage() {
         </article>
       </section>
 
+      <section
+        data-tour="help"
+        className="rounded-lg border border-[#c7dfcf] bg-[#f4fbf6] p-5 shadow-sm"
+      >
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm font-medium text-[#14543f]">Yeni kullanicilar icin onerilir</p>
+            <h2 className="mt-1 text-lg font-semibold text-[#16201b]">Baslangic Turu</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#46534b]">
+              Uygulamanin temel alanlarini kisa baloncuklarla tanitin: dashboard, sol menu,
+              cariler, faturalar, AI fatura okuma, yedekleme ve destek araclari.
+            </p>
+          </div>
+          <GuidedTourButton compact />
+        </div>
+      </section>
       <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
         <div className="flex items-start justify-between gap-4">
           <div>

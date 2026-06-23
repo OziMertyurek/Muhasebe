@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
 import { HelpHint } from "@/components/ui/help-hint";
+import { GuidedTourButton } from "@/components/ui/guided-tour";
 import {
   formatBackupReminderDate,
   getBackupReminderStatus,
@@ -192,7 +193,10 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <section className="rounded-xl border border-[#dce2dc] bg-white p-6 shadow-sm lg:flex lg:items-end lg:justify-between lg:gap-6">
+      <section
+        data-tour="dashboard-summary"
+        className="rounded-xl border border-[#dce2dc] bg-white p-6 shadow-sm lg:flex lg:items-end lg:justify-between lg:gap-6"
+      >
         <div>
           <p className="text-sm font-medium text-[#607167]">Genel bakış</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
@@ -208,6 +212,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="mt-5 flex flex-wrap gap-2 lg:mt-0">
+          <GuidedTourButton />
           <Link
             href="/payments/new"
             className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
@@ -277,6 +282,7 @@ export default async function DashboardPage() {
       </section>
 
       <section
+        data-tour="backup"
         className={
           backupReminder.tone === "warning"
             ? "rounded-lg border border-[#f0d9a2] bg-[#fffaf0] p-5 shadow-sm"
