@@ -55,3 +55,15 @@ Bu kontrol listesi v2.1.0 release oncesi yapilan genel urun QA kapsamini ozetler
 - [x] `0.0.0.0:3000` listener gorunmez.
 - [x] Diagnostics raporu `.env`, gercek `DATABASE_URL`, tam AppData/DB path, upload/fatura/backup dosyasi icermez.
 - [x] `npm audit` temiz: `found 0 vulnerabilities`.
+
+## v2.2.0 Help & Onboarding Smoke Checklist
+
+- [x] `/help` route 500 vermeden acilir veya korumali akisla login/onboarding'e yonlenir.
+- [x] Sidebar icinde Yardim linki gorunur.
+- [x] Dashboard ust alaninda Baslangic Turu baslatma butonu gorunur.
+- [x] Yardim Merkezi icinde Baslangic Turu karti gorunur.
+- [x] Baslangic Turu acilir.
+- [x] Ileri, Geri, Bitir, Turu atla ve ESC ile kapatma kontrolleri calisir.
+- [x] HelpHint kutulari ana operasyon sayfalarinda gorunur.
+- [x] Security smoke test davranislari bozulmaz.
+- [x] `npm audit` temiz: `found 0 vulnerabilities`.

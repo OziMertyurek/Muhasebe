@@ -1,5 +1,37 @@
 # Release Notes
 
+## v2.2.0 - Help & Onboarding Release
+
+Bu release, yeni kullanicilarin uygulamayi daha rahat ogrenebilmesi icin Yardim Merkezi, sayfa ici ipucu kutulari ve baloncuklu Baslangic Turu ozelliklerini ekler. v2.1.1 guvenlik duzeltmeleri korunur ve `npm audit` son durumda `found 0 vulnerabilities` sonucunu verir.
+
+### One Cikanlar
+
+- Yardim Merkezi eklendi.
+- `docs/USER_GUIDE.md` musteri kullanim rehberi eklendi.
+- Ana operasyon sayfalarina sayfa ici HelpHint ipucu kutulari eklendi.
+- Baloncuklu Baslangic Turu eklendi.
+- Baslangic Turu Dashboard ve Yardim Merkezi uzerinden baslatilabilir.
+- Tur Ileri, Geri, Bitir, Turu atla ve ESC ile kapatma kontrollerini destekler.
+- 8 adimli baslangic rehberi eklendi:
+  - Dashboard
+  - Sidebar
+  - Cariler
+  - Faturalar
+  - AI Fatura Okuma
+  - Backup/Yedekleme
+  - System Status/Destek
+  - Yardim Merkezi
+- v2.1.1 security hardening davranislari korunur.
+- `npm audit` temiz: `found 0 vulnerabilities`.
+
+### Indirme Notu
+
+- Windows kullanicilari icin onerilen dosya: `Muhasebe-Takip-Setup-2.2.0.exe`.
+- Kurulum istemeyen kullanicilar icin portable dosya: `Muhasebe-Takip-Portable-2.2.0.exe`.
+- Apple Silicon Mac kullanicilari `arm64`, Intel Mac kullanicilari `x64` macOS dosyasini indirmelidir.
+- macOS uygulamasi henuz Apple Developer ID ile signed/notarized degildir; Gatekeeper uyarisi gorulebilir.
+- Node.js ve Python ayrica kurulmaz; desktop paketleri gerekli runtime altyapisini beraber getirir.
+- Veriler yerel bilgisayarda saklanir. Duzenli olarak Tam Yedek alinmalidir.
 ## v2.1.1 - Security Hardening Release
 
 Bu patch release, v2.1.0 uzerine guvenlik duzeltmeleri ve dependency audit temizligi getirir. Yeni ozellik, DB schema degisikligi, signing/notarization veya SQLite encryption bu release kapsaminda yoktur.

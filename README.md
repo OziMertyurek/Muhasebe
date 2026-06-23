@@ -4,7 +4,7 @@ Bu proje local çalışan, şirket içi kullanım için geliştirilmiş mini muh
 
 Uygulama online yayınlanmak için değil, yerel bilgisayarda çalışmak için tasarlanmıştır. Kod private GitHub repository içinde tutulabilir; veritabanı ve yüklenen dosyalar ayrıca yedeklenmelidir.
 
-## v2.1.1 Desktop Release Durumu
+## v2.2.0 Desktop Release Durumu
 
 Bu sürüm Windows desktop kullanımı için setup installer ve portable exe paketleri hazır olan stabil desktop release sürümüdür.
 
@@ -12,6 +12,7 @@ Bu sürüm Windows desktop kullanımı için setup installer ve portable exe pak
 - Paketli desktop modda veriler `%APPDATA%/MuhasebeTakip/` altında saklanır.
 - Node.js ve Python kurulu olmayan kullanicilar icin paketli uygulamada bundled Node ve bundled Python runtime kullanilir.
 - Onboarding, local PIN/login, backup/restore, ZIP/CSV/PDF download ve AI fatura okuma akışları korunur.
+- Yardim Merkezi, sayfa ici ipucu kutulari ve baloncuklu Baslangic Turu yeni kullanicilarin uygulamayi daha kolay ogrenmesine yardim eder.
 - GitHub sadece kodu saklar; veritabanı ve upload dosyalarını saklamaz.
 - Veritabanı ve upload dosyaları için düzenli yedek alınmalıdır.
 
@@ -21,19 +22,19 @@ Bu sürüm Windows desktop kullanımı için setup installer ve portable exe pak
 Windows 10/11 kullaniyorsaniz GitHub Release sayfasindan su dosyayi indirin:
 
 ```text
-Muhasebe-Takip-v2.1.1-Windows-Release.zip
+Muhasebe-Takip-v2.2.0-Windows-Release.zip
 ```
 
 ZIP icinden onerilen kurulum dosyasi:
 
 ```text
-Muhasebe-Takip-Setup-2.1.1.exe
+Muhasebe-Takip-Setup-2.2.0.exe
 ```
 
 Kurulum yapmak istemeyen ileri kullanicilar portable surumu kullanabilir:
 
 ```text
-Muhasebe-Takip-Portable-2.1.1.exe
+Muhasebe-Takip-Portable-2.2.0.exe
 ```
 
 Node.js veya Python kurmaniza gerek yoktur; Windows desktop paketi gerekli runtime'lari beraber getirir. Veriler %APPDATA%/MuhasebeTakip/ altinda saklanir. Duzenli olarak Ayarlar > Yedekleme > Tam Yedek Indir ile tam yedek alinmalidir.
@@ -41,13 +42,13 @@ Node.js veya Python kurmaniza gerek yoktur; Windows desktop paketi gerekli runti
 macOS icin ciktilar isletim sistemi mimarisine gore ayrilir:
 
 ```text
-Muhasebe-Takip-2.1.1-macOS-arm64.dmg
-Muhasebe-Takip-2.1.1-macOS-x64.dmg
+Muhasebe-Takip-2.2.0-macOS-arm64.dmg
+Muhasebe-Takip-2.2.0-macOS-x64.dmg
 ```
 
 Apple Silicon Mac icin `arm64`, Intel Mac icin `x64` dosyasi indirilmelidir. macOS uygulamasi henuz Apple Developer ID ile signed/notarized degildir; Gatekeeper uyarisi gorulebilir. Ilk acilista gerekirse sag tik > Open kullanilabilir.
 
-macOS build denemeleri GitHub Actions uzerinden manuel workflow ile yapilir. Gercek Mac cihaz testi v2.1.1 sonrasinda ayrica takip edilecektir.
+macOS build denemeleri GitHub Actions uzerinden manuel workflow ile yapilir. Gercek Mac cihaz testi v2.2.0 sonrasinda ayrica takip edilecektir.
 ## Özellikler
 
 - Dashboard gerçek veri özetleri
@@ -177,7 +178,7 @@ npm run build
 npm run dist:portable
 ```
 
-Bu komut `dist/Muhasebe-Takip-Portable-2.1.1.exe` çıktısını üretir. Paket içine `.env`, local DB ve upload klasörleri alınmaz; paketli Electron modunda kullanıcı verisi AppData altındaki `MuhasebeTakip` veri klasöründe tutulur.
+Bu komut `dist/Muhasebe-Takip-Portable-2.2.0.exe` çıktısını üretir. Paket içine `.env`, local DB ve upload klasörleri alınmaz; paketli Electron modunda kullanıcı verisi AppData altındaki `MuhasebeTakip` veri klasöründe tutulur.
 
 Windows setup installer denemesi için:
 
@@ -186,7 +187,7 @@ npm run build
 npm run dist:installer
 ```
 
-Bu komut `dist/Muhasebe-Takip-Setup-2.1.1.exe` çıktısını üretir. Installer masaüstü ve Start Menu kısayolu oluşturur. Kaldırma sırasında AppData içindeki uygulama verisi otomatik silinmez; veritabanı ve upload dosyaları için düzenli tam yedek alınmaya devam edilmelidir.
+Bu komut `dist/Muhasebe-Takip-Setup-2.2.0.exe` çıktısını üretir. Installer masaüstü ve Start Menu kısayolu oluşturur. Kaldırma sırasında AppData içindeki uygulama verisi otomatik silinmez; veritabanı ve upload dosyaları için düzenli tam yedek alınmaya devam edilmelidir.
 
 Desktop build çıktıları `dist/` altında oluşur ve Git'e alınmaz. Son kullanıcıya dosya vermeden önce `Ayarlar > Yedekleme > Tam Yedek İndir` akışı ile tam yedek alma alışkanlığı korunmalıdır.
 
@@ -329,3 +330,5 @@ npx prisma migrate dev
 ## Musteri Kullanim Rehberi
 
 Uygulamayi kullanmaya baslayan musteriler icin temel akislari anlatan yazili rehber [docs/USER_GUIDE.md](docs/USER_GUIDE.md) dosyasindadir. Uygulama icinde ayni bilgilerin kisa ozeti sol menudeki `Yardim` sayfasindan acilabilir.
+
+Baslangic Turu Dashboard ve Yardim Merkezi uzerinden baslatilabilir. Tur, Dashboard, Sidebar, Cariler, Faturalar, AI Fatura Okuma, Yedekleme, System Status/Destek ve Yardim Merkezi adimlarini kisa baloncuklarla anlatir.
