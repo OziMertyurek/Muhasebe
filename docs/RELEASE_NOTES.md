@@ -1,5 +1,27 @@
 # Release Notes
 
+## v2.1.1 - Taslak / Security Hardening
+
+Bu taslak release, v2.1.0 sonrasinda genis dagitim oncesi yapilan guvenlik sikilastirmalarini ozetler.
+
+### One Cikanlar
+
+- Export CSV/PDF route'larina local PIN auth korumasi eklendi.
+- AI extraction POST route'larina local PIN auth korumasi eklendi.
+- Desktop production/packaged server localhost/`127.0.0.1` ile sinirlandirildi.
+- PIN cok deneme korumasi eklendi.
+- 5 hatali PIN denemesinden sonra 5 dakika gecici kilit uygulanir.
+- Local Host/Origin/Referer kontrolu eklendi.
+- Diagnostics/log gizliligi korunur; hata raporu `.env`, gercek `DATABASE_URL`, tam path veya kullanici dosyasi icermez.
+- `npm audit` bulgulari incelendi; critical bulgu yoktur.
+
+### Audit Notu
+
+- `npm audit` sonucu 0 critical, 1 high, 5 moderate bulgu verdi.
+- High bulgu `hono` transitive dependency zincirinden gelir ve uygulama Hono static server olarak calismadigi icin packaged runtime yuzeyinde dogrudan risk olarak degerlendirilmedi.
+- Otomatik audit fix onerileri Next/Prisma gibi cekirdek paketlerde riskli major/downgrade hareketi oneriyor; v2.1.1 kapsaminda uygulanmadi.
+- Dependency guncellemeleri ayri test branch uzerinde ele alinmalidir.
+
 ## v2.1.0 - UI/UX Desktop Release
 
 Bu release, Muhasebe Takip uygulamasinin masaustu kullanima daha hazir ve satisa sunulabilir hissettirmesi icin yapilan UI/UX yenilemesini tamamlar. Teknik cekirdek, veritabani semasi, AppData veri davranisi, backup/restore, Electron runtime ve Python/MarkItDown akislari korunmustur.

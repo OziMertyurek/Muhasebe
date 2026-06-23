@@ -290,7 +290,17 @@ Hazır olan altyapı:
 
 MarkItDown entegrasyonu sadece dosyadan metin çıkarır. OpenAI, LLM veya otomatik fatura oluşturma entegrasyonu henüz yoktur. İleride çıkarılan metni fatura alanlarına dönüştürme, kullanıcıya onaylatma ve onaydan sonra `Invoice` kaydı oluşturma akışı eklenebilir.
 
+
 ## Güvenlik Notları
+
+- Veriler yerel bilgisayarda saklanır; GitHub veya harici bir sunucuya otomatik gönderilmez.
+- PIN uygulama erisimini sinirlar; bilgisayar erisimi olan kisilere karsi isletim sistemi kullanici hesabi da parola/PIN ile korunmalidir.
+- Desktop server paketli modda `127.0.0.1` ile sinirlandirilir ve local Host/Origin kontrolleri uygulanir.
+- Cok sayida hatali PIN denemesinde gecici kilit uygulanir.
+- Duzenli olarak `Ayarlar > Yedekleme > Tam Yedek Indir` ile tam yedek alinmalidir.
+- Hata raporu hassas verileri icermeyecek sekilde tasarlanmistir; `.env`, gercek `DATABASE_URL`, tam local path ve kullanici dosyalari rapora eklenmez.
+- Windows build henuz code signed degildir; SmartScreen uyarisi gorulebilir.
+- macOS build henuz Apple Developer ID ile signed/notarized degildir; Gatekeeper uyarisi gorulebilir.
 
 - Proje local kullanım içindir.
 - `.env`, `prisma/dev.db`, `storage/uploads/` GitHub'a gönderilmez.

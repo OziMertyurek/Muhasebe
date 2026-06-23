@@ -42,3 +42,16 @@ Bu kontrol listesi v2.1.0 release oncesi yapilan genel urun QA kapsamini ozetler
 - [x] macOS GitHub Actions workflow hazir.
 - [x] macOS gercek cihaz testi daha sonra yapilacak.
 - [x] macOS build unsigned/notarized oldugu icin Gatekeeper uyarisi release notlarinda belirtilmeli.
+
+## v2.1.1 Security Smoke Checklist
+
+- [x] Auth yokken `/exports/companies` 401 doner.
+- [x] Auth yokken AI extraction POST route 401 doner.
+- [x] Kotu Origin ile local POST 403 doner.
+- [x] Kotu Host ile protected route 403 doner.
+- [x] 5 hatali PIN denemesinden sonra login route 429 doner.
+- [x] Dogru PIN sonrasi hatali deneme sayaci sifirlanir.
+- [x] Packaged/production server `127.0.0.1` dinler.
+- [x] `0.0.0.0:3000` listener gorunmez.
+- [x] Diagnostics raporu `.env`, gercek `DATABASE_URL`, tam AppData/DB path, upload/fatura/backup dosyasi icermez.
+- [x] `npm audit` bulgulari incelendi; critical bulgu yoktur.
