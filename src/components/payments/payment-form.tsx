@@ -50,14 +50,14 @@ const initialState: PaymentFormState = {};
 
 function fieldClass(hasError?: boolean) {
   return [
-    "mt-2 h-11 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] shadow-sm outline-none transition",
+    "mt-2 h-11 w-full rounded-md border bg-white px-3 text-sm text-[#16201b] outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
 
 function textareaClass(hasError?: boolean) {
   return [
-    "mt-2 min-h-32 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] shadow-sm outline-none transition",
+    "mt-2 min-h-32 w-full rounded-md border bg-white px-3 py-2 text-sm text-[#16201b] outline-none transition",
     hasError ? "border-[#b9473d]" : "border-[#cfd8cf] focus:border-[#1f6f54]",
   ].join(" ");
 }
@@ -105,7 +105,7 @@ export function PaymentForm({
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+      <div className="rounded-lg border border-[#dce2dc] bg-white p-6">
         <h2 className="text-base font-semibold text-[#16201b]">Para hareketi bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-semibold text-[#46534b]">
@@ -277,7 +277,7 @@ export function PaymentForm({
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-11 items-center gap-2 rounded-md bg-[#1f6f54] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] focus:outline-none focus:ring-2 focus:ring-[#8ea99b] focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-65"
+          className="inline-flex h-11 items-center gap-2 rounded-md bg-[#1f6f54] px-5 text-sm font-semibold text-white transition hover:bg-[#195d47] focus:outline-none focus:ring-2 focus:ring-[#8ea99b]  disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Save className="h-4 w-4" />
           {isPending ? "Kaydediliyor" : submitLabel}

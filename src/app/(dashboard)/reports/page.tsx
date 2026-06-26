@@ -52,9 +52,8 @@ export default function ReportsPage() {
         <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
           Finans raporları
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-          Cari, fatura, ödeme, gider ve hesap kayıtlarını sade raporlarla kontrol edin; gerekli
-          listeleri CSV veya PDF olarak dışa aktarın.
+        <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
+          Cari, fatura, ödeme, gider ve hesap özetlerini kontrol edin.
         </p>
       </section>
 
@@ -76,16 +75,16 @@ export default function ReportsPage() {
             <Link
               key={report.href}
               href={report.href}
-              className="group flex min-h-44 flex-col justify-between rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm transition hover:border-[#8ea99b] hover:bg-[#fbfcfa]"
+              className="group flex min-h-36 flex-col justify-between rounded-lg border border-[#dce2dc] bg-white p-4 transition hover:border-[#8ea99b] hover:bg-[#f7f9f7]"
             >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
-                <Icon className="h-5 w-5" />
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#f3f7f4] text-[#14543f]">
+                <Icon className="h-4 w-4" />
               </span>
               <span>
-                <span className="block text-lg font-semibold text-[#16201b]">
+                <span className="block text-base font-semibold text-[#16201b]">
                   {report.title}
                 </span>
-                <span className="mt-2 block text-sm leading-6 text-[#647067]">
+                <span className="mt-2 block text-sm leading-5 text-[#647067]">
                   {report.description}
                 </span>
               </span>
@@ -99,31 +98,29 @@ export default function ReportsPage() {
       </section>
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-[#dce2dc] bg-white p-4">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#ecf0f5] text-[#34445c]">
               <FolderKanban className="h-5 w-5" />
           </span>
             <div>
               <h2 className="text-lg font-semibold text-[#16201b]">Veri kaynağı</h2>
-              <p className="mt-1 text-sm leading-6 text-[#647067]">
-                Bu raporlar gerçek Prisma kayıtlarından üretilir. Silinmiş kayıtlar ve iptal
-                edilmiş faturalar/giderler hesaplara dahil edilmez.
+              <p className="mt-1 text-sm leading-5 text-[#647067]">
+                Raporlar kayıtlı verilerden üretilir; silinmiş kayıtlar hesaba katılmaz.
               </p>
             </div>
           </div>
         </article>
 
-        <article className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-[#dce2dc] bg-white p-4">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
               <FileDown className="h-5 w-5" />
             </span>
             <div>
               <h2 className="text-lg font-semibold text-[#16201b]">Dışa aktarma</h2>
-              <p className="mt-1 text-sm leading-6 text-[#647067]">
-                CSV ve PDF çıktıları kullanıcı indirme klasörüne kaydedilir. Paketli masaüstü
-                uygulamasında indirmeler güvenli dosya adıyla yönetilir.
+              <p className="mt-1 text-sm leading-5 text-[#647067]">
+                CSV ve PDF çıktıları indirme klasörüne güvenli dosya adıyla kaydedilir.
               </p>
             </div>
           </div>

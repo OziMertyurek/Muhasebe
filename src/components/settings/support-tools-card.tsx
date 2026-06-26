@@ -39,14 +39,14 @@ export function SupportToolsCard() {
   );
   const [isBusy, setIsBusy] = useState<SupportAction | null>(null);
   const [message, setMessage] = useState(
-    "Bu araçlar masaüstü uygulamasında kullanılabilir.",
+    "Masaüstü uygulamasında kullanılabilir.",
   );
 
   async function runAction(action: SupportAction) {
     const api = window.muhasebeSupport;
 
     if (!api) {
-      setMessage("Bu araçlar masaüstü uygulamasında kullanılabilir.");
+      setMessage("Masaüstü uygulamasında kullanılabilir.");
       return;
     }
 
@@ -75,33 +75,25 @@ export function SupportToolsCard() {
   }
 
   return (
-    <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-[#dce2dc] bg-white p-4">
       <div className="flex items-start gap-3">
-        <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
-          <LifeBuoy className="h-5 w-5" />
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#f3f7f4] text-[#14543f]">
+          <LifeBuoy className="h-4 w-4" />
         </span>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-normal text-[#607167]">
-                Masaüstü destek
+              <h2 className="text-base font-semibold text-[#16201b]">Destek Araçları</h2>
+              <p className="mt-1 text-sm text-[#647067]">
+                Klasörleri açın veya güvenli hata raporu oluşturun.
               </p>
-              <h2 className="mt-1 text-lg font-semibold text-[#16201b]">Destek Araçları</h2>
             </div>
-            <span className="inline-flex w-fit rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-2.5 py-1 text-xs font-semibold text-[#607167]">
+            <span className="inline-flex w-fit rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-2 py-0.5 text-xs font-semibold text-[#607167]">
               {isAvailable ? "Hazır" : "Sadece masaüstü"}
             </span>
           </div>
-          <p className="mt-2 text-sm leading-6 text-[#647067]">
-            Veri klasörü, log klasörü ve güvenli hata raporu işlemleri masaüstü uygulamasında
-            tek tıkla çalışır.
-          </p>
-          <p className="mt-3 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-3 py-2 text-xs leading-5 text-[#647067]">
-            Hata raporu .env, DATABASE_URL, tam dosya yolu, fatura dosyası veya yedek içeriği
-            eklemeden maskeli sistem özeti üretir.
-          </p>
 
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-2">
             <SupportButton
               disabled={!isAvailable || Boolean(isBusy)}
               icon={FolderOpen}
@@ -125,7 +117,7 @@ export function SupportToolsCard() {
             />
           </div>
 
-          <p className="mt-3 rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-2 text-sm text-[#647067]">
+          <p className="mt-3 rounded-md bg-[#fbfcfa] px-3 py-2 text-sm text-[#647067]">
             {message}
           </p>
         </div>
@@ -152,7 +144,7 @@ function SupportButton({
       type="button"
       disabled={disabled}
       onClick={onClick}
-      className="inline-flex min-h-10 items-center gap-2 rounded-md border border-[#cbd8cf] bg-white px-4 py-2 text-sm font-semibold text-[#1f6f54] shadow-sm transition hover:border-[#9fbead] hover:bg-[#f2faf5] focus:outline-none focus:ring-2 focus:ring-[#d8eadf] disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex min-h-9 items-center gap-2 rounded-md border border-[#cbd8cf] bg-white px-3 py-2 text-sm font-semibold text-[#1f6f54] transition hover:bg-[#f7f9f7] focus:outline-none focus:ring-2 focus:ring-[#d8eadf] disabled:cursor-not-allowed disabled:opacity-50"
     >
       <Icon className="h-4 w-4" />
       {loading ? "İşleniyor..." : label}

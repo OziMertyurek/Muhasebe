@@ -39,7 +39,7 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
         <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
           İşlem Geçmişi
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+        <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
           Sistemde yapılan önemli işlemleri, geri yüklemeleri, yedekleme
           hareketlerini ve kayıt değişikliklerini buradan takip edin.
         </p>
@@ -54,7 +54,7 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
         ]}
       />
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4">
         <div className="grid gap-3 lg:grid-cols-[1fr_190px_190px_150px_150px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -101,13 +101,13 @@ export default async function AuditLogsPage({ searchParams }: AuditLogsPageProps
             defaultValue={params?.dateTo ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           />
-          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] focus:outline-none focus:ring-2 focus:ring-[#d8eadf]">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] focus:outline-none focus:ring-2 focus:ring-[#d8eadf]">
             Filtrele
           </button>
         </div>
       </form>
 
-      <section className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
+      <section className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white">
         {logs.length === 0 ? (
           <EmptyState
             title="Henüz işlem kaydı yok"

@@ -49,21 +49,21 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             Cari hesaplar
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
             Müşteri ve tedarikçi firmaları tek merkezden yönetin.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <a
             href={exportHref}
-            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
             CSV Dışa Aktar
           </a>
           <Link
             href="/companies/new"
-            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47]"
           >
             <Plus className="h-4 w-4" />
             Yeni Cari
@@ -81,7 +81,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
         href="/help#cariler"
       />
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4">
         <div className="grid gap-3 md:grid-cols-[1fr_220px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -110,7 +110,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white">
         {companies.length === 0 ? (
           <EmptyState
             title="Henüz cari eklenmedi"
@@ -136,7 +136,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
               </thead>
               <tbody>
                 {companies.map((company) => (
-                  <tr key={company.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
+                  <tr key={company.id} className="border-t border-[#e5e9e5] transition hover:bg-[#f7f9f7]">
                     <td className="px-4 py-3 font-semibold text-[#16201b]">{company.name}</td>
                     <td className="px-4 py-3 text-[#46534b]">{companyTypeLabels[company.type]}</td>
                     <td className="px-4 py-3 text-[#46534b]">{company.city ?? "-"}</td>

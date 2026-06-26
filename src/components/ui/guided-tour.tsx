@@ -12,42 +12,42 @@ type TourStep = {
 const tourSteps: TourStep[] = [
   {
     title: "Dashboard",
-    body: "Burasi genel durum ekraniniz. Alacak, borc, son hareketler ve yaklasan vadeleri buradan takip edebilirsiniz.",
+    body: "Genel finans durumunu ve son hareketleri buradan takip edin.",
     selector: '[data-tour="dashboard-summary"]',
   },
   {
     title: "Sidebar",
-    body: "Sol menuden cariler, faturalar, giderler, raporlar ve ayarlara ulasabilirsiniz.",
+    body: "Cariler, faturalar, giderler, raporlar ve ayarlara buradan gecin.",
     selector: '[data-tour="sidebar"]',
   },
   {
     title: "Cariler",
-    body: "Musteri ve tedarikcilerinizi Cariler ekranindan ekleyip takip edebilirsiniz.",
+    body: "Musteri ve tedarikcileri burada yonetin.",
     selector: '[data-tour="companies"]',
   },
   {
     title: "Faturalar",
-    body: "Satis ve alis faturalarinizi buradan kaydedebilir, odeme durumlarini izleyebilirsiniz.",
+    body: "Satis ve alis faturalarini kaydedin, odeme durumunu izleyin.",
     selector: '[data-tour="invoices"]',
   },
   {
     title: "AI Fatura Okuma",
-    body: "Fatura dosyalarini yukleyerek bilgileri otomatik cikarmayi deneyebilirsiniz. Kaydetmeden once mutlaka kontrol edin.",
+    body: "Fatura dosyasini yukleyin, cikan bilgileri kaydetmeden once kontrol edin.",
     selector: '[data-tour="ai-extraction"]',
   },
   {
     title: "Backup / Yedekleme",
-    body: "Duzenli olarak Tam Yedek Indir kullanin. Yedek dosyasini guvenli yerde saklayin.",
+    body: "Duzenli Tam Yedek alin ve dosyayi guvenli yerde saklayin.",
     selector: '[data-tour="backup"]',
   },
   {
     title: "System Status / Destek",
-    body: "Sorun yasarsaniz sistem durumunu kontrol edebilir ve guvenli hata raporu disa aktarabilirsiniz.",
+    body: "Sorun halinde sistem durumunu kontrol edin veya hata raporu alin.",
     selector: '[data-tour="system-status"]',
   },
   {
     title: "Yardim Merkezi",
-    body: "Daha detayli anlatimlar icin Yardim Merkezi'ni kullanabilirsiniz.",
+    body: "Detayli anlatimlar icin Yardim Merkezi'ni acin.",
     selector: '[data-tour="help"]',
   },
 ];
@@ -134,7 +134,7 @@ export function GuidedTourButton({
       return undefined;
     }
 
-    const popoverWidth = 360;
+    const popoverWidth = 340;
     const top =
       highlightRect.top + highlightRect.height + 18 < window.innerHeight - 210
         ? highlightRect.top + highlightRect.height + 18
@@ -172,7 +172,7 @@ export function GuidedTourButton({
         onClick={openTour}
         className={
           className ??
-          "inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#46534b] shadow-sm transition hover:border-[#8ea99b] hover:text-[#16201b]"
+          "inline-flex h-9 items-center justify-center gap-2 rounded-md border border-[#dce2dc] bg-white px-3 text-sm font-semibold text-[#46534b] transition hover:bg-[#f7f9f7] hover:text-[#16201b]"
         }
       >
         <PlayCircle className="h-4 w-4" aria-hidden="true" />
@@ -190,11 +190,11 @@ export function GuidedTourButton({
           aria-modal="true"
           aria-labelledby="guided-tour-title"
         >
-          <div className="absolute inset-0 bg-[#16201b]/35" />
+          <div className="absolute inset-0 bg-[#16201b]/25" />
 
           {highlightRect ? (
             <div
-              className="pointer-events-none fixed rounded-xl border border-white/80 bg-white/10 shadow-[0_0_0_9999px_rgba(22,32,27,0.35),0_18px_50px_rgba(22,32,27,0.25)]"
+              className="pointer-events-none fixed rounded-lg border border-white/80 bg-white/10 shadow-[0_0_0_9999px_rgba(22,32,27,0.25),0_14px_36px_rgba(22,32,27,0.18)]"
               style={highlightRect}
             />
           ) : null}
@@ -202,8 +202,8 @@ export function GuidedTourButton({
           <div
             className={
               popoverStyle
-                ? "fixed rounded-xl border border-[#dce2dc] bg-white p-5 shadow-2xl"
-                : "fixed left-1/2 top-1/2 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[#dce2dc] bg-white p-5 shadow-2xl"
+                ? "fixed rounded-lg border border-[#dce2dc] bg-white p-4 shadow-xl"
+                : "fixed left-1/2 top-1/2 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-[#dce2dc] bg-white p-4 shadow-xl"
             }
             style={popoverStyle}
           >
@@ -229,7 +229,7 @@ export function GuidedTourButton({
               </button>
             </div>
 
-            <p className="mt-3 text-sm leading-6 text-[#46534b]">{activeStep.body}</p>
+            <p className="mt-3 text-sm leading-5 text-[#46534b]">{activeStep.body}</p>
 
             <div className="mt-5 flex items-center gap-2">
               {tourSteps.map((step, index) => (
@@ -237,8 +237,8 @@ export function GuidedTourButton({
                   key={step.title}
                   className={
                     index === activeIndex
-                      ? "h-2 flex-1 rounded-full bg-[#1f6f54]"
-                      : "h-2 flex-1 rounded-full bg-[#dce2dc]"
+                      ? "h-1.5 flex-1 rounded-full bg-[#1f6f54]"
+                      : "h-1.5 flex-1 rounded-full bg-[#dce2dc]"
                   }
                 />
               ))}

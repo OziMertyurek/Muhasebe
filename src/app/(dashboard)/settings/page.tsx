@@ -14,6 +14,7 @@ import {
 import { appInfo } from "@/lib/app-info";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
 import { isLocalPinConfigured } from "@/lib/security-utils";
+import { ThemeSettingsCard } from "@/components/theme/theme-settings-card";
 
 export const dynamic = "force-dynamic";
 
@@ -97,7 +98,7 @@ export default async function SettingsPage() {
         <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
           Sistem ayarları
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+        <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
           Şirket bilgileri, güvenlik, yedekleme, sistem sağlığı ve destek araçlarını tek yerden
           yönetin.
         </p>
@@ -130,6 +131,8 @@ export default async function SettingsPage() {
         </section>
       ) : null}
 
+      <ThemeSettingsCard />
+
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {settingCards.map((card) => {
           const Icon = card.icon;
@@ -138,7 +141,7 @@ export default async function SettingsPage() {
             <Link
               key={card.title}
               href={card.href}
-              className="group flex min-h-44 flex-col justify-between rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm transition hover:border-[#8ea99b] hover:bg-[#fbfcfa]"
+              className="group flex min-h-44 flex-col justify-between rounded-lg border border-[#dce2dc] bg-white p-5 transition hover:border-[#8ea99b] hover:bg-[#f7f9f7]"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
                 <Icon className="h-5 w-5" />
@@ -147,7 +150,7 @@ export default async function SettingsPage() {
                 <span className="block text-lg font-semibold text-[#16201b]">
                   {card.title}
                 </span>
-                <span className="mt-2 block text-sm leading-6 text-[#647067]">
+                <span className="mt-2 block text-sm leading-5 text-[#647067]">
                   {card.description}
                 </span>
               </span>
@@ -162,7 +165,7 @@ export default async function SettingsPage() {
 
       <section
         id="app-info"
-        className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm"
+        className="rounded-lg border border-[#dce2dc] bg-white p-5"
       >
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#ecf0f5] text-[#34445c]">

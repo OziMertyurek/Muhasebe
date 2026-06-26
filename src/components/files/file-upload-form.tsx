@@ -59,9 +59,9 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
         </div>
       ) : null}
 
-      <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
         <h2 className="text-lg font-semibold text-[#16201b]">Dosya bilgileri</h2>
-        <p className="mt-2 text-sm leading-6 text-[#647067]">
+        <p className="mt-2 text-sm leading-5 text-[#647067]">
           Fatura ve AI analiz dosyaları için PDF, PNG, JPG, WebP veya HTML desteklenir.
           HTML dosyaları tarayıcıda gösterilmez, sadece metin çıkarma için işlenir.
         </p>
@@ -150,7 +150,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-65"
+          className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Upload className="h-4 w-4" />
           {isPending ? "Yükleniyor" : "Dosyayı yükle"}

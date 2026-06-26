@@ -9,17 +9,17 @@ type StatusBadgeProps = {
 };
 
 const toneClasses: Record<StatusTone, string> = {
-  positive: "border-[#b9d8c7] bg-[#f1faf4] text-[#14543f]",
-  warning: "border-[#ead7a8] bg-[#fff8e8] text-[#765116]",
-  neutral: "border-[#cfd8cf] bg-[#f6f7f4] text-[#46534b]",
-  danger: "border-[#e0c4bf] bg-[#fff7f5] text-[#8b2f28]",
+  positive: "border-[#cfe0d5] bg-[#f6faf7] text-[#14543f]",
+  warning: "border-[#e5d8b8] bg-[#fdf9ee] text-[#765116]",
+  neutral: "border-[#d8ded8] bg-[#f8f9f7] text-[#46534b]",
+  danger: "border-[#e2cfcb] bg-[#fff9f7] text-[#8b2f28]",
 };
 
 export function StatusBadge({ children, tone = "neutral" }: StatusBadgeProps) {
   return (
     <span
       className={clsx(
-        "inline-flex min-h-7 items-center whitespace-nowrap rounded-md border px-2.5 py-1 text-xs font-semibold leading-none",
+        "inline-flex min-h-6 items-center whitespace-nowrap rounded-md border px-2 py-0.5 text-xs font-semibold leading-none",
         toneClasses[tone],
       )}
     >

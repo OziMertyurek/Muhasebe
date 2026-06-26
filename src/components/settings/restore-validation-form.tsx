@@ -189,7 +189,7 @@ export function RestoreValidationForm() {
   const StatusIcon = result?.isValid ? CheckCircle2 : result ? XCircle : ShieldCheck;
 
   return (
-    <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+    <section className="rounded-lg border border-[#dce2dc] bg-white p-5">
       <div className="flex items-start gap-3">
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#ecf0f5] text-[#34445c]">
           <ShieldCheck className="h-5 w-5" />
@@ -198,7 +198,7 @@ export function RestoreValidationForm() {
           <h2 className="text-lg font-semibold text-[#16201b]">
             Yedek kontrolü ve içeri aktarma
           </h2>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-[#647067]">
+          <p className="mt-2 max-w-3xl text-sm leading-5 text-[#647067]">
             Eski bilgisayardan aldığınız tam yedek ZIP dosyasını önce güvenli şekilde kontrol
             edin. Geri yükleme yalnızca son onaydan sonra çalışır ve mevcut yerel verileri seçilen
             yedekle değiştirir.
@@ -222,7 +222,7 @@ export function RestoreValidationForm() {
         <button
           type="submit"
           disabled={isValidating || isRestoring}
-          className="inline-flex h-10 items-center justify-center gap-2 self-end rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:opacity-60"
+          className="inline-flex h-10 items-center justify-center gap-2 self-end rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47] disabled:opacity-60"
         >
           {isValidating ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -296,7 +296,7 @@ export function RestoreValidationForm() {
             <AlertTriangle className="h-5 w-5" />
             Yedeği içeri aktar / geri yükle
           </h3>
-          <p className="mt-2 text-sm leading-6">
+          <p className="mt-2 text-sm leading-5">
             Bu işlem mevcut local veritabanınızı ve upload dosyalarınızı seçtiğiniz yedekle
             değiştirecek. İşlemden önce mevcut sistem otomatik olarak yedeklenecek. Devam etmek
             istiyor musunuz?
@@ -314,7 +314,7 @@ export function RestoreValidationForm() {
             type="button"
             disabled={!isConfirmed || isRestoring}
             onClick={handleRestore}
-            className="mt-4 inline-flex h-10 items-center gap-2 rounded-md bg-[#8b2f28] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#742820] disabled:opacity-60"
+            className="mt-4 inline-flex h-10 items-center gap-2 rounded-md bg-[#8b2f28] px-4 text-sm font-semibold text-white transition hover:bg-[#742820] disabled:opacity-60"
           >
             {isRestoring ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
             Geri Yükle
@@ -362,7 +362,7 @@ export function RestoreValidationForm() {
         </div>
       ) : null}
 
-      <p className="mt-5 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-3 text-sm leading-6 text-[#647067]">
+      <p className="mt-5 rounded-md border border-[#e5e9e5] bg-[#fbfcfa] px-4 py-3 text-sm leading-5 text-[#647067]">
         Geri yükleme sırasında sadece `database/dev.db`, `uploads/` ve `backup-info.json` okunur.
         Gizli dosyalar, node_modules, .next ve Git dosyaları geri yüklenmez; tam yerel dosya
         yolları ekranda gösterilmez.

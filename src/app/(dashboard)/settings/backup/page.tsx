@@ -7,7 +7,6 @@ import {
   FileArchive,
   FolderArchive,
   PackageCheck,
-  ShieldAlert,
 } from "lucide-react";
 import { HelpHint } from "@/components/ui/help-hint";
 import {
@@ -61,9 +60,8 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
         <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
           Yedekleme
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-          Local SQLite veritabanı ve yüklenen dosyalar GitHub&apos;a gitmez. Bu yüzden düzenli
-          olarak tam yedek alınmalıdır.
+        <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
+          Veritabanı ve yüklenen dosyalar için düzenli tam yedek alın.
         </p>
       </section>
 
@@ -83,31 +81,14 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
         </div>
       ) : null}
 
-      <section className="rounded-lg border border-[#e0c4bf] bg-[#fff7f5] p-5 shadow-sm">
-        <div className="flex items-start gap-3">
-          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fdecea] text-[#8b2f28]">
-            <ShieldAlert className="h-5 w-5" />
-          </span>
-          <div>
-            <h2 className="text-lg font-semibold text-[#8b2f28]">Önemli yedekleme notu</h2>
-            <p className="mt-2 text-sm leading-6 text-[#6f4a45]">
-              GitHub sadece kodu saklar. Veritabanı, upload dosyaları ve alınan yedekler
-              ayrıca korunmalıdır. Tam yedek, local kullanım için önerilen ana yedekleme
-              yöntemidir.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-2xl">
             <h2 className="text-lg font-semibold text-[#16201b]">
               Otomatik yedek hatırlatma
             </h2>
-            <p className="mt-2 text-sm leading-6 text-[#647067]">
-              Sistem arka planda otomatik yedek almaz. Sadece son tam yedek tarihine göre
-              size hatırlatma gösterir.
+            <p className="mt-2 text-sm leading-5 text-[#647067]">
+              Sistem otomatik yedek almaz; son tam yedek tarihine göre hatırlatma gösterir.
             </p>
             <div className="mt-4 grid gap-3 text-sm text-[#46534b] md:grid-cols-3">
               <InfoLine
@@ -162,7 +143,7 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
             </select>
             <button
               type="submit"
-              className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+              className="mt-4 inline-flex h-10 w-full items-center justify-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47]"
             >
               Ayarı Kaydet
             </button>
@@ -171,7 +152,7 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
       </section>
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-lg border border-[#bfd8cc] bg-[#fbfffc] p-5 shadow-sm ring-1 ring-[#e2f1e7]">
+        <article className="rounded-lg border border-[#bfd8cc] bg-[#fbfffc] p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-start gap-3">
               <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
@@ -182,8 +163,8 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
                   Önerilen yöntem
                 </p>
                 <h2 className="mt-1 text-lg font-semibold text-[#16201b]">Tam yedek</h2>
-                <p className="mt-2 text-sm leading-6 text-[#647067]">
-                  Veritabanı, upload klasörü ve yedek metadata dosyasını tek ZIP içinde indirir.
+                <p className="mt-2 text-sm leading-5 text-[#647067]">
+                  Veritabanı ve upload dosyalarını tek ZIP içinde indirir.
                 </p>
               </div>
             </div>
@@ -198,15 +179,14 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
             />
             <BackupFeature icon={FileArchive} label="Yedek bilgisi" value="backup-info.json" />
           </div>
-          <p className="mt-4 rounded-md border border-[#e5e9e5] bg-white px-3 py-2 text-xs leading-5 text-[#647067]">
-            Gizli ayar dosyaları, node_modules ve build çıktıları tam yedeğe eklenmez. ZIP
-            yalnızca uygulama verisini taşımak için hazırlanır.
+          <p className="mt-4 rounded-md bg-white px-3 py-2 text-xs leading-5 text-[#647067]">
+            Gizli ayarlar ve build çıktıları yedeğe eklenmez.
           </p>
 
           {database.exists ? (
             <a
               href="/settings/backup/download-full"
-              className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+              className="mt-5 inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47]"
             >
               <Download className="h-4 w-4" />
               Tam Yedek İndir
@@ -218,14 +198,14 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
           )}
         </article>
 
-        <article className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
               <DatabaseBackup className="h-5 w-5" />
             </span>
             <div>
               <h2 className="text-lg font-semibold text-[#16201b]">Veritabanı yedeği</h2>
-              <p className="mt-2 text-sm leading-6 text-[#647067]">
+              <p className="mt-2 text-sm leading-5 text-[#647067]">
                 Sadece kayıtları içeren SQLite veritabanı dosyasını indirir. Upload dosyalarını
                 içermez.
               </p>
@@ -241,7 +221,7 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
           {database.exists ? (
             <a
               href="/settings/backup/download-db"
-              className="mt-5 inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#16201b] shadow-sm transition hover:bg-[#f1f4f1]"
+              className="mt-5 inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#16201b] transition hover:bg-[#f1f4f1]"
             >
               <Download className="h-4 w-4" />
               Veritabanı Yedeğini İndir
@@ -255,14 +235,14 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
       </section>
 
       <section className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <div className="flex items-start gap-3">
             <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#ecf0f5] text-[#34445c]">
               <FolderArchive className="h-5 w-5" />
             </span>
             <div>
               <h2 className="text-lg font-semibold text-[#16201b]">Upload klasörü bilgisi</h2>
-              <p className="mt-2 text-sm leading-6 text-[#647067]">
+              <p className="mt-2 text-sm leading-5 text-[#647067]">
                 `storage/uploads/` klasörü tam yedeğe dahil edilir. Klasör boşsa ZIP yine
                 oluşturulur.
               </p>
@@ -273,14 +253,14 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
             <p className="mt-1 font-semibold text-[#16201b]">
               {uploads.exists ? "Klasör hazır" : "Klasör henüz oluşmamış"}
             </p>
-            <p className="mt-3 text-sm leading-6 text-[#647067]">
+            <p className="mt-3 text-sm leading-5 text-[#647067]">
               Tam dosya yolu ekranda gösterilmez; yüklenen dosyalar tam yedek ZIP dosyasına
               güvenli biçimde eklenir.
             </p>
           </div>
         </article>
 
-        <article className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <article className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#16201b]">Yedekleme kontrol listesi</h2>
           <div className="mt-4 space-y-3">
             {checklist.map((item) => (
@@ -298,14 +278,14 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
 
       <RestoreValidationForm />
 
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fff4dc] text-[#765116]">
             <Archive className="h-5 w-5" />
           </span>
           <div>
             <h2 className="text-lg font-semibold text-[#16201b]">Geri yükleme sonrası not</h2>
-            <p className="mt-2 text-sm leading-6 text-[#647067]">
+            <p className="mt-2 text-sm leading-5 text-[#647067]">
               İşlem sonrası server&apos;ı Ctrl+C ile durdurup `npm run dev` ile yeniden başlatın.
               Böylece SQLite bağlantısı yeni veritabanı dosyasını temiz şekilde okur.
             </p>

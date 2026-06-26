@@ -212,14 +212,14 @@ export default function HelpPage() {
             <h1 className="text-3xl font-semibold tracking-normal text-[#16201b]">
               Muhasebe Takip kullanim rehberi
             </h1>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-[#647067]">
+            <p className="mt-2 max-w-3xl text-sm leading-5 text-[#647067]">
               Gunluk muhasebe akisini, yedekleme aliskanligini, AI fatura okuma adimlarini
               ve destek araclarini tek sayfada ozetleyen musteri rehberi.
             </p>
           </div>
           <Link
             href="/settings/system-status"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#46534b] shadow-sm transition hover:border-[#8ea99b] hover:text-[#16201b]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#46534b] transition hover:border-[#8ea99b] hover:text-[#16201b]"
           >
             Sistem Durumuna Git
             <ArrowRight className="h-4 w-4" />
@@ -228,32 +228,30 @@ export default function HelpPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
-        <article className="rounded-lg border border-[#c7dfcf] bg-[#f4fbf6] p-5 shadow-sm">
+        <article className="rounded-lg border border-[#dce2dc] bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-white text-[#14543f] shadow-sm">
-              <ShieldCheck className="h-5 w-5" />
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#f3f7f4] text-[#14543f]">
+              <ShieldCheck className="h-4 w-4" />
             </span>
             <div>
               <h2 className="text-lg font-semibold text-[#16201b]">Baslamadan once</h2>
-              <p className="mt-2 text-sm leading-6 text-[#46534b]">
-                Program yerel bilgisayarda calisir; verileriniz bu bilgisayarda saklanir.
-                PIN uygulamaya girisi korur, fakat bilgisayar kullanici hesabinizin da
-                guvenli olmasi gerekir. En iyi koruma duzenli tam yedek almaktir.
+              <p className="mt-2 text-sm leading-5 text-[#46534b]">
+                Veriler bu bilgisayarda saklanir. PIN uygulama girisini korur; duzenli tam
+                yedek almak en iyi aliskanliktir.
               </p>
             </div>
           </div>
         </article>
 
-        <article className="rounded-lg border border-[#ead7a8] bg-[#fffaf0] p-5 shadow-sm">
+        <article className="rounded-lg border border-[#e4ddc9] bg-white p-4">
           <div className="flex items-start gap-3">
-            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-white text-[#765116] shadow-sm">
-              <AlertTriangle className="h-5 w-5" />
+            <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#fbf7ed] text-[#765116]">
+              <AlertTriangle className="h-4 w-4" />
             </span>
             <div>
               <h2 className="text-lg font-semibold text-[#16201b]">Yedek uyarisi</h2>
-              <p className="mt-2 text-sm leading-6 text-[#745214]">
-                Tam yedek almadan bilgisayar degistirmeyin, restore denemesi yapmayin ve
-                onemli verileri silmeyin. Bilinmeyen ZIP dosyalariyla geri yukleme yapmayin.
+              <p className="mt-2 text-sm leading-5 text-[#745214]">
+                Restore oncesi tam yedek alin. Bilinmeyen ZIP dosyalariyla geri yukleme yapmayin.
               </p>
             </div>
           </div>
@@ -262,25 +260,24 @@ export default function HelpPage() {
 
       <section
         data-tour="help"
-        className="rounded-lg border border-[#c7dfcf] bg-[#f4fbf6] p-5 shadow-sm"
+        className="rounded-lg border border-[#dce2dc] bg-white p-4"
       >
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-medium text-[#14543f]">Yeni kullanicilar icin onerilir</p>
             <h2 className="mt-1 text-lg font-semibold text-[#16201b]">Baslangic Turu</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[#46534b]">
-              Uygulamanin temel alanlarini kisa baloncuklarla tanitin: dashboard, sol menu,
-              cariler, faturalar, AI fatura okuma, yedekleme ve destek araclari.
+            <p className="mt-2 max-w-2xl text-sm leading-5 text-[#46534b]">
+              Dashboard, menu, cariler, faturalar, yedekleme ve destek alanlarini kisa turla tanitin.
             </p>
           </div>
           <GuidedTourButton compact />
         </div>
       </section>
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
             <h2 className="text-lg font-semibold text-[#16201b]">Onerilen kullanim sirasi</h2>
-            <p className="mt-1 text-sm leading-6 text-[#647067]">
+            <p className="mt-1 text-sm leading-5 text-[#647067]">
               Ilk kurulumdan gunluk kullanima kadar en saglikli akis.
             </p>
           </div>
@@ -311,14 +308,14 @@ export default function HelpPage() {
             <article
               key={section.id}
               id={section.id}
-              className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm"
+              className="rounded-lg border border-[#dce2dc] bg-white p-4"
             >
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
                 <Icon className="h-5 w-5" />
               </span>
               <h2 className="mt-4 text-lg font-semibold text-[#16201b]">{section.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-[#647067]">{section.description}</p>
-              <ul className="mt-4 space-y-2 text-sm leading-6 text-[#46534b]">
+              <p className="mt-2 text-sm leading-5 text-[#647067]">{section.description}</p>
+              <ul className="mt-4 space-y-2 text-sm leading-5 text-[#46534b]">
                 {section.bullets.map((bullet) => (
                   <li key={bullet} className="flex gap-2">
                     <CheckCircle2 className="mt-1 h-4 w-4 shrink-0 text-[#1f6f54]" />
@@ -331,14 +328,14 @@ export default function HelpPage() {
         })}
       </section>
 
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#ecf0f5] text-[#34445c]">
             <CircleHelp className="h-5 w-5" />
           </span>
           <div>
             <h2 className="text-lg font-semibold text-[#16201b]">Sik karsilasilan sorunlar</h2>
-            <p className="mt-1 text-sm leading-6 text-[#647067]">
+            <p className="mt-1 text-sm leading-5 text-[#647067]">
               Ilk destek kontrolu icin kisa cevaplar.
             </p>
           </div>
@@ -350,7 +347,7 @@ export default function HelpPage() {
               className="rounded-lg border border-[#e5e9e5] bg-[#fbfcfa] p-4"
             >
               <h3 className="text-sm font-semibold text-[#16201b]">{item.issue}</h3>
-              <p className="mt-2 text-sm leading-6 text-[#647067]">{item.answer}</p>
+              <p className="mt-2 text-sm leading-5 text-[#647067]">{item.answer}</p>
             </div>
           ))}
         </div>

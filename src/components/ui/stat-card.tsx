@@ -12,24 +12,24 @@ type StatCardProps = {
 
 const toneClasses = {
   positive: {
-    card: "border-[#b9d8c7]",
-    accent: "bg-[#1f6f54]",
-    icon: "bg-[#e8f2ed] text-[#14543f]",
+    card: "border-[#dce2dc]",
+    value: "text-[#14543f]",
+    icon: "bg-[#f3f7f4] text-[#14543f]",
   },
   warning: {
-    card: "border-[#ead7a8]",
-    accent: "bg-[#c99224]",
-    icon: "bg-[#fff4dc] text-[#765116]",
+    card: "border-[#e4ddc9]",
+    value: "text-[#765116]",
+    icon: "bg-[#fbf7ed] text-[#765116]",
   },
   neutral: {
     card: "border-[#dce2dc]",
-    accent: "bg-[#607167]",
-    icon: "bg-[#ecf0f5] text-[#34445c]",
+    value: "text-[#16201b]",
+    icon: "bg-[#f3f5f4] text-[#46534b]",
   },
   danger: {
-    card: "border-[#e0c4bf]",
-    accent: "bg-[#b9473d]",
-    icon: "bg-[#fdecea] text-[#8b2f28]",
+    card: "border-[#e5d8d5]",
+    value: "text-[#8b2f28]",
+    icon: "bg-[#fbf1ef] text-[#8b2f28]",
   },
 };
 
@@ -45,28 +45,32 @@ export function StatCard({
   return (
     <article
       className={clsx(
-        "relative min-h-40 overflow-hidden rounded-lg border bg-white p-5 shadow-sm transition hover:shadow-md",
+        "rounded-lg border bg-white p-4",
         toneClass.card,
       )}
     >
-      <span className={clsx("absolute inset-x-0 top-0 h-1", toneClass.accent)} />
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <p className="text-sm font-medium text-[#647067]">{title}</p>
-          <p className="mt-3 text-2xl font-semibold leading-tight tracking-normal text-[#16201b]">
+          <p
+            className={clsx(
+              "mt-3 text-2xl font-semibold leading-tight tracking-normal",
+              toneClass.value,
+            )}
+          >
             {value}
           </p>
         </div>
         <div
           className={clsx(
-            "flex h-10 w-10 shrink-0 items-center justify-center rounded-md",
+            "flex h-9 w-9 shrink-0 items-center justify-center rounded-md",
             toneClass.icon,
           )}
         >
-          <Icon className="h-5 w-5" />
+          <Icon className="h-4 w-4" />
         </div>
       </div>
-      <p className="mt-4 text-sm leading-5 text-[#647067]">{description}</p>
+      <p className="mt-3 text-sm leading-5 text-[#647067]">{description}</p>
     </article>
   );
 }

@@ -113,21 +113,21 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             Para hareketleri
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
             Faturaya bağlı ya da genel cari para hareketlerini takip edin.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <a
             href={exportHref}
-            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
             CSV Dışa Aktar
           </a>
           <Link
             href="/payments/new"
-            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47]"
           >
             <Plus className="h-4 w-4" />
             Yeni Hareket
@@ -145,7 +145,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
         href="/help#tahsilat-odeme"
       />
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4">
         <div className="grid gap-3 xl:grid-cols-[1fr_180px_180px_150px_150px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -198,7 +198,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white">
         {payments.length === 0 ? (
           <EmptyState
             title="Henüz ödeme/tahsilat hareketi yok"
@@ -225,7 +225,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
               </thead>
               <tbody>
                 {payments.map((payment) => (
-                  <tr key={payment.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
+                  <tr key={payment.id} className="border-t border-[#e5e9e5] transition hover:bg-[#f7f9f7]">
                     <td className="px-4 py-3 text-[#46534b]">{formatDate(payment.paymentDate)}</td>
                     <td className="px-4 py-3">
                       <StatusBadge tone={getPaymentTypeTone(payment.type)}>

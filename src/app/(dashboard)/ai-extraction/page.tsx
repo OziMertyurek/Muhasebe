@@ -94,14 +94,13 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             AI analiz kayıtları
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve cari
-            eşleşmesini güvenle onaylayın.
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
+            Faturayı yükleyin, çıkan bilgileri kontrol edin ve onaylayın.
           </p>
         </div>
         <Link
           href="/ai-extraction/new"
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47]"
         >
           <Plus className="h-4 w-4" />
           Yeni Analiz Kaydı
@@ -125,19 +124,19 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
           return (
             <article
               key={step.title}
-              className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm"
+              className="rounded-lg border border-[#dce2dc] bg-white p-4"
             >
               <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
                 <Icon className="h-5 w-5" />
               </span>
               <h2 className="mt-3 text-sm font-semibold text-[#16201b]">{step.title}</h2>
-              <p className="mt-1 text-sm leading-6 text-[#647067]">{step.description}</p>
+              <p className="mt-1 text-sm leading-5 text-[#647067]">{step.description}</p>
             </article>
           );
         })}
       </section>
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4">
         <div className="grid gap-3 lg:grid-cols-[1fr_180px_170px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -172,13 +171,13 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
               </option>
             ))}
           </select>
-          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] focus:outline-none focus:ring-2 focus:ring-[#d8eadf]">
+          <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:bg-[#f1f4f1] focus:outline-none focus:ring-2 focus:ring-[#d8eadf]">
             Filtrele
           </button>
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white">
         {jobs.length === 0 ? (
           <EmptyState
             title="Henüz AI analiz kaydı yok"

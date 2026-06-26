@@ -71,9 +71,9 @@ export function Sidebar() {
       className="border-b border-[#dce2dc] bg-white md:fixed md:inset-y-0 md:left-0 md:w-64 md:border-b-0 md:border-r"
     >
       <div className="flex h-full flex-col">
-        <div className="flex h-16 items-center gap-3 border-b border-[#dce2dc] px-5">
-          <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#1f6f54] text-white shadow-sm">
-            <Building2 className="h-5 w-5" />
+        <div className="flex h-16 items-center gap-3 border-b border-[#e5e9e5] px-5">
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-[#dce2dc] bg-[#fbfcfa] text-[#14543f]">
+            <Building2 className="h-4 w-4" />
           </div>
           <div>
             <p className="text-sm font-semibold text-[#16201b]">Muhasebe Takip</p>
@@ -83,7 +83,7 @@ export function Sidebar() {
 
         <nav
           aria-label="Ana menü"
-          className="flex gap-2 overflow-x-auto px-3 py-3 md:flex-1 md:flex-col md:gap-4 md:overflow-y-auto"
+          className="flex gap-2 overflow-x-auto px-3 py-3 md:flex-1 md:flex-col md:gap-3 md:overflow-y-auto"
         >
           {navigationGroups.map((group) => (
             <div key={group.title} className="flex gap-1 md:flex-col">
@@ -115,9 +115,9 @@ export function Sidebar() {
                       }
                       aria-current={isActive ? "page" : undefined}
                       className={clsx(
-                        "group relative flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition md:h-10",
+                        "group relative flex h-10 shrink-0 items-center gap-3 rounded-md px-3 text-sm font-medium transition md:h-9",
                         isActive
-                          ? "bg-[#e8f2ed] text-[#14543f] shadow-[inset_3px_0_0_#1f6f54]"
+                          ? "bg-[#f4f7f4] text-[#14543f] shadow-[inset_2px_0_0_#8ea99b]"
                           : "text-[#46534b] hover:bg-[#f1f4f1] hover:text-[#16201b]",
                       )}
                     >
@@ -131,7 +131,7 @@ export function Sidebar() {
                       />
                       <span className="whitespace-nowrap">{item.label}</span>
                       {"badge" in item ? (
-                        <span className="ml-auto rounded-sm border border-[#cfd8cf] bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-normal text-[#607167]">
+                        <span className="ml-auto rounded-sm border border-[#dce2dc] bg-white px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-normal text-[#607167]">
                           {item.badge}
                         </span>
                       ) : null}
@@ -149,10 +149,10 @@ export function Sidebar() {
           </Link>
         </nav>
 
-        <div className="hidden border-t border-[#dce2dc] px-5 py-4 text-xs text-[#647067] md:block">
+        <div className="hidden border-t border-[#e5e9e5] px-5 py-4 text-xs text-[#647067] md:block">
           <Link
             href="/cikis"
-            className="mb-3 flex h-9 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#46534b] transition hover:border-[#8ea99b] hover:text-[#16201b]"
+            className="mb-3 flex h-9 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#46534b] transition hover:bg-[#f7f9f7] hover:text-[#16201b]"
           >
             <LogOut className="h-4 w-4" />
             Çıkış Yap

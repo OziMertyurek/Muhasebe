@@ -76,9 +76,8 @@ export default async function SystemStatusPage() {
         <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
           Sistem durumu
         </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-          Local kullanım için uygulama, veritabanı, yedekleme, güvenlik ve MarkItDown
-          altyapısının genel sağlık durumunu kontrol edin.
+        <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
+          Uygulama, veritabanı, yedekleme ve destek durumunu kontrol edin.
         </p>
       </section>
 
@@ -125,16 +124,15 @@ export default async function SystemStatusPage() {
         />
       </section>
 
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
             <Terminal className="h-5 w-5" />
           </span>
           <div>
             <h2 className="text-lg font-semibold text-[#16201b]">Kontrol sonuçları</h2>
-            <p className="mt-2 text-sm leading-6 text-[#647067]">
-              Bu ekran sadece durum bilgisi gösterir; dosyaları değiştirmez, taşımaz veya
-              silmez.
+            <p className="mt-2 text-sm leading-5 text-[#647067]">
+              Bu ekran sadece durum bilgisi gösterir; dosyaları değiştirmez.
             </p>
           </div>
         </div>
@@ -148,7 +146,7 @@ export default async function SystemStatusPage() {
 
       <SupportToolsCard />
 
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-5">
         <div className="flex items-start gap-3">
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fff4dc] text-[#765116]">
             <AlertTriangle className="h-5 w-5" />
@@ -167,9 +165,8 @@ export default async function SystemStatusPage() {
                 ))}
               </div>
             ) : (
-              <p className="mt-2 text-sm leading-6 text-[#647067]">
-                Şu anda kritik bir öneri yok. Destek gerektiğinde aşağıdaki Destek Araçları ile
-                güvenli hata raporu dışa aktarabilirsiniz.
+              <p className="mt-2 text-sm leading-5 text-[#647067]">
+                Kritik öneri yok. Destek gerekirse hata raporu dışa aktarabilirsiniz.
               </p>
             )}
           </div>
@@ -184,7 +181,7 @@ function StatusCheckCard({ check }: { check: SystemStatusCheck }) {
   const Icon = style.icon;
 
   return (
-    <article className="rounded-lg border border-[#e5e9e5] bg-[#fbfcfa] p-4 transition hover:border-[#cfd8cf] hover:bg-white">
+    <article className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-3 transition hover:border-[#cfd8cf] hover:bg-white">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h3 className="text-base font-semibold text-[#16201b]">{check.title}</h3>
@@ -197,7 +194,7 @@ function StatusCheckCard({ check }: { check: SystemStatusCheck }) {
           {style.label}
         </span>
       </div>
-      <p className="mt-3 text-sm leading-6 text-[#647067]">{check.description}</p>
+      <p className="mt-2 text-sm leading-5 text-[#647067]">{check.description}</p>
       {check.suggestion ? (
         <p className="mt-3 rounded-md border border-[#f0d9a2] bg-[#fffaf0] px-3 py-2 text-sm text-[#745214]">
           {check.suggestion}
@@ -217,7 +214,7 @@ function InfoCard({
   value: string;
 }) {
   return (
-    <div className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm transition hover:border-[#cfd8cf]">
+    <div className="rounded-lg border border-[#dce2dc] bg-white p-4 transition hover:border-[#cfd8cf]">
       <div className="flex items-center gap-3">
         <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
           <Icon className="h-5 w-5" />
@@ -241,9 +238,9 @@ function SummaryCard({
   className: string;
 }) {
   return (
-    <div className={`rounded-lg border p-4 shadow-sm ${className}`}>
+    <div className={`rounded-lg border p-4 ${className}`}>
       <p className="text-sm font-medium">{label}</p>
-      <p className="mt-2 text-3xl font-semibold">{value}</p>
+      <p className="mt-2 text-2xl font-semibold">{value}</p>
     </div>
   );
 }

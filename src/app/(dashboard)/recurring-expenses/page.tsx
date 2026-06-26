@@ -94,13 +94,13 @@ export default async function RecurringExpensesPage({
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             Sabit gider tanımları
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
             Her ay tekrar eden kira, abonelik ve düzenli ödemeleri şablon olarak takip edin.
           </p>
         </div>
         <Link
           href="/recurring-expenses/new"
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47]"
         >
           <Plus className="h-4 w-4" />
           Yeni Sabit Gider
@@ -118,11 +118,11 @@ export default async function RecurringExpensesPage({
       />
 
       <section className="grid gap-4 md:grid-cols-3">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <p className="text-sm font-medium text-[#607167]">Aktif sabit gider</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{activeCount}</p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <p className="text-sm font-medium text-[#607167]">Aylık toplam sabit gider</p>
           {monthlyTotals.length === 0 ? (
             <p className="mt-2 text-2xl font-semibold text-[#16201b]">-</p>
@@ -136,13 +136,13 @@ export default async function RecurringExpensesPage({
             </div>
           )}
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <p className="text-sm font-medium text-[#607167]">Pasif sabit gider</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{passiveCount}</p>
         </div>
       </section>
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4">
         <div className="grid gap-3 lg:grid-cols-[1fr_220px_180px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -180,7 +180,7 @@ export default async function RecurringExpensesPage({
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white">
         {recurringExpenses.length === 0 ? (
           <EmptyState
             title="Henüz sabit gider eklenmedi"
@@ -206,7 +206,7 @@ export default async function RecurringExpensesPage({
               </thead>
               <tbody>
                 {recurringExpenses.map((recurringExpense) => (
-                  <tr key={recurringExpense.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
+                  <tr key={recurringExpense.id} className="border-t border-[#e5e9e5] transition hover:bg-[#f7f9f7]">
                     <td className="px-4 py-3 font-semibold text-[#16201b]">
                       {recurringExpense.title}
                     </td>

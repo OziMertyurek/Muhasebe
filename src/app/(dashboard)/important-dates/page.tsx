@@ -145,13 +145,13 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             Hatırlatmalar
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
             Vergi günü, sözleşme bitişi, kredi kartı tarihleri ve ödeme sözlerini takip edin.
           </p>
         </div>
         <Link
           href="/important-dates/new"
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+          className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white transition hover:bg-[#195d47]"
         >
           <Plus className="h-4 w-4" />
           Hatırlatma Ekle
@@ -169,25 +169,25 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
       />
 
       <section className="grid gap-4 md:grid-cols-4">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <p className="text-sm font-medium text-[#607167]">Bugünkü önemli tarihler</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{todayCount}</p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <p className="text-sm font-medium text-[#607167]">Bu hafta yaklaşanlar</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{weekCount}</p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <p className="text-sm font-medium text-[#607167]">Geciken bekleyenler</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{overdueCount}</p>
         </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <p className="text-sm font-medium text-[#607167]">Toplam bekleyen</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{pendingCount}</p>
         </div>
       </section>
 
-      <form className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ring-1 ring-black/0">
+      <form className="rounded-lg border border-[#dce2dc] bg-white p-4">
         <div className="grid gap-3 xl:grid-cols-[1fr_170px_150px_150px_150px_auto]">
           <label className="relative block">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#647067]" />
@@ -251,7 +251,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
         </div>
       </form>
 
-      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
+      <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white">
         {importantDates.length === 0 ? (
           <EmptyState
             title="Henüz önemli tarih eklenmedi"
@@ -277,7 +277,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
               </thead>
               <tbody>
                 {importantDates.map((importantDate) => (
-                  <tr key={importantDate.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
+                  <tr key={importantDate.id} className="border-t border-[#e5e9e5] transition hover:bg-[#f7f9f7]">
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatDate(importantDate.date)}
                     </td>

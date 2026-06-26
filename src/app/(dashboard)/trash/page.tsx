@@ -37,14 +37,14 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             Çöp Kutusu
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+          <p className="mt-2 max-w-2xl text-sm leading-5 text-[#647067]">
             Silinen kayıtları burada görebilir ve ihtiyaç olduğunda geri
             yükleyebilirsiniz. Kalıcı silme bu aşamada kapalıdır.
           </p>
         </div>
         <Link
           href="/settings"
-          className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
+          className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
         >
           Ayarlara dön
         </Link>
@@ -73,7 +73,7 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
         </div>
       ) : null}
 
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-4">
         <div className="flex flex-wrap gap-2">
           <TrashTab href="/trash" label="Tümü" active={!selectedType} count={totalCount} />
           {trashTabs.map((tab) => (
@@ -90,12 +90,12 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
       </section>
 
       {selectedTab && !selectedTab.supported ? (
-        <section className="rounded-lg border border-[#eadcb8] bg-[#fffaf0] p-5 text-sm text-[#765c19] shadow-sm">
+        <section className="rounded-lg border border-[#eadcb8] bg-[#fffaf0] p-5 text-sm text-[#765c19]">
           <div className="flex items-start gap-3">
             <Info className="mt-0.5 h-5 w-5 shrink-0" />
             <div>
               <h2 className="font-semibold">{selectedTab.label} için not</h2>
-              <p className="mt-2 leading-6">
+              <p className="mt-2 leading-5">
                 Bu kayıt tipinde şu anda soft delete alanı bulunmadığı için veritabanı
                 şeması değiştirilmeden çöp kutusuna dahil edilmedi. Fiziksel dosyalar
                 silinmez; dosya ve AI kayıtları için geri yüklenebilir silme sonraki
@@ -106,7 +106,7 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
         </section>
       ) : null}
 
-      <section className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
+      <section className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white">
         {formattedRecords.length === 0 ? (
           <EmptyState
             title={
@@ -131,7 +131,7 @@ export default async function TrashPage({ searchParams }: TrashPageProps) {
               </thead>
               <tbody>
                 {formattedRecords.map((record) => (
-                  <tr key={`${record.type}-${record.id}`} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
+                  <tr key={`${record.type}-${record.id}`} className="border-t border-[#e5e9e5] transition hover:bg-[#f7f9f7]">
                     <td className="px-4 py-3">
                       <span className="inline-flex rounded-full bg-[#edf2ef] px-2.5 py-1 text-xs font-semibold text-[#46534b]">
                         {record.typeLabel}

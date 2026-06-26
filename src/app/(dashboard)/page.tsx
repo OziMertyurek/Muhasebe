@@ -4,17 +4,13 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Building2,
-  CalendarClock,
-  DatabaseBackup,
   FilePlus2,
-  FileWarning,
   Plus,
   ReceiptText,
   Inbox,
   WalletCards,
 } from "lucide-react";
 import { StatCard } from "@/components/ui/stat-card";
-import { HelpHint } from "@/components/ui/help-hint";
 import { GuidedTourButton } from "@/components/ui/guided-tour";
 import {
   formatBackupReminderDate,
@@ -38,9 +34,7 @@ const statIcons = {
   receivable: ArrowDownLeft,
   payable: ArrowUpRight,
   net: WalletCards,
-  unpaidInvoices: FileWarning,
-  monthlyExpenses: ReceiptText,
-  upcomingDates: CalendarClock,
+  unpaidInvoices: FilePlus2,
 };
 
 export const dynamic = "force-dynamic";
@@ -114,28 +108,21 @@ export default async function DashboardPage() {
       id: "receivable" as const,
       title: "Toplam alacak",
       value: <MoneyLines items={cards.receivables} />,
-      description: "Satış faturalarından tahsilatlar düşüldükten sonra kalan tutar.",
+      description: "Tahsil edilmeyi bekleyen bakiye.",
       tone: "positive" as const,
     },
     {
       id: "payable" as const,
       title: "Toplam borç",
       value: <MoneyLines items={cards.payables} />,
-      description: "Alış faturalarından ödemeler düşüldükten sonra kalan tutar.",
+      description: "Ödemeyi bekleyen bakiye.",
       tone: "danger" as const,
     },
     {
       id: "net" as const,
       title: "Net durum",
       value: <MoneyLines items={cards.net} signed />,
-      description: "Para birimi bazında alacak ve borç farkı.",
-      tone: "neutral" as const,
-    },
-    {
-      id: "monthlyExpenses" as const,
-      title: "Bu ayki giderler",
-      value: <MoneyLines items={cards.monthlyExpenses} />,
-      description: "Bu ay kaydedilen iptal edilmemiş giderlerin toplamı.",
+      description: "Alacak ve borç farkı.",
       tone: "neutral" as const,
     },
     {
@@ -149,13 +136,6 @@ export default async function DashboardPage() {
       ),
       tone: "warning" as const,
     },
-    {
-      id: "upcomingDates" as const,
-      title: "Yaklaşan tarihler",
-      value: `${cards.upcomingImportantDateCount} kayıt`,
-      description: `${cards.overdueImportantDateCount} geciken bekleyen hatırlatma var.`,
-      tone: "warning" as const,
-    },
   ];
 
   const quickActions = [
@@ -163,84 +143,53 @@ export default async function DashboardPage() {
       title: "Yeni Cari",
       href: "/companies/new",
       icon: Building2,
-      description: "Müşteri veya tedarikçi kaydı oluşturun.",
+      description: "Müşteri veya tedarikçi.",
     },
     {
       title: "Yeni Fatura",
       href: "/invoices/new",
       icon: FilePlus2,
-      description: "Ben fatura kestim veya bana fatura kesildi.",
+      description: "Satış veya alış faturası.",
     },
     {
-      title: "Para Aldım / Para Ödedim",
+      title: "Tahsilat / Ödeme",
       href: "/payments/new",
       icon: ArrowDownLeft,
-      description: "Tahsilat veya ödeme hareketi kaydedin.",
+      description: "Cari hareketi kaydet.",
     },
     {
       title: "Yeni Gider",
       href: "/expenses/new",
       icon: ReceiptText,
-      description: "Tek seferlik veya ödenmiş gider ekleyin.",
-    },
-    {
-      title: "Yeni Hatırlatma",
-      href: "/important-dates/new",
-      icon: CalendarClock,
-      description: "Vergi, vade veya sözleşme tarihi not alın.",
+      description: "Gider kaydı oluştur.",
     },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <section
         data-tour="dashboard-summary"
-        className="rounded-xl border border-[#dce2dc] bg-white p-6 shadow-sm lg:flex lg:items-end lg:justify-between lg:gap-6"
+        className="rounded-lg border border-[#dce2dc] bg-white p-5 lg:flex lg:items-center lg:justify-between lg:gap-6"
       >
         <div>
-          <p className="text-sm font-medium text-[#607167]">Genel bakış</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
-            Finans durumu
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-normal text-[#16201b]">Dashboard</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Fatura, tahsilat, ödeme, gider ve hatırlatmaları gerçek kayıtlarınızla takip edin.
+            Alacak, borç, vade ve son hareketlerin kısa özeti.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-[#607167]">
-            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">Yerel veritabanı</span>
-            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">PIN korumalı</span>
-            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">Tam yedek önerilir</span>
-          </div>
         </div>
-        <div className="mt-5 flex flex-wrap gap-2 lg:mt-0">
-          <GuidedTourButton />
+        <div className="mt-5 flex flex-wrap gap-2 lg:mt-0 lg:justify-end">
           <Link
-            href="/payments/new"
+            href="/invoices/new"
             className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
           >
-            <ArrowDownLeft className="h-4 w-4" />
-            Para aldım / Para ödedim
+            <FilePlus2 className="h-4 w-4" />
+            Yeni Fatura
           </Link>
-          <Link
-            href="/expenses/new"
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
-          >
-            <ReceiptText className="h-4 w-4" />
-            Gider ekle
-          </Link>
+          <GuidedTourButton compact />
         </div>
       </section>
 
-      <HelpHint
-        title="Bu sayfada neye bakmaliyim?"
-        items={[
-          "Genel durumunuzu buradan takip edin.",
-          "Yaklasan vadeleri ve son hareketleri kontrol edin.",
-          "Duzenli olarak tam yedek almayi unutmayin.",
-        ]}
-        href="/help#baslangic"
-      />
-
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {dashboardStats.map((stat) => (
           <StatCard
             key={stat.id}
@@ -253,85 +202,10 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Bu ayki ödenmiş giderler</p>
-          <div className="mt-3 text-xl font-semibold text-[#16201b]">
-            <MoneyLines items={cards.monthlyPaidExpenses} />
-          </div>
-        </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Aktif sabit giderler</p>
-          <p className="mt-3 text-xl font-semibold text-[#16201b]">
-            {cards.activeRecurringExpenseCount} kayıt
-          </p>
-          <p className="mt-2 text-sm text-[#647067]">
-            Aylık toplam: <SmallMoneyLines items={cards.activeRecurringExpenseTotals} />
-          </p>
-        </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Cari sayısı</p>
-          <p className="mt-3 text-xl font-semibold text-[#16201b]">
-            {cards.companyBreakdown.total} kayıt
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[#647067]">
-            Müşteri: {cards.companyBreakdown.CUSTOMER} · Tedarikçi:{" "}
-            {cards.companyBreakdown.SUPPLIER} · İkisi de: {cards.companyBreakdown.BOTH}
-          </p>
-        </div>
-      </section>
-
-      <section
-        data-tour="backup"
-        className={
-          backupReminder.tone === "warning"
-            ? "rounded-lg border border-[#f0d9a2] bg-[#fffaf0] p-5 shadow-sm"
-            : "rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm"
-        }
-      >
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-3">
-            <span
-              className={
-                backupReminder.tone === "warning"
-                  ? "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fff4dc] text-[#765116]"
-                  : "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]"
-              }
-            >
-              <DatabaseBackup className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold text-[#16201b]">Yedek durumu</h2>
-              <p className="mt-1 text-sm leading-6 text-[#647067]">
-                {backupReminder.message}
-              </p>
-              <p className="mt-2 text-xs text-[#647067]">
-                Son tam yedek: {formatBackupReminderDate(backupReminder.lastFullBackupAt)}
-                {backupReminder.enabled
-                  ? ` · Hatırlatma aralığı: ${backupReminder.intervalDays} gün`
-                  : " · Hatırlatma kapalı"}
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/settings/backup"
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
-          >
-            Yedekleme Sayfasına Git
-          </Link>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-[#16201b]">Hızlı işlemler</h2>
-            <p className="mt-1 text-sm text-[#647067]">
-              Sık kullanılan kayıt ekranlarına doğrudan geçin.
-            </p>
-          </div>
-        </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+      <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+        <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
+          <h2 className="text-base font-semibold text-[#16201b]">Hızlı işlemler</h2>
+          <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {quickActions.map((action) => {
             const Icon = action.icon;
 
@@ -339,22 +213,49 @@ export default async function DashboardPage() {
               <Link
                 key={action.href}
                 href={action.href}
-                className="flex min-h-28 flex-col items-start justify-between rounded-md border border-[#dce2dc] bg-[#fbfcfa] p-4 text-left transition hover:border-[#8ea99b] hover:bg-white"
+                className="flex items-center gap-3 rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-3 text-left transition hover:border-[#8ea99b] hover:bg-white"
               >
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-white text-[#14543f]">
                   <Icon className="h-4 w-4" />
                 </span>
                 <span>
                   <span className="block text-sm font-semibold text-[#223028]">
                     {action.title}
                   </span>
-                  <span className="mt-2 block text-sm leading-5 text-[#647067]">
+                  <span className="mt-1 block text-xs leading-5 text-[#647067]">
                     {action.description}
                   </span>
                 </span>
               </Link>
             );
           })}
+          </div>
+        </div>
+
+        <div data-tour="backup" className="rounded-lg border border-[#dce2dc] bg-white p-5">
+          <h2 className="text-base font-semibold text-[#16201b]">Durum</h2>
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-[#edf0ed] pb-3">
+              <span className="text-[#647067]">Veri</span>
+              <span className="font-semibold text-[#223028]">Yerel</span>
+            </div>
+            <div className="flex items-center justify-between gap-3 border-b border-[#edf0ed] pb-3">
+              <span className="text-[#647067]">Güvenlik</span>
+              <span className="font-semibold text-[#223028]">PIN aktif</span>
+            </div>
+            <div className="flex items-start justify-between gap-3">
+              <span className="text-[#647067]">Yedek</span>
+              <span className="max-w-52 text-right font-semibold text-[#223028]">
+                {backupReminder.tone === "warning" ? "Kontrol önerilir" : "Güncel"}
+              </span>
+            </div>
+          </div>
+          <div className="mt-4 flex items-center justify-between gap-3 rounded-md bg-[#fbfcfa] px-3 py-2 text-xs text-[#647067]">
+            <span>Son yedek: {formatBackupReminderDate(backupReminder.lastFullBackupAt)}</span>
+            <Link href="/settings/backup" className="font-semibold text-[#1f6f54] hover:text-[#195d47]">
+              Aç
+            </Link>
+          </div>
         </div>
       </section>
 
