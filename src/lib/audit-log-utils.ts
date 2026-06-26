@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export type AuditEntityType =
   | "COMPANY"
+  | "CRM_COMPANY"
   | "INVOICE"
   | "PAYMENT"
   | "FINANCIAL_ACCOUNT"
@@ -48,6 +49,7 @@ export type AuditLogFilters = {
 
 export const auditEntityTypeLabels: Record<AuditEntityType, string> = {
   COMPANY: "Cari",
+  CRM_COMPANY: "Firma Takip",
   INVOICE: "Fatura",
   PAYMENT: "Tahsilat / Ödeme",
   FINANCIAL_ACCOUNT: "Finansal Hesap",
@@ -157,6 +159,8 @@ export function getAuditEntityHref(log: Pick<AuditLog, "entityType" | "entityId"
   switch (log.entityType) {
     case "COMPANY":
       return `/companies/${log.entityId}`;
+    case "CRM_COMPANY":
+      return `/crm/${log.entityId}`;
     case "INVOICE":
       return `/invoices/${log.entityId}`;
     case "PAYMENT":

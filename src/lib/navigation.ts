@@ -1,6 +1,7 @@
 import {
   Banknote,
   BarChart3,
+  BriefcaseBusiness,
   CalendarClock,
   CreditCard,
   FolderArchive,
@@ -25,6 +26,11 @@ export const navigationItems = [
     label: "Cariler",
     href: "/companies",
     icon: Users,
+  },
+  {
+    label: "Firma Takip",
+    href: "/crm",
+    icon: BriefcaseBusiness,
   },
   {
     label: "Faturalar",

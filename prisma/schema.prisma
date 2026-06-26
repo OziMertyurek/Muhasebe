@@ -12,6 +12,25 @@ enum CompanyType {
   BOTH
 }
 
+enum CrmCompanyStatus {
+  NEW
+  EMAIL_SENT
+  WAITING_REPLY
+  POSITIVE_REPLY
+  SAMPLE_REQUESTED
+  PRICE_REQUESTED
+  NEGATIVE
+  FOLLOW_UP
+  DO_NOT_CONTACT
+}
+
+enum CrmReplyStatus {
+  NO_CONTACT
+  WAITING
+  REPLIED
+  NO_REPLY
+}
+
 enum InvoiceType {
   SALES
   PURCHASE
@@ -123,6 +142,7 @@ model Company {
   expenses        Expense[]
   importantDates  ImportantDate[]
   files           FileAttachment[]
+  crmCompanies    CrmCompany[]
 
   @@index([name])
   @@index([type])
@@ -391,6 +411,38 @@ model ExchangeRate {
 
   @@index([currency, effectiveDate])
   @@index([source, fetchedAt])
+}
+
+model CrmCompany {
+  id              String           @id @default(cuid())
+  companyName     String
+  country         String?
+  email           String?
+  website         String?
+  contactPerson   String?
+  phone           String?
+  sector          String?
+  source          String?
+  status          CrmCompanyStatus @default(NEW)
+  replyStatus     CrmReplyStatus   @default(NO_CONTACT)
+  lastContactDate DateTime?
+  followUpDate    DateTime?
+  notes           String?
+  tagsJson        String?
+  linkedCompanyId String?
+  linkedCompany   Company?         @relation(fields: [linkedCompanyId], references: [id], onDelete: SetNull)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+
+  @@index([companyName])
+  @@index([email])
+  @@index([country])
+  @@index([status])
+  @@index([replyStatus])
+  @@index([followUpDate])
+  @@index([linkedCompanyId])
+  @@index([deletedAt])
 }
 
 model AuditLog {

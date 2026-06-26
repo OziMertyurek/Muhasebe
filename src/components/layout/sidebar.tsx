@@ -10,7 +10,7 @@ import { appInfo } from "@/lib/app-info";
 const navigationGroups = [
   {
     title: "Genel",
-    hrefs: ["/", "/companies", "/invoices", "/payments", "/expenses"],
+    hrefs: ["/", "/companies", "/crm", "/invoices", "/payments", "/expenses"],
   },
   {
     title: "Operasyon",
