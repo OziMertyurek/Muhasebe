@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ExchangeRatesCard } from "@/components/dashboard/exchange-rates-card";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -22,6 +23,7 @@ import {
   formatDashboardSignedMoney,
   getDashboardData,
 } from "@/lib/dashboard-utils";
+import { getLatestExchangeRates } from "@/lib/exchange-rates";
 import { expenseStatusLabels } from "@/lib/expense-utils";
 import {
   importantDateCategoryLabels,
@@ -97,9 +99,10 @@ function EmptyState({ text, action }: { text: string; action?: ReactNode }) {
 }
 
 export default async function DashboardPage() {
-  const [dashboard, backupReminder] = await Promise.all([
+  const [dashboard, backupReminder, exchangeRates] = await Promise.all([
     getDashboardData(),
     getBackupReminderStatus(),
+    getLatestExchangeRates(),
   ]);
   const { cards, lists } = dashboard;
 
@@ -202,7 +205,7 @@ export default async function DashboardPage() {
         ))}
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.2fr_0.8fr]">
+      <section className="grid gap-4 xl:grid-cols-3">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5">
           <h2 className="text-base font-semibold text-[#16201b]">Hızlı işlemler</h2>
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -257,6 +260,11 @@ export default async function DashboardPage() {
             </Link>
           </div>
         </div>
+
+        <ExchangeRatesCard
+          initialRates={exchangeRates.rates}
+          initialMessage={exchangeRates.message}
+        />
       </section>
 
       <section className="grid gap-5 xl:grid-cols-3">

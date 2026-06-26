@@ -377,6 +377,22 @@ model AppSetting {
   updatedAt DateTime @updatedAt
 }
 
+model ExchangeRate {
+  id            String   @id @default(cuid())
+  currency      String
+  baseCurrency  String   @default("TRY")
+  buyRate       Decimal?
+  sellRate      Decimal?
+  effectiveDate DateTime
+  source        String
+  fetchedAt     DateTime @default(now())
+  isManual      Boolean  @default(false)
+  note          String?
+
+  @@index([currency, effectiveDate])
+  @@index([source, fetchedAt])
+}
+
 model AuditLog {
   id           String   @id @default(cuid())
   entityType   String
