@@ -68,8 +68,10 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
   const relatedType = getRelatedType(params?.relatedType);
   const jobs = await prisma.aiExtractionJob.findMany({
     where: {
+      deletedAt: null,
       ...(status ? { status } : {}),
       fileAttachment: {
+        deletedAt: null,
         ...(relatedType ? { relatedType } : {}),
         ...(query ? { originalFileName: { contains: query } } : {}),
       },

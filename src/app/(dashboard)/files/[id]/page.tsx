@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Plus } from "lucide-react";
+import { Archive, ArrowLeft, ExternalLink, Plus } from "lucide-react";
+import { archiveFileAttachmentAction } from "@/app/(dashboard)/files/actions";
 import {
   aiExtractionStatusLabels,
   formatConfidence,
   isAiExtractionSupportedFile,
 } from "@/lib/ai-extraction-utils";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import {
   fileRelatedTypeLabels,
@@ -18,6 +20,7 @@ import { prisma } from "@/lib/prisma";
 
 type FileDetailPageProps = {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ error?: string }>;
 };
 
 function InfoItem({ label, value }: { label: string; value: string }) {
@@ -29,16 +32,35 @@ function InfoItem({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default async function FileDetailPage({ params }: FileDetailPageProps) {
-  const { id } = await params;
-  const file = await prisma.fileAttachment.findUnique({
-    where: { id },
+function formatArchiveError(value?: string) {
+  switch (value) {
+    case "archive-active-ai":
+      return "Bu dosya arşivlenemez. Dosyaya bağlı aktif AI analiz kaydı bulunuyor.";
+    case "archive-linked-record":
+      return "Bu dosya arşivlenemez. Dosya fatura, gider, cari veya tahsilat / ödeme kaydına bağlı.";
+    case "archive-already":
+      return "Bu dosya zaten arşivlenmiş.";
+    case "archive":
+      return "Dosya arşivlenirken bir hata oluştu.";
+    default:
+      return null;
+  }
+}
+
+export default async function FileDetailPage({
+  params,
+  searchParams,
+}: FileDetailPageProps) {
+  const [{ id }, query] = await Promise.all([params, searchParams]);
+  const file = await prisma.fileAttachment.findFirst({
+    where: { id, deletedAt: null },
     include: {
       invoice: { select: { id: true, invoiceNumber: true } },
       expense: { select: { id: true, title: true } },
       company: { select: { id: true, name: true } },
       payment: { select: { id: true, description: true, paymentDate: true } },
       aiExtractionJobs: {
+        where: { deletedAt: null },
         orderBy: { createdAt: "desc" },
         select: { id: true, status: true, confidence: true, createdAt: true },
       },
@@ -53,10 +75,11 @@ export default async function FileDetailPage({ params }: FileDetailPageProps) {
   const isPreviewable =
     file.mimeType === "application/pdf" || Boolean(file.mimeType?.startsWith("image/"));
   const supportsAiExtraction = isAiExtractionSupportedFile(file);
+  const archiveError = formatArchiveError(query?.error);
 
   return (
     <div className="space-y-6">
-      <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6">
+      <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6 lg:flex-row lg:items-end lg:justify-between">
         <Link
           href="/files"
           className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#1f6f54] hover:text-[#195d47]"
@@ -70,7 +93,22 @@ export default async function FileDetailPage({ params }: FileDetailPageProps) {
             {file.originalFileName}
           </h1>
         </div>
+        <form action={archiveFileAttachmentAction.bind(null, file.id)}>
+          <ConfirmSubmitButton
+            message="Bu dosya arşivlenecek. Fiziksel dosya korunacaktır. Bu işlem yalnızca bağlantısız ve aktif AI analizi bulunmayan dosyalar için yapılabilir."
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#d8b4ae] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#b9473d]"
+          >
+            <Archive className="h-4 w-4" />
+            Arşivle
+          </ConfirmSubmitButton>
+        </form>
       </section>
+
+      {archiveError ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          {archiveError}
+        </div>
+      ) : null}
 
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">

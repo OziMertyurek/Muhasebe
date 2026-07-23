@@ -8,6 +8,7 @@ import {
   restoreRecord,
   type TrashRecordType,
 } from "@/lib/trash-utils";
+import { requireLocalAuth } from "@/lib/security-utils";
 
 const listPathsByType: Record<TrashRecordType, string[]> = {
   companies: ["/companies"],
@@ -27,6 +28,8 @@ export async function restoreTrashRecordAction(type: TrashRecordType, id: string
   if (!safeType || !isSupportedTrashType(safeType)) {
     redirect("/trash?error=unsupported");
   }
+
+  await requireLocalAuth(`/trash?type=${safeType}`);
 
   try {
     await restoreRecord(safeType, id);

@@ -38,6 +38,7 @@ export function isAiExtractionSupportedFile(file: {
 
 export function getAiExtractionFileWhere() {
   return {
+    deletedAt: null,
     relatedType: { in: ["INVOICE", "OTHER"] as FileRelatedType[] },
     OR: [
       { mimeType: "application/pdf" },

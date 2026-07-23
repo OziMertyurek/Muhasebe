@@ -34,8 +34,12 @@ export async function POST(request: Request, { params }: CreateInvoiceRouteConte
   const invoiceType = readFormText(formData, "invoiceType");
   const confirmed = formData.get("confirmCreateInvoice") === "yes";
 
-  const job = await prisma.aiExtractionJob.findUnique({
-    where: { id },
+  const job = await prisma.aiExtractionJob.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      fileAttachment: { deletedAt: null },
+    },
     select: {
       id: true,
       status: true,

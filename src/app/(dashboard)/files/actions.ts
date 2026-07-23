@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { FileRelatedType } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   getSafeFileExtension,
@@ -13,6 +14,7 @@ import {
 import { getUploadsDir } from "@/lib/app-paths";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
+import { requireLocalAuth } from "@/lib/security-utils";
 
 export type FileUploadFormState = {
   message?: string;
@@ -207,4 +209,155 @@ export async function uploadFileAction(
   }
 
   redirect(`/files/${fileId}`);
+}
+
+export async function archiveFileAttachmentAction(fileId: string) {
+  await requireLocalAuth(`/files/${fileId}`);
+
+  try {
+    const file = await prisma.fileAttachment.findUnique({
+      where: { id: fileId },
+      select: {
+        id: true,
+        originalFileName: true,
+        storedFileName: true,
+        filePath: true,
+        relatedType: true,
+        invoiceId: true,
+        expenseId: true,
+        companyId: true,
+        paymentId: true,
+        deletedAt: true,
+        aiExtractionJobs: {
+          where: { deletedAt: null },
+          select: { id: true },
+        },
+      },
+    });
+
+    if (!file) {
+      redirect("/files?error=archive-not-found");
+    }
+
+    if (file.deletedAt) {
+      redirect(`/files/${file.id}?error=archive-already`);
+    }
+
+    if (file.aiExtractionJobs.length > 0) {
+      redirect(`/files/${file.id}?error=archive-active-ai`);
+    }
+
+    if (file.invoiceId || file.expenseId || file.companyId || file.paymentId) {
+      redirect(`/files/${file.id}?error=archive-linked-record`);
+    }
+
+    const archivedFile = await prisma.fileAttachment.update({
+      where: { id: file.id, deletedAt: null },
+      data: { deletedAt: new Date() },
+      select: {
+        id: true,
+        originalFileName: true,
+        storedFileName: true,
+        filePath: true,
+        relatedType: true,
+        deletedAt: true,
+      },
+    });
+
+    await createAuditLog({
+      entityType: "FILE_ATTACHMENT",
+      entityId: archivedFile.id,
+      action: "SOFT_DELETE",
+      title: `Dosya arşivlendi: ${archivedFile.originalFileName}`,
+      description:
+        "Dosya kaydı arşivlendi. Fiziksel dosya ve iş kayıtları değiştirilmedi.",
+      before: {
+        id: file.id,
+        originalFileName: file.originalFileName,
+        storedFileName: file.storedFileName,
+        filePath: file.filePath,
+        relatedType: file.relatedType,
+      },
+      after: archivedFile,
+    });
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    redirect(`/files/${fileId}?error=archive`);
+  }
+
+  revalidatePath("/files");
+  revalidatePath("/trash");
+  redirect("/files?archived=1");
+}
+
+export async function restoreFileAttachmentAction(fileId: string) {
+  await requireLocalAuth("/trash?type=files");
+
+  try {
+    const file = await prisma.fileAttachment.findUnique({
+      where: { id: fileId },
+      select: {
+        id: true,
+        originalFileName: true,
+        storedFileName: true,
+        filePath: true,
+        relatedType: true,
+        deletedAt: true,
+      },
+    });
+
+    if (!file) {
+      redirect("/trash?type=files&error=restore-not-found");
+    }
+
+    if (!file.deletedAt) {
+      redirect("/trash?type=files&error=restore-active");
+    }
+
+    const restoredFile = await prisma.fileAttachment.update({
+      where: { id: file.id },
+      data: { deletedAt: null },
+      select: {
+        id: true,
+        originalFileName: true,
+        storedFileName: true,
+        filePath: true,
+        relatedType: true,
+      },
+    });
+
+    await createAuditLog({
+      entityType: "FILE_ATTACHMENT",
+      entityId: restoredFile.id,
+      action: "RESTORE",
+      title: `Dosya geri yÃ¼klendi: ${restoredFile.originalFileName}`,
+      description:
+        "Dosya kaydı arşivden geri yüklendi. Fiziksel dosya taşınmadı veya yeniden oluşturulmadı.",
+      before: file,
+      after: restoredFile,
+    });
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    redirect("/trash?type=files&error=restore");
+  }
+
+  revalidatePath("/files");
+  revalidatePath("/trash");
+  redirect("/trash?type=files&restored=1");
+}
+
+function isRedirectError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: unknown }).digest === "string" &&
+    (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  );
 }

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AiExtractionStatus, type CompanyType } from "@prisma/client";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CheckCircle2, ExternalLink, FileText, Pencil, ScanText } from "lucide-react";
+import { Archive, ArrowLeft, CheckCircle2, ExternalLink, FileText, Pencil, ScanText } from "lucide-react";
 import {
   getAiInvoiceCreatedInvoiceId,
   getAiInvoiceDefaultCompanyId,
@@ -9,8 +9,10 @@ import {
   parseAiInvoiceCreateData,
 } from "@/lib/ai-invoice-create-utils";
 import {
+  archiveAiExtractionJobAction,
   updateAiExtractionStatusAction,
 } from "@/app/(dashboard)/ai-extraction/actions";
+import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import {
   aiExtractionStatusLabels,
   aiExtractionStatusOptions,
@@ -604,14 +606,29 @@ function formatCreateInvoiceError(value: string) {
   }
 }
 
+function formatArchiveError(value?: string) {
+  switch (value) {
+    case "archive-already":
+      return "Bu AI analiz kaydı zaten arşivlenmiş.";
+    case "archive":
+      return "AI analiz kaydı arşivlenirken bir hata oluştu.";
+    default:
+      return null;
+  }
+}
+
 export default async function AiExtractionDetailPage({
   params,
   searchParams,
 }: AiExtractionDetailPageProps) {
   const [{ id }, query] = await Promise.all([params, searchParams]);
   const [job, companies] = await Promise.all([
-    prisma.aiExtractionJob.findUnique({
-      where: { id },
+    prisma.aiExtractionJob.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        fileAttachment: { deletedAt: null },
+      },
       include: {
         fileAttachment: {
           select: {
@@ -647,6 +664,7 @@ export default async function AiExtractionDetailPage({
   const companyMatchData = parseCompanyMatchJson(job.extractedJson);
   const aiInvoiceCreateData = parseAiInvoiceCreateData(job.extractedJson);
   const createdInvoiceId = getAiInvoiceCreatedInvoiceId(job.extractedJson);
+  const archiveError = formatArchiveError(query?.error);
 
   return (
     <div className="space-y-6">
@@ -693,8 +711,23 @@ export default async function AiExtractionDetailPage({
             <Pencil className="h-4 w-4" />
             Düzenle
           </Link>
+          <form action={archiveAiExtractionJobAction.bind(null, job.id)}>
+            <ConfirmSubmitButton
+              message="Bu AI analiz kaydı arşivlenecek. Bağlı dosya ve oluşturulmuş fatura silinmeyecektir."
+              className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#d8b4ae] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#b9473d]"
+            >
+              <Archive className="h-4 w-4" />
+              Arşivle
+            </ConfirmSubmitButton>
+          </form>
         </div>
       </section>
+
+      {archiveError ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          {archiveError}
+        </div>
+      ) : null}
 
       <section className="grid gap-3 md:grid-cols-3">
         <ProcessHint icon={FileText} title="Metin çıkar" description="Dosyadan okunabilir metin üretin." />
