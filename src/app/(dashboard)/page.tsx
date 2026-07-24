@@ -60,10 +60,10 @@ function MoneyLines({
       {visibleItems.map((item) => (
         <span
           key={item.currency}
-          className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-1"
+          className="flex min-w-0 flex-wrap items-baseline gap-x-1"
         >
-          <span>{item.currency}:</span>
-          <span className="min-w-0 break-words">
+          <span className="shrink-0">{item.currency}:</span>
+          <span className="min-w-0 break-all">
             {signed
               ? formatDashboardSignedMoney(item.amount, item.currency)
               : formatDashboardMoney(item.amount, item.currency)}
@@ -180,12 +180,12 @@ function MetricCard({
   return (
     <Link
       href={href}
-      className="block min-w-0 rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm transition hover:border-[#8ea99b]"
+      className="block min-w-0 rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm transition hover:border-[#8ea99b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-[#607167]">{title}</p>
-          <p className="mt-2 min-w-0 text-xl font-semibold leading-tight tracking-normal text-[#16201b]">
+          <p className="mt-2 min-w-0 text-lg font-semibold leading-tight tracking-normal text-[#16201b] xl:text-xl">
             {value}
           </p>
         </div>
@@ -235,7 +235,7 @@ function AttentionItem({
     <Link
       href={href}
       data-tour={dataTour}
-      className={`block min-w-0 rounded-lg border p-4 shadow-sm transition hover:border-[#8ea99b] ${severityClasses[severity]}`}
+      className={`block min-w-0 rounded-lg border p-4 shadow-sm transition hover:border-[#8ea99b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc] ${severityClasses[severity]}`}
     >
       <div className="flex min-w-0 items-start justify-between gap-3">
         <div className="min-w-0">
@@ -286,15 +286,15 @@ function ListLink({
   return (
     <Link
       href={href}
-      className="block rounded-md border border-[#e5e9e5] px-3 py-2.5 transition hover:border-[#aebdae]"
+      className="block min-w-0 overflow-hidden rounded-md border border-[#e5e9e5] px-3 py-2.5 transition hover:border-[#aebdae] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
     >
-      <div className="flex min-w-0 items-start justify-between gap-3">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-start gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-[#223028]">{title}</p>
           <p className="mt-1 min-w-0 truncate text-xs text-[#647067]">{meta}</p>
         </div>
         {trailing ? (
-          <span className="shrink-0 text-right text-sm font-semibold text-[#16201b]">
+          <span className="max-w-48 break-words text-right text-sm font-semibold text-[#16201b]">
             {trailing}
           </span>
         ) : null}
@@ -364,7 +364,7 @@ function TimelineRow({
 
   if (!item.href) {
     return (
-      <div className="rounded-md border border-[#e5e9e5] px-3 py-2.5">
+      <div className="min-w-0 rounded-md border border-[#e5e9e5] px-3 py-2.5">
         {content}
       </div>
     );
@@ -373,7 +373,7 @@ function TimelineRow({
   return (
     <Link
       href={item.href}
-      className="block rounded-md border border-[#e5e9e5] px-3 py-2.5 transition hover:border-[#aebdae] hover:bg-[#fbfcfa]"
+      className="block min-w-0 rounded-md border border-[#e5e9e5] px-3 py-2.5 transition hover:border-[#aebdae] hover:bg-[#fbfcfa] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
     >
       {content}
     </Link>
@@ -528,7 +528,7 @@ export default async function DashboardPage() {
   const hiddenAttentionCount = attentionItems.length - visibleAttentionItems.length;
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-5 overflow-x-hidden">
       <section
         data-tour="dashboard-summary"
         className="flex flex-col gap-4 border-b border-[#dce2dc] pb-5 lg:flex-row lg:items-end lg:justify-between"
@@ -546,7 +546,7 @@ export default async function DashboardPage() {
           <GuidedTourButton compact />
           <Link
             href="/help#baslangic"
-            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#46534b] shadow-sm transition hover:border-[#8ea99b] hover:text-[#16201b]"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#46534b] shadow-sm transition hover:border-[#8ea99b] hover:text-[#16201b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
           >
             <HelpCircle className="h-4 w-4" />
             Yardım
@@ -565,8 +565,8 @@ export default async function DashboardPage() {
               href={action.href}
               className={
                 primary
-                  ? "inline-flex h-12 min-w-0 items-center gap-3 rounded-lg bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
-                  : "inline-flex h-12 min-w-0 items-center gap-3 rounded-lg border border-[#dce2dc] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#8ea99b]"
+                  ? "inline-flex h-12 min-w-0 items-center gap-3 rounded-lg bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
+                  : "inline-flex h-12 min-w-0 items-center gap-3 rounded-lg border border-[#dce2dc] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#8ea99b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
               }
             >
               <Icon className="h-4 w-4 shrink-0" />
@@ -649,7 +649,7 @@ export default async function DashboardPage() {
             action={
               <Link
                 href="/important-dates/new"
-                className="inline-flex h-9 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                className="inline-flex h-9 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
               >
                 <Plus className="h-4 w-4" />
                 Ekle
@@ -663,7 +663,7 @@ export default async function DashboardPage() {
                 action={
                   <Link
                     href="/important-dates/new"
-                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
                   >
                     Hatırlatma ekle
                   </Link>
@@ -729,7 +729,7 @@ export default async function DashboardPage() {
             </div>
             <Link
               href="/settings/backup"
-              className="inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#d7e5dc]"
             >
               Yedekleme
             </Link>
