@@ -8,13 +8,12 @@ import {
   DatabaseBackup,
   FilePlus2,
   FileWarning,
+  HelpCircle,
+  Inbox,
   Plus,
   ReceiptText,
-  Inbox,
   WalletCards,
 } from "lucide-react";
-import { StatCard } from "@/components/ui/stat-card";
-import { HelpHint } from "@/components/ui/help-hint";
 import { GuidedTourButton } from "@/components/ui/guided-tour";
 import {
   formatBackupReminderDate,
@@ -34,16 +33,14 @@ import {
 import { invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentTypeLabels } from "@/lib/payment-utils";
 
-const statIcons = {
+export const dynamic = "force-dynamic";
+
+const metricIcons = {
   receivable: ArrowDownLeft,
   payable: ArrowUpRight,
   net: WalletCards,
   unpaidInvoices: FileWarning,
-  monthlyExpenses: ReceiptText,
-  upcomingDates: CalendarClock,
 };
-
-export const dynamic = "force-dynamic";
 
 function MoneyLines({
   items,
@@ -57,9 +54,9 @@ function MoneyLines({
   }
 
   return (
-    <span className="block space-y-1">
+    <span className="block min-w-0 space-y-1">
       {items.map((item) => (
-        <span key={item.currency} className="block">
+        <span key={item.currency} className="block truncate">
           {item.currency}:{" "}
           {signed
             ? formatDashboardSignedMoney(item.amount, item.currency)
@@ -80,9 +77,9 @@ function SmallMoneyLines({
   }
 
   return (
-    <span className="space-x-2">
+    <span className="inline-flex max-w-full flex-wrap gap-x-2 gap-y-1">
       {items.map((item) => (
-        <span key={item.currency}>
+        <span key={item.currency} className="whitespace-nowrap">
           {item.currency}: {formatDashboardMoney(item.amount, item.currency)}
         </span>
       ))}
@@ -90,15 +87,159 @@ function SmallMoneyLines({
   );
 }
 
+function SectionHeader({
+  eyebrow,
+  title,
+  action,
+}: {
+  eyebrow?: string;
+  title: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="min-w-0">
+        {eyebrow ? (
+          <p className="text-xs font-semibold uppercase tracking-normal text-[#607167]">
+            {eyebrow}
+          </p>
+        ) : null}
+        <h2 className="mt-1 text-base font-semibold text-[#16201b]">{title}</h2>
+      </div>
+      {action ? <div className="shrink-0">{action}</div> : null}
+    </div>
+  );
+}
+
 function EmptyState({ text, action }: { text: string; action?: ReactNode }) {
   return (
-    <div className="flex min-h-32 flex-col items-center justify-center rounded-md border border-dashed border-[#d8e0d9] bg-[#fbfcfa] px-5 py-7 text-center">
-      <span className="inline-flex h-10 w-10 items-center justify-center rounded-md bg-[#eef4ef] text-[#607167]">
+    <div className="flex min-h-28 flex-col items-center justify-center rounded-md border border-dashed border-[#d8e0d9] bg-[#fbfcfa] px-4 py-6 text-center">
+      <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#eef4ef] text-[#607167]">
         <Inbox className="h-4 w-4" />
       </span>
       <p className="mt-3 text-sm font-semibold text-[#223028]">{text}</p>
       {action ? <div className="mt-4">{action}</div> : null}
     </div>
+  );
+}
+
+function DashboardPanel({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <section className={`rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ${className}`}>
+      {children}
+    </section>
+  );
+}
+
+function MetricCard({
+  title,
+  value,
+  description,
+  tone,
+  icon,
+}: {
+  title: string;
+  value: ReactNode;
+  description: ReactNode;
+  tone: "positive" | "warning" | "neutral" | "danger";
+  icon: keyof typeof metricIcons;
+}) {
+  const Icon = metricIcons[icon];
+  const toneClasses = {
+    positive: "border-[#b9d8c7] bg-[#f8fcf9] text-[#14543f]",
+    warning: "border-[#ead7a8] bg-[#fffaf0] text-[#765116]",
+    neutral: "border-[#dce2dc] bg-white text-[#34445c]",
+    danger: "border-[#e0c4bf] bg-[#fff8f6] text-[#8b2f28]",
+  };
+
+  return (
+    <article className="min-w-0 rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#607167]">{title}</p>
+          <p className="mt-2 min-w-0 text-xl font-semibold leading-tight tracking-normal text-[#16201b]">
+            {value}
+          </p>
+        </div>
+        <span
+          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border ${toneClasses[tone]}`}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-5 text-[#647067]">{description}</p>
+    </article>
+  );
+}
+
+function AttentionItem({
+  title,
+  value,
+  description,
+  href,
+  tone = "neutral",
+  dataTour,
+}: {
+  title: string;
+  value: string;
+  description: string;
+  href: string;
+  tone?: "warning" | "positive" | "neutral";
+  dataTour?: string;
+}) {
+  const toneClasses = {
+    warning: "border-[#ead7a8] bg-[#fffaf0]",
+    positive: "border-[#b9d8c7] bg-[#f8fcf9]",
+    neutral: "border-[#dce2dc] bg-white",
+  };
+
+  return (
+    <Link
+      href={href}
+      data-tour={dataTour}
+      className={`block min-w-0 rounded-lg border p-4 shadow-sm transition hover:border-[#8ea99b] ${toneClasses[tone]}`}
+    >
+      <p className="truncate text-sm font-medium text-[#607167]">{title}</p>
+      <p className="mt-2 truncate text-xl font-semibold text-[#16201b]">{value}</p>
+      <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#647067]">{description}</p>
+    </Link>
+  );
+}
+
+function ListLink({
+  href,
+  title,
+  meta,
+  trailing,
+}: {
+  href: string;
+  title: string;
+  meta: ReactNode;
+  trailing?: ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="block rounded-md border border-[#e5e9e5] px-3 py-2.5 transition hover:border-[#aebdae]"
+    >
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold text-[#223028]">{title}</p>
+          <p className="mt-1 min-w-0 truncate text-xs text-[#647067]">{meta}</p>
+        </div>
+        {trailing ? (
+          <span className="shrink-0 text-right text-sm font-semibold text-[#16201b]">
+            {trailing}
+          </span>
+        ) : null}
+      </div>
+    </Link>
   );
 }
 
@@ -109,19 +250,19 @@ export default async function DashboardPage() {
   ]);
   const { cards, lists } = dashboard;
 
-  const dashboardStats = [
+  const financialStats = [
     {
       id: "receivable" as const,
       title: "Toplam alacak",
       value: <MoneyLines items={cards.receivables} />,
-      description: "Satış faturalarından tahsilatlar düşüldükten sonra kalan tutar.",
+      description: "Tahsilatlar düşüldükten sonra kalan satış faturası tutarı.",
       tone: "positive" as const,
     },
     {
       id: "payable" as const,
       title: "Toplam borç",
       value: <MoneyLines items={cards.payables} />,
-      description: "Alış faturalarından ödemeler düşüldükten sonra kalan tutar.",
+      description: "Ödemeler düşüldükten sonra kalan alış faturası tutarı.",
       tone: "danger" as const,
     },
     {
@@ -132,383 +273,173 @@ export default async function DashboardPage() {
       tone: "neutral" as const,
     },
     {
-      id: "monthlyExpenses" as const,
-      title: "Bu ayki giderler",
-      value: <MoneyLines items={cards.monthlyExpenses} />,
-      description: "Bu ay kaydedilen iptal edilmemiş giderlerin toplamı.",
-      tone: "neutral" as const,
-    },
-    {
       id: "unpaidInvoices" as const,
       title: "Ödenmemiş faturalar",
       value: `${cards.unpaidInvoiceCount} adet`,
       description: (
         <>
-          Kalan tutar: <SmallMoneyLines items={cards.unpaidInvoiceRemaining} />
+          Kalan: <SmallMoneyLines items={cards.unpaidInvoiceRemaining} />
         </>
       ),
-      tone: "warning" as const,
-    },
-    {
-      id: "upcomingDates" as const,
-      title: "Yaklaşan tarihler",
-      value: `${cards.upcomingImportantDateCount} kayıt`,
-      description: `${cards.overdueImportantDateCount} geciken bekleyen hatırlatma var.`,
       tone: "warning" as const,
     },
   ];
 
   const quickActions = [
     {
-      title: "Yeni Cari",
-      href: "/companies/new",
-      icon: Building2,
-      description: "Müşteri veya tedarikçi kaydı oluşturun.",
-    },
-    {
       title: "Yeni Fatura",
       href: "/invoices/new",
       icon: FilePlus2,
-      description: "Ben fatura kestim veya bana fatura kesildi.",
     },
     {
-      title: "Para Aldım / Para Ödedim",
+      title: "Para Aldım / Ödedim",
       href: "/payments/new",
       icon: ArrowDownLeft,
-      description: "Tahsilat veya ödeme hareketi kaydedin.",
     },
     {
       title: "Yeni Gider",
       href: "/expenses/new",
       icon: ReceiptText,
-      description: "Tek seferlik veya ödenmiş gider ekleyin.",
     },
     {
-      title: "Yeni Hatırlatma",
+      title: "Yeni Cari",
+      href: "/companies/new",
+      icon: Building2,
+    },
+    {
+      title: "Hatırlatma",
       href: "/important-dates/new",
       icon: CalendarClock,
-      description: "Vergi, vade veya sözleşme tarihi not alın.",
     },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-5">
       <section
         data-tour="dashboard-summary"
-        className="rounded-xl border border-[#dce2dc] bg-white p-6 shadow-sm lg:flex lg:items-end lg:justify-between lg:gap-6"
+        className="flex flex-col gap-4 border-b border-[#dce2dc] pb-5 lg:flex-row lg:items-end lg:justify-between"
       >
-        <div>
+        <div className="min-w-0">
           <p className="text-sm font-medium text-[#607167]">Genel bakış</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
+          <h1 className="mt-1 text-2xl font-semibold tracking-normal text-[#16201b] md:text-3xl">
             Finans durumu
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Fatura, tahsilat, ödeme, gider ve hatırlatmaları gerçek kayıtlarınızla takip edin.
+            Bugünkü işleri, yaklaşan vadeleri ve para durumunu tek ekranda kontrol edin.
           </p>
-          <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-[#607167]">
-            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">Yerel veritabanı</span>
-            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">PIN korumalı</span>
-            <span className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-3 py-1">Tam yedek önerilir</span>
-          </div>
         </div>
-        <div className="mt-5 flex flex-wrap gap-2 lg:mt-0">
-          <GuidedTourButton />
+        <div className="flex flex-wrap gap-2">
+          <GuidedTourButton compact />
           <Link
-            href="/payments/new"
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+            href="/help#baslangic"
+            className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#46534b] shadow-sm transition hover:border-[#8ea99b] hover:text-[#16201b]"
           >
-            <ArrowDownLeft className="h-4 w-4" />
-            Para aldım / Para ödedim
-          </Link>
-          <Link
-            href="/expenses/new"
-            className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
-          >
-            <ReceiptText className="h-4 w-4" />
-            Gider ekle
+            <HelpCircle className="h-4 w-4" />
+            Yardım
           </Link>
         </div>
       </section>
 
-      <HelpHint
-        title="Bu sayfada neye bakmaliyim?"
-        items={[
-          "Genel durumunuzu buradan takip edin.",
-          "Yaklasan vadeleri ve son hareketleri kontrol edin.",
-          "Duzenli olarak tam yedek almayi unutmayin.",
-        ]}
-        href="/help#baslangic"
-      />
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        {quickActions.map((action, index) => {
+          const Icon = action.icon;
+          const primary = index === 0;
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {dashboardStats.map((stat) => (
-          <StatCard
+          return (
+            <Link
+              key={action.href}
+              href={action.href}
+              className={
+                primary
+                  ? "inline-flex h-12 min-w-0 items-center gap-3 rounded-lg bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
+                  : "inline-flex h-12 min-w-0 items-center gap-3 rounded-lg border border-[#dce2dc] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#8ea99b]"
+              }
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="truncate">{action.title}</span>
+            </Link>
+          );
+        })}
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-3">
+        <AttentionItem
+          title="Bu hafta vadesi gelen"
+          value={`${lists.dueInvoicesThisWeek.length} fatura`}
+          description="Ödenmemiş veya kısmi ödenmiş faturaları kontrol edin."
+          href="/reports/due-invoices?view=7"
+          tone={lists.dueInvoicesThisWeek.length > 0 ? "warning" : "positive"}
+        />
+        <AttentionItem
+          title="Bekleyen hatırlatmalar"
+          value={`${cards.upcomingImportantDateCount} yaklaşan`}
+          description={`${cards.overdueImportantDateCount} geciken bekleyen hatırlatma var.`}
+          href="/important-dates?status=PENDING"
+          tone={cards.overdueImportantDateCount > 0 ? "warning" : "neutral"}
+        />
+        <AttentionItem
+          title="Yedek durumu"
+          value={backupReminder.isDue ? "Yedek önerilir" : "Güncel"}
+          description={backupReminder.message}
+          href="/settings/backup"
+          tone={backupReminder.tone === "warning" ? "warning" : "positive"}
+          dataTour="backup"
+        />
+      </section>
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {financialStats.map((stat) => (
+          <MetricCard
             key={stat.id}
             title={stat.title}
             value={stat.value}
             description={stat.description}
             tone={stat.tone}
-            icon={statIcons[stat.id]}
+            icon={stat.id}
           />
         ))}
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Bu ayki ödenmiş giderler</p>
-          <div className="mt-3 text-xl font-semibold text-[#16201b]">
-            <MoneyLines items={cards.monthlyPaidExpenses} />
-          </div>
-        </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Aktif sabit giderler</p>
-          <p className="mt-3 text-xl font-semibold text-[#16201b]">
-            {cards.activeRecurringExpenseCount} kayıt
-          </p>
-          <p className="mt-2 text-sm text-[#647067]">
-            Aylık toplam: <SmallMoneyLines items={cards.activeRecurringExpenseTotals} />
-          </p>
-        </div>
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Cari sayısı</p>
-          <p className="mt-3 text-xl font-semibold text-[#16201b]">
-            {cards.companyBreakdown.total} kayıt
-          </p>
-          <p className="mt-2 text-sm leading-6 text-[#647067]">
-            Müşteri: {cards.companyBreakdown.CUSTOMER} · Tedarikçi:{" "}
-            {cards.companyBreakdown.SUPPLIER} · İkisi de: {cards.companyBreakdown.BOTH}
-          </p>
-        </div>
-      </section>
-
-      <section
-        data-tour="backup"
-        className={
-          backupReminder.tone === "warning"
-            ? "rounded-lg border border-[#f0d9a2] bg-[#fffaf0] p-5 shadow-sm"
-            : "rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm"
-        }
-      >
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-start gap-3">
-            <span
-              className={
-                backupReminder.tone === "warning"
-                  ? "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fff4dc] text-[#765116]"
-                  : "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]"
-              }
-            >
-              <DatabaseBackup className="h-5 w-5" />
-            </span>
-            <div>
-              <h2 className="text-lg font-semibold text-[#16201b]">Yedek durumu</h2>
-              <p className="mt-1 text-sm leading-6 text-[#647067]">
-                {backupReminder.message}
-              </p>
-              <p className="mt-2 text-xs text-[#647067]">
-                Son tam yedek: {formatBackupReminderDate(backupReminder.lastFullBackupAt)}
-                {backupReminder.enabled
-                  ? ` · Hatırlatma aralığı: ${backupReminder.intervalDays} gün`
-                  : " · Hatırlatma kapalı"}
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/settings/backup"
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
-          >
-            Yedekleme Sayfasına Git
-          </Link>
-        </div>
-      </section>
-
-      <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-[#16201b]">Hızlı işlemler</h2>
-            <p className="mt-1 text-sm text-[#647067]">
-              Sık kullanılan kayıt ekranlarına doğrudan geçin.
-            </p>
-          </div>
-        </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-          {quickActions.map((action) => {
-            const Icon = action.icon;
-
-            return (
-              <Link
-                key={action.href}
-                href={action.href}
-                className="flex min-h-28 flex-col items-start justify-between rounded-md border border-[#dce2dc] bg-[#fbfcfa] p-4 text-left transition hover:border-[#8ea99b] hover:bg-white"
-              >
-                <span className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
-                  <Icon className="h-4 w-4" />
-                </span>
-                <span>
-                  <span className="block text-sm font-semibold text-[#223028]">
-                    {action.title}
-                  </span>
-                  <span className="mt-2 block text-sm leading-5 text-[#647067]">
-                    {action.description}
-                  </span>
-                </span>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="grid gap-5 xl:grid-cols-3">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Son 5 fatura</h2>
-          <div className="mt-5 space-y-3">
-            {lists.recentInvoices.length === 0 ? (
-              <EmptyState
-                text="Henüz fatura kaydı yok"
-                action={
-                  <Link
-                    href="/invoices/new"
-                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-                  >
-                    İlk faturayı ekle
-                  </Link>
-                }
-              />
+      <section className="grid gap-4 xl:grid-cols-2">
+        <DashboardPanel>
+          <SectionHeader
+            eyebrow="Yaklaşan işler"
+            title="Bu hafta vadesi gelen faturalar"
+          />
+          <div className="mt-4 space-y-2.5">
+            {lists.dueInvoicesThisWeek.length === 0 ? (
+              <EmptyState text="Bu hafta vadesi gelen fatura yok" />
             ) : (
-              lists.recentInvoices.map((invoice) => (
-                <Link
+              lists.dueInvoicesThisWeek.map((invoice) => (
+                <ListLink
                   key={invoice.id}
                   href={`/invoices/${invoice.id}`}
-                  className="block rounded-md border border-[#e5e9e5] px-4 py-3 transition hover:border-[#aebdae]"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#223028]">
-                        {invoice.invoiceNumber}
-                      </p>
-                      <p className="mt-1 text-sm text-[#647067]">{invoice.company.name}</p>
-                    </div>
-                    <span className="text-sm font-semibold text-[#16201b]">
-                      {formatDashboardMoney(invoice.totalAmount, invoice.currency)}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-xs text-[#647067]">
-                    {invoiceTypeLabels[invoice.type]} · {invoiceStatusLabels[invoice.status]} ·{" "}
-                    {formatDate(invoice.invoiceDate)}
-                  </p>
-                </Link>
+                  title={invoice.invoiceNumber}
+                  meta={`${invoice.companyName} - ${
+                    invoice.dueDate ? formatDate(invoice.dueDate) : "-"
+                  }`}
+                  trailing={formatDashboardMoney(invoice.remainingAmount, invoice.currency)}
+                />
               ))
             )}
           </div>
-        </div>
+        </DashboardPanel>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Son 5 ödeme/tahsilat</h2>
-          <div className="mt-5 space-y-3">
-            {lists.recentPayments.length === 0 ? (
-              <EmptyState
-                text="Henüz ödeme veya tahsilat yok"
-                action={
-                  <Link
-                    href="/payments/new"
-                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-                  >
-                    İlk hareketi ekle
-                  </Link>
-                }
-              />
-            ) : (
-              lists.recentPayments.map((payment) => (
-                <Link
-                  key={payment.id}
-                  href={`/payments/${payment.id}`}
-                  className="block rounded-md border border-[#e5e9e5] px-4 py-3 transition hover:border-[#aebdae]"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#223028]">
-                        {paymentTypeLabels[payment.type]}
-                      </p>
-                      <p className="mt-1 text-sm text-[#647067]">
-                        {payment.company?.name ?? payment.invoice?.invoiceNumber ?? "Genel hareket"}
-                      </p>
-                    </div>
-                    <span className="text-sm font-semibold text-[#16201b]">
-                      {formatDashboardMoney(payment.amount, payment.currency)}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-xs text-[#647067]">
-                    {formatDate(payment.paymentDate)}
-                  </p>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Son 5 gider</h2>
-          <div className="mt-5 space-y-3">
-            {lists.recentExpenses.length === 0 ? (
-              <EmptyState
-                text="Henüz gider kaydı yok"
-                action={
-                  <Link
-                    href="/expenses/new"
-                    className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-                  >
-                    İlk gideri ekle
-                  </Link>
-                }
-              />
-            ) : (
-              lists.recentExpenses.map((expense) => (
-                <Link
-                  key={expense.id}
-                  href={`/expenses/${expense.id}`}
-                  className="block rounded-md border border-[#e5e9e5] px-4 py-3 transition hover:border-[#aebdae]"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-[#223028]">{expense.title}</p>
-                      <p className="mt-1 text-sm text-[#647067]">
-                        {expense.category?.name ?? expense.company?.name ?? "Kategori yok"}
-                      </p>
-                    </div>
-                    <span className="text-sm font-semibold text-[#16201b]">
-                      {formatDashboardMoney(expense.amount, expense.currency)}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-xs text-[#647067]">
-                    {expenseStatusLabels[expense.status]} · {formatDate(expense.expenseDate)}
-                  </p>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-      </section>
-
-      <section className="grid gap-5 xl:grid-cols-2">
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold text-[#16201b]">
-                Yaklaşan önemli tarihler
-              </h2>
-              <p className="mt-1 text-sm text-[#647067]">
-                Bugünden itibaren 7 gün içindeki bekleyen hatırlatmalar.
-              </p>
-            </div>
-            <Link
-              href="/important-dates/new"
-              className="inline-flex h-9 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-            >
-              <Plus className="h-4 w-4" />
-              Ekle
-            </Link>
-          </div>
-          <div className="mt-5 space-y-3">
+        <DashboardPanel>
+          <SectionHeader
+            eyebrow="Yaklaşan işler"
+            title="Önemli tarihler"
+            action={
+              <Link
+                href="/important-dates/new"
+                className="inline-flex h-9 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+              >
+                <Plus className="h-4 w-4" />
+                Ekle
+              </Link>
+            }
+          />
+          <div className="mt-4 space-y-2.5">
             {lists.upcomingImportantDates.length === 0 ? (
               <EmptyState
                 text="Yaklaşan hatırlatma yok"
@@ -523,63 +454,176 @@ export default async function DashboardPage() {
               />
             ) : (
               lists.upcomingImportantDates.map((item) => (
-                <Link
+                <ListLink
                   key={item.id}
                   href={`/important-dates/${item.id}`}
-                  className="flex items-center justify-between gap-4 rounded-md border border-[#e5e9e5] px-4 py-3 transition hover:border-[#aebdae]"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-[#223028]">{item.title}</p>
-                    <p className="mt-1 text-sm text-[#647067]">
-                      {importantDateCategoryLabels[item.category]} · {priorityLabels[item.priority]}
-                    </p>
-                  </div>
-                  <span className="shrink-0 rounded-md bg-[#eef5f1] px-3 py-1 text-sm font-semibold text-[#1f6f54]">
-                    {formatDate(item.date)}
-                    {item.time ? ` · ${item.time}` : ""}
-                  </span>
-                </Link>
+                  title={item.title}
+                  meta={`${importantDateCategoryLabels[item.category]} - ${priorityLabels[item.priority]}`}
+                  trailing={
+                    <>
+                      <span className="block">{formatDate(item.date)}</span>
+                      {item.time ? (
+                        <span className="mt-1 block text-xs font-medium text-[#647067]">
+                          {item.time}
+                        </span>
+                      ) : null}
+                    </>
+                  }
+                />
               ))
             )}
           </div>
-        </div>
+        </DashboardPanel>
+      </section>
 
-        <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">
-            Bu hafta vadesi gelen faturalar
-          </h2>
-          <p className="mt-1 text-sm text-[#647067]">
-            Bugün ve önümüzdeki 7 gün içinde vadesi gelen ödenmemiş faturalar.
-          </p>
-          <div className="mt-5 space-y-3">
-            {lists.dueInvoicesThisWeek.length === 0 ? (
-              <EmptyState text="Bu hafta vadesi gelen fatura yok" />
-            ) : (
-              lists.dueInvoicesThisWeek.map((invoice) => (
-                <Link
-                  key={invoice.id}
-                  href={`/invoices/${invoice.id}`}
-                  className="flex items-center justify-between gap-4 rounded-md border border-[#e5e9e5] px-4 py-3 transition hover:border-[#aebdae]"
-                >
-                  <div>
-                    <p className="text-sm font-semibold text-[#223028]">
-                      {invoice.invoiceNumber}
-                    </p>
-                    <p className="mt-1 text-sm text-[#647067]">{invoice.companyName}</p>
-                  </div>
-                  <span className="text-right text-sm">
-                    <span className="block font-semibold text-[#16201b]">
-                      {formatDashboardMoney(invoice.remainingAmount, invoice.currency)}
-                    </span>
-                    <span className="mt-1 block text-[#647067]">
-                      {invoice.dueDate ? formatDate(invoice.dueDate) : "-"}
-                    </span>
-                  </span>
-                </Link>
-              ))
-            )}
+      <DashboardPanel>
+        <SectionHeader eyebrow="Son hareketler" title="Son hareketler" />
+        <div className="mt-4 grid gap-4 xl:grid-cols-3">
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-[#223028]">Son faturalar</h3>
+            <div className="mt-3 space-y-2.5">
+              {lists.recentInvoices.length === 0 ? (
+                <EmptyState
+                  text="Henüz fatura kaydı yok"
+                  action={
+                    <Link
+                      href="/invoices/new"
+                      className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                    >
+                      İlk faturayı ekle
+                    </Link>
+                  }
+                />
+              ) : (
+                lists.recentInvoices.map((invoice) => (
+                  <ListLink
+                    key={invoice.id}
+                    href={`/invoices/${invoice.id}`}
+                    title={invoice.invoiceNumber}
+                    meta={`${invoice.company.name} - ${invoiceTypeLabels[invoice.type]} - ${
+                      invoiceStatusLabels[invoice.status]
+                    }`}
+                    trailing={formatDashboardMoney(invoice.totalAmount, invoice.currency)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-[#223028]">
+              Son ödeme/tahsilat
+            </h3>
+            <div className="mt-3 space-y-2.5">
+              {lists.recentPayments.length === 0 ? (
+                <EmptyState
+                  text="Henüz ödeme veya tahsilat yok"
+                  action={
+                    <Link
+                      href="/payments/new"
+                      className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                    >
+                      İlk hareketi ekle
+                    </Link>
+                  }
+                />
+              ) : (
+                lists.recentPayments.map((payment) => (
+                  <ListLink
+                    key={payment.id}
+                    href={`/payments/${payment.id}`}
+                    title={paymentTypeLabels[payment.type]}
+                    meta={`${
+                      payment.company?.name ?? payment.invoice?.invoiceNumber ?? "Genel hareket"
+                    } - ${formatDate(payment.paymentDate)}`}
+                    trailing={formatDashboardMoney(payment.amount, payment.currency)}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+
+          <div className="min-w-0">
+            <h3 className="text-sm font-semibold text-[#223028]">Son giderler</h3>
+            <div className="mt-3 space-y-2.5">
+              {lists.recentExpenses.length === 0 ? (
+                <EmptyState
+                  text="Henüz gider kaydı yok"
+                  action={
+                    <Link
+                      href="/expenses/new"
+                      className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+                    >
+                      İlk gideri ekle
+                    </Link>
+                  }
+                />
+              ) : (
+                lists.recentExpenses.map((expense) => (
+                  <ListLink
+                    key={expense.id}
+                    href={`/expenses/${expense.id}`}
+                    title={expense.title}
+                    meta={`${
+                      expense.category?.name ?? expense.company?.name ?? "Kategori yok"
+                    } - ${expenseStatusLabels[expense.status]} - ${formatDate(expense.expenseDate)}`}
+                    trailing={formatDashboardMoney(expense.amount, expense.currency)}
+                  />
+                ))
+              )}
+            </div>
           </div>
         </div>
+      </DashboardPanel>
+
+      <section className="grid gap-3 lg:grid-cols-4">
+        <DashboardPanel className="lg:col-span-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 items-start gap-3">
+              <span
+                className={
+                  backupReminder.tone === "warning"
+                    ? "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#fff4dc] text-[#765116]"
+                    : "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]"
+                }
+              >
+                <DatabaseBackup className="h-4 w-4" />
+              </span>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-[#16201b]">Yedek durumu</p>
+                <p className="mt-1 truncate text-sm text-[#647067]">
+                  Son tam yedek: {formatBackupReminderDate(backupReminder.lastFullBackupAt)}
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/settings/backup"
+              className="inline-flex h-9 shrink-0 items-center justify-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+            >
+              Yedekleme
+            </Link>
+          </div>
+        </DashboardPanel>
+
+        <DashboardPanel>
+          <p className="text-sm font-medium text-[#607167]">Bu ayki giderler</p>
+          <div className="mt-2 text-lg font-semibold text-[#16201b]">
+            <MoneyLines items={cards.monthlyExpenses} />
+          </div>
+          <p className="mt-2 text-sm text-[#647067]">
+            Ödenen: <SmallMoneyLines items={cards.monthlyPaidExpenses} />
+          </p>
+        </DashboardPanel>
+
+        <DashboardPanel>
+          <p className="text-sm font-medium text-[#607167]">Sabit gider / cari</p>
+          <p className="mt-2 text-lg font-semibold text-[#16201b]">
+            {cards.activeRecurringExpenseCount} sabit gider
+          </p>
+          <p className="mt-2 text-sm text-[#647067]">
+            {cards.companyBreakdown.total} cari kaydı
+          </p>
+        </DashboardPanel>
       </section>
     </div>
   );
