@@ -7,6 +7,15 @@ const standaloneDir = path.join(projectRoot, ".next", "standalone");
 const staticSourceDir = path.join(projectRoot, ".next", "static");
 const staticTargetDir = path.join(standaloneDir, ".next", "static");
 const nativePlatformArch = `${process.platform}-${process.arch}`;
+const nextCompiledServerRuntimePackagePath = path.join(
+  "next",
+  "dist",
+  "compiled",
+  "next-server",
+);
+const requiredNextServerRuntimeFiles = [
+  "app-route-turbo.runtime.prod.js",
+];
 
 const forbiddenStandaloneEntries = [
   "dist",
@@ -91,6 +100,39 @@ function copyRuntimePackageToStandalone(packageName) {
   });
 }
 
+function copyNextCompiledServerRuntimes() {
+  const sourceRuntimeDir = path.join(
+    projectRoot,
+    "node_modules",
+    nextCompiledServerRuntimePackagePath,
+  );
+  const targetRuntimeDir = path.join(
+    standaloneDir,
+    "node_modules",
+    nextCompiledServerRuntimePackagePath,
+  );
+
+  if (!fs.existsSync(sourceRuntimeDir)) {
+    throw new Error("Next compiled server runtime klasoru bulunamadi. Once npm install calistirin.");
+  }
+
+  for (const fileName of requiredNextServerRuntimeFiles) {
+    if (!fs.existsSync(path.join(sourceRuntimeDir, fileName))) {
+      throw new Error(`Next compiled server runtime dosyasi bulunamadi: ${fileName}`);
+    }
+  }
+
+  fs.rmSync(targetRuntimeDir, {
+    recursive: true,
+    force: true,
+  });
+  fs.cpSync(sourceRuntimeDir, targetRuntimeDir, {
+    recursive: true,
+    force: true,
+    dereference: true,
+  });
+}
+
 function copyBetterSqliteNativeBinding() {
   const sourceBindingPath = path.join(
     projectRoot,
@@ -133,5 +175,6 @@ function copyBetterSqliteNativeBinding() {
 cleanForbiddenStandaloneEntries();
 copyStaticAssets();
 replaceLinksInTree(standaloneDir);
+copyNextCompiledServerRuntimes();
 copyRuntimePackageToStandalone("@prisma/client-runtime-utils");
 copyBetterSqliteNativeBinding();

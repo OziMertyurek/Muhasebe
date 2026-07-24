@@ -8,6 +8,15 @@ const forbiddenEntries = [
   path.join("prisma", "dev.db"),
   path.join("prisma", "dev.db-journal"),
 ];
+const nextCompiledServerRuntimePackagePath = path.join(
+  "next",
+  "dist",
+  "compiled",
+  "next-server",
+);
+const requiredNextServerRuntimeFiles = [
+  "app-route-turbo.runtime.prod.js",
+];
 
 function getTargetPlatform(context) {
   return context.electronPlatformName || process.platform;
@@ -214,6 +223,40 @@ function copyRuntimePackageToStandalone(context, packageName) {
   });
 }
 
+function copyNextCompiledServerRuntimes(context) {
+  const sourceRuntimeDir = path.join(
+    context.packager.projectDir,
+    "node_modules",
+    nextCompiledServerRuntimePackagePath,
+  );
+  const targetRuntimeDir = path.join(
+    getResourcesDir(context),
+    "standalone",
+    "node_modules",
+    nextCompiledServerRuntimePackagePath,
+  );
+
+  if (!fs.existsSync(sourceRuntimeDir)) {
+    throw new Error("Next compiled server runtime klasoru bulunamadi. Once npm install calistirin.");
+  }
+
+  for (const fileName of requiredNextServerRuntimeFiles) {
+    if (!fs.existsSync(path.join(sourceRuntimeDir, fileName))) {
+      throw new Error(`Next compiled server runtime dosyasi bulunamadi: ${fileName}`);
+    }
+  }
+
+  fs.rmSync(targetRuntimeDir, {
+    recursive: true,
+    force: true,
+  });
+  fs.cpSync(sourceRuntimeDir, targetRuntimeDir, {
+    recursive: true,
+    force: true,
+    dereference: true,
+  });
+}
+
 exports.default = async function afterPack(context) {
   const sourceStandaloneDir = path.join(context.packager.projectDir, ".next", "standalone");
   const targetStandaloneDir = path.join(getResourcesDir(context), "standalone");
@@ -234,6 +277,7 @@ exports.default = async function afterPack(context) {
   });
 
   removeForbiddenEntries(targetStandaloneDir);
+  copyNextCompiledServerRuntimes(context);
   copyRuntimePackageToStandalone(context, "@prisma/client-runtime-utils");
   copyBetterSqliteNativeBinding(context);
   ensureElectronEntrypoint(context);
