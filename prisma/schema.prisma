@@ -170,10 +170,12 @@ model InvoiceItem {
   vatRate        Decimal
   discountAmount Decimal  @default(0)
   lineTotal      Decimal
+  sortOrder      Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
   @@index([invoiceId])
+  @@index([invoiceId, sortOrder])
 }
 
 model Payment {
