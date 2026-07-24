@@ -1,5 +1,33 @@
 # Release Notes
 
+## [2.3.0] - 2026-07-24
+
+### Added
+
+- File and AI extraction soft archive/restore support
+- File and AI records in Trash with restore actions
+- Estimated cash and bank position on Dashboard
+- Unified Dashboard activity timeline
+- Smart prioritized Attention Center
+
+### Changed
+
+- Redesigned Dashboard information hierarchy
+- Quick Actions moved above the fold
+- Financial Snapshot simplified and improved
+- Dashboard responsive behavior and accessibility improved
+- Application version now reads from package.json as the single source of truth
+
+### Safety and Data Integrity
+
+- Archived files remain physically stored
+- Related invoices and business records are not deleted during archive operations
+- Audit logs are created for file and AI archive/restore operations
+
+### Known Warnings
+
+- Windows standalone build still reports the existing traced-font copy warning involving `C:\Windows\Fonts`
+
 ## v2.2.0 - Help & Onboarding Release
 
 Bu release, yeni kullanicilarin uygulamayi daha rahat ogrenebilmesi icin Yardim Merkezi, sayfa ici ipucu kutulari ve baloncuklu Baslangic Turu ozelliklerini ekler. v2.1.1 guvenlik duzeltmeleri korunur ve `npm audit` son durumda `found 0 vulnerabilities` sonucunu verir.
