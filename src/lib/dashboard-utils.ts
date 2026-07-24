@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { FinancialAccountType, Prisma } from "@prisma/client";
 import { addDays, getLocalDateRange } from "@/lib/important-date-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -36,6 +36,8 @@ function getMonthRange(date = new Date()) {
 function getInvoiceExpectedPaymentType(invoiceType: "SALES" | "PURCHASE") {
   return invoiceType === "SALES" ? "COLLECTION" : "PAYMENT";
 }
+
+const liquidFinancialAccountTypes: FinancialAccountType[] = ["CASH", "BANK", "FOREIGN_CURRENCY"];
 
 export function formatDashboardMoney(value: { toNumber: () => number }, currency: string) {
   return new Intl.NumberFormat("tr-TR", {
@@ -79,6 +81,7 @@ export async function getDashboardData() {
     recentPayments,
     recentExpenses,
     dueInvoicesThisWeek,
+    liquidFinancialAccounts,
     companyCounts,
   ] = await Promise.all([
     prisma.invoice.findMany({
@@ -179,6 +182,25 @@ export async function getDashboardData() {
         },
       },
     }),
+    prisma.financialAccount.findMany({
+      where: {
+        deletedAt: null,
+        isActive: true,
+        type: { in: liquidFinancialAccountTypes },
+      },
+      select: {
+        currency: true,
+        openingBalance: true,
+        payments: {
+          where: { deletedAt: null },
+          select: { type: true, amount: true },
+        },
+        expenses: {
+          where: { deletedAt: null, status: "PAID" },
+          select: { amount: true },
+        },
+      },
+    }),
     prisma.company.groupBy({
       by: ["type"],
       where: { deletedAt: null },
@@ -231,6 +253,26 @@ export async function getDashboardData() {
     addMoney(recurringExpenseTotals, recurringExpense.currency, recurringExpense.amount);
   }
 
+  const liquidAccountTotals = new Map<string, Prisma.Decimal>();
+  for (const account of liquidFinancialAccounts) {
+    const collectionTotal = account.payments
+      .filter((payment) => payment.type === "COLLECTION")
+      .reduce((total, payment) => total.plus(payment.amount), zero());
+    const paymentTotal = account.payments
+      .filter((payment) => payment.type === "PAYMENT")
+      .reduce((total, payment) => total.plus(payment.amount), zero());
+    const paidExpenseTotal = account.expenses.reduce(
+      (total, expense) => total.plus(expense.amount),
+      zero(),
+    );
+    const estimatedBalance = account.openingBalance
+      .plus(collectionTotal)
+      .minus(paymentTotal)
+      .minus(paidExpenseTotal);
+
+    addMoney(liquidAccountTotals, account.currency, estimatedBalance);
+  }
+
   const companyBreakdown = {
     total: 0,
     CUSTOMER: 0,
@@ -263,6 +305,7 @@ export async function getDashboardData() {
       receivables: toMoneyItems(receivables),
       payables: toMoneyItems(payables),
       net: toMoneyItems(net),
+      liquidAccountEstimate: toMoneyItems(liquidAccountTotals),
       monthlyExpenses: toMoneyItems(monthlyExpenseTotals),
       monthlyPaidExpenses: toMoneyItems(monthlyPaidExpenseTotals),
       activeRecurringExpenseCount: activeRecurringExpenses.length,

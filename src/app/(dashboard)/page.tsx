@@ -7,7 +7,6 @@ import {
   CalendarClock,
   DatabaseBackup,
   FilePlus2,
-  FileWarning,
   HelpCircle,
   Inbox,
   Plus,
@@ -39,7 +38,7 @@ const metricIcons = {
   receivable: ArrowDownLeft,
   payable: ArrowUpRight,
   net: WalletCards,
-  unpaidInvoices: FileWarning,
+  liquidAccounts: WalletCards,
 };
 
 function MoneyLines({
@@ -50,19 +49,32 @@ function MoneyLines({
   signed?: boolean;
 }) {
   if (items.length === 0) {
-    return <span>0</span>;
+    return <span className="text-[#647067]">Kayıt yok</span>;
   }
+
+  const visibleItems = items.slice(0, 2);
+  const remainingCount = items.length - visibleItems.length;
 
   return (
     <span className="block min-w-0 space-y-1">
-      {items.map((item) => (
-        <span key={item.currency} className="block truncate">
-          {item.currency}:{" "}
-          {signed
-            ? formatDashboardSignedMoney(item.amount, item.currency)
-            : formatDashboardMoney(item.amount, item.currency)}
+      {visibleItems.map((item) => (
+        <span
+          key={item.currency}
+          className="grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-x-1"
+        >
+          <span>{item.currency}:</span>
+          <span className="min-w-0 break-words">
+            {signed
+              ? formatDashboardSignedMoney(item.amount, item.currency)
+              : formatDashboardMoney(item.amount, item.currency)}
+          </span>
         </span>
       ))}
+      {remainingCount > 0 ? (
+        <span className="block text-sm font-medium text-[#647067]">
+          +{remainingCount} para birimi
+        </span>
+      ) : null}
     </span>
   );
 }
@@ -143,12 +155,14 @@ function MetricCard({
   description,
   tone,
   icon,
+  href,
 }: {
   title: string;
   value: ReactNode;
   description: ReactNode;
   tone: "positive" | "warning" | "neutral" | "danger";
   icon: keyof typeof metricIcons;
+  href: string;
 }) {
   const Icon = metricIcons[icon];
   const toneClasses = {
@@ -159,7 +173,10 @@ function MetricCard({
   };
 
   return (
-    <article className="min-w-0 rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm">
+    <Link
+      href={href}
+      className="block min-w-0 rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm transition hover:border-[#8ea99b]"
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-[#607167]">{title}</p>
@@ -174,7 +191,7 @@ function MetricCard({
         </span>
       </div>
       <p className="mt-3 text-sm leading-5 text-[#647067]">{description}</p>
-    </article>
+    </Link>
   );
 }
 
@@ -253,35 +270,35 @@ export default async function DashboardPage() {
   const financialStats = [
     {
       id: "receivable" as const,
-      title: "Toplam alacak",
+      title: "Alacaklar",
       value: <MoneyLines items={cards.receivables} />,
-      description: "Tahsilatlar düşüldükten sonra kalan satış faturası tutarı.",
+      description: "Kalan satış faturası tutarı.",
       tone: "positive" as const,
+      href: "/reports/receivables-payables",
     },
     {
       id: "payable" as const,
-      title: "Toplam borç",
+      title: "Borçlar",
       value: <MoneyLines items={cards.payables} />,
-      description: "Ödemeler düşüldükten sonra kalan alış faturası tutarı.",
+      description: "Kalan alış faturası tutarı.",
       tone: "danger" as const,
+      href: "/reports/receivables-payables",
     },
     {
       id: "net" as const,
-      title: "Net durum",
+      title: "Net Durum",
       value: <MoneyLines items={cards.net} signed />,
-      description: "Para birimi bazında alacak ve borç farkı.",
+      description: "Alacak ve borç farkı.",
       tone: "neutral" as const,
+      href: "/reports/receivables-payables",
     },
     {
-      id: "unpaidInvoices" as const,
-      title: "Ödenmemiş faturalar",
-      value: `${cards.unpaidInvoiceCount} adet`,
-      description: (
-        <>
-          Kalan: <SmallMoneyLines items={cards.unpaidInvoiceRemaining} />
-        </>
-      ),
-      tone: "warning" as const,
+      id: "liquidAccounts" as const,
+      title: "Kasa & Banka Tahmini",
+      value: <MoneyLines items={cards.liquidAccountEstimate} signed />,
+      description: "Aktif nakit, banka ve döviz hesapları.",
+      tone: "positive" as const,
+      href: "/reports/accounts-summary",
     },
   ];
 
@@ -396,6 +413,7 @@ export default async function DashboardPage() {
             description={stat.description}
             tone={stat.tone}
             icon={stat.id}
+            href={stat.href}
           />
         ))}
       </section>
