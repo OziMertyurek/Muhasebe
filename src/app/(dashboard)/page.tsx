@@ -1,12 +1,15 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import {
+  AlertTriangle,
   ArrowDownLeft,
   ArrowUpRight,
   Building2,
   CalendarClock,
+  CheckCircle2,
   DatabaseBackup,
   FilePlus2,
+  FileWarning,
   HelpCircle,
   Inbox,
   Plus,
@@ -135,12 +138,17 @@ function EmptyState({ text, action }: { text: string; action?: ReactNode }) {
 function DashboardPanel({
   children,
   className = "",
+  dataTour,
 }: {
   children: ReactNode;
   className?: string;
+  dataTour?: string;
 }) {
   return (
-    <section className={`rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ${className}`}>
+    <section
+      data-tour={dataTour}
+      className={`rounded-lg border border-[#dce2dc] bg-white p-4 shadow-sm ${className}`}
+    >
       {children}
     </section>
   );
@@ -197,32 +205,70 @@ function AttentionItem({
   value,
   description,
   href,
-  tone = "neutral",
+  severity = "neutral",
   dataTour,
 }: {
   title: string;
   value: string;
   description: string;
   href: string;
-  tone?: "warning" | "positive" | "neutral";
+  severity?: "critical" | "warning" | "info" | "success" | "neutral";
   dataTour?: string;
 }) {
-  const toneClasses = {
+  const severityClasses = {
+    critical: "border-[#e0c4bf] bg-[#fff8f6]",
     warning: "border-[#ead7a8] bg-[#fffaf0]",
-    positive: "border-[#b9d8c7] bg-[#f8fcf9]",
+    info: "border-[#c9d7e8] bg-[#f7fbff]",
+    success: "border-[#b9d8c7] bg-[#f8fcf9]",
     neutral: "border-[#dce2dc] bg-white",
   };
+  const iconClasses = {
+    critical: "border-[#e0c4bf] bg-white text-[#8b2f28]",
+    warning: "border-[#ead7a8] bg-white text-[#765116]",
+    info: "border-[#c9d7e8] bg-white text-[#34445c]",
+    success: "border-[#b9d8c7] bg-white text-[#14543f]",
+    neutral: "border-[#dce2dc] bg-white text-[#607167]",
+  };
+  const Icon = severity === "critical" ? AlertTriangle : severity === "success" ? CheckCircle2 : FileWarning;
 
   return (
     <Link
       href={href}
       data-tour={dataTour}
-      className={`block min-w-0 rounded-lg border p-4 shadow-sm transition hover:border-[#8ea99b] ${toneClasses[tone]}`}
+      className={`block min-w-0 rounded-lg border p-4 shadow-sm transition hover:border-[#8ea99b] ${severityClasses[severity]}`}
     >
-      <p className="truncate text-sm font-medium text-[#607167]">{title}</p>
-      <p className="mt-2 truncate text-xl font-semibold text-[#16201b]">{value}</p>
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-medium text-[#607167]">{title}</p>
+          <p className="mt-2 truncate text-xl font-semibold text-[#16201b]">{value}</p>
+        </div>
+        <span
+          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border ${iconClasses[severity]}`}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+      </div>
       <p className="mt-2 line-clamp-2 text-sm leading-5 text-[#647067]">{description}</p>
     </Link>
+  );
+}
+
+function AttentionHealthyState() {
+  return (
+    <div className="rounded-lg border border-[#b9d8c7] bg-[#f8fcf9] p-4 shadow-sm">
+      <div className="flex min-w-0 items-start gap-3">
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-[#b9d8c7] bg-white text-[#14543f]">
+          <CheckCircle2 className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-[#607167]">Dikkat merkezi</p>
+          <p className="mt-2 text-xl font-semibold text-[#16201b]">Bugün acil işlem yok</p>
+          <p className="mt-2 text-sm leading-5 text-[#647067]">
+            Vadesi geçmiş fatura, geciken hatırlatma veya yedek uyarısı bulunmuyor.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -403,6 +449,83 @@ export default async function DashboardPage() {
       icon: CalendarClock,
     },
   ];
+  const attentionItems = [
+    cards.overdueSalesInvoiceCount > 0
+      ? {
+          id: "overdue-sales",
+          title: "Geciken tahsilatlar",
+          value: `${cards.overdueSalesInvoiceCount} fatura`,
+          description: "Vadesi geçmiş satış faturalarını kontrol edin.",
+          href: "/reports/due-invoices?view=past&invoiceType=SALES",
+          severity: "critical" as const,
+        }
+      : null,
+    cards.overdueImportantDateCount > 0
+      ? {
+          id: "overdue-reminders",
+          title: "Geciken hatırlatmalar",
+          value: `${cards.overdueImportantDateCount} kayıt`,
+          description: "Bekleyen geçmiş tarihli hatırlatmalar var.",
+          href: "/important-dates?status=PENDING&upcoming=past",
+          severity: "critical" as const,
+        }
+      : null,
+    cards.overduePurchaseInvoiceCount > 0
+      ? {
+          id: "overdue-purchases",
+          title: "Geciken ödemeler",
+          value: `${cards.overduePurchaseInvoiceCount} fatura`,
+          description: "Vadesi geçmiş alış faturalarını kontrol edin.",
+          href: "/reports/due-invoices?view=past&invoiceType=PURCHASE",
+          severity: "warning" as const,
+        }
+      : null,
+    cards.todayInvoiceCount > 0
+      ? {
+          id: "today-invoices",
+          title: "Bugün vadesi gelen faturalar",
+          value: `${cards.todayInvoiceCount} fatura`,
+          description: "Bugün vadesi dolan açık faturalar var.",
+          href: "/reports/due-invoices?view=7",
+          severity: "warning" as const,
+        }
+      : null,
+    cards.todayImportantDateCount > 0
+      ? {
+          id: "today-reminders",
+          title: "Bugünkü hatırlatmalar",
+          value: `${cards.todayImportantDateCount} kayıt`,
+          description: "Bugün takip edilmesi gereken hatırlatmalar var.",
+          href: "/important-dates?status=PENDING&upcoming=today",
+          severity: "warning" as const,
+        }
+      : null,
+    backupReminder.isDue
+      ? {
+          id: "backup-due",
+          title: "Yedek alınmalı",
+          value: "Yedek önerilir",
+          description: backupReminder.lastFullBackupAt
+            ? "Son tam yedek tarihi kontrol edilmeli."
+            : "Henüz tam yedek alınmadı.",
+          href: "/settings/backup",
+          severity: "warning" as const,
+          dataTour: "backup",
+        }
+      : null,
+    cards.failedAiExtractionCount > 0
+      ? {
+          id: "failed-ai",
+          title: "Hatalı AI analizleri",
+          value: `${cards.failedAiExtractionCount} kayıt`,
+          description: "Kontrol bekleyen hatalı analiz kayıtları var.",
+          href: "/ai-extraction?status=FAILED",
+          severity: "warning" as const,
+        }
+      : null,
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const visibleAttentionItems = attentionItems.slice(0, 3);
+  const hiddenAttentionCount = attentionItems.length - visibleAttentionItems.length;
 
   return (
     <div className="space-y-5">
@@ -453,29 +576,31 @@ export default async function DashboardPage() {
         })}
       </section>
 
-      <section className="grid gap-3 lg:grid-cols-3">
-        <AttentionItem
-          title="Bu hafta vadesi gelen"
-          value={`${lists.dueInvoicesThisWeek.length} fatura`}
-          description="Ödenmemiş veya kısmi ödenmiş faturaları kontrol edin."
-          href="/reports/due-invoices?view=7"
-          tone={lists.dueInvoicesThisWeek.length > 0 ? "warning" : "positive"}
-        />
-        <AttentionItem
-          title="Bekleyen hatırlatmalar"
-          value={`${cards.upcomingImportantDateCount} yaklaşan`}
-          description={`${cards.overdueImportantDateCount} geciken bekleyen hatırlatma var.`}
-          href="/important-dates?status=PENDING"
-          tone={cards.overdueImportantDateCount > 0 ? "warning" : "neutral"}
-        />
-        <AttentionItem
-          title="Yedek durumu"
-          value={backupReminder.isDue ? "Yedek önerilir" : "Güncel"}
-          description={backupReminder.message}
-          href="/settings/backup"
-          tone={backupReminder.tone === "warning" ? "warning" : "positive"}
-          dataTour="backup"
-        />
+      <section className="space-y-2">
+        {attentionItems.length === 0 ? (
+          <AttentionHealthyState />
+        ) : (
+          <>
+            <div className="grid gap-3 lg:grid-cols-3">
+              {visibleAttentionItems.map((item) => (
+                <AttentionItem
+                  key={item.id}
+                  title={item.title}
+                  value={item.value}
+                  description={item.description}
+                  href={item.href}
+                  severity={item.severity}
+                  dataTour={item.dataTour}
+                />
+              ))}
+            </div>
+            {hiddenAttentionCount > 0 ? (
+              <p className="px-1 text-xs font-medium text-[#607167]">
+                +{hiddenAttentionCount} diğer konu
+              </p>
+            ) : null}
+          </>
+        )}
       </section>
 
       <section className="grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
@@ -580,7 +705,10 @@ export default async function DashboardPage() {
       </DashboardPanel>
 
       <section className="grid gap-3 lg:grid-cols-4">
-        <DashboardPanel className="lg:col-span-2">
+        <DashboardPanel
+          className="lg:col-span-2"
+          dataTour={backupReminder.isDue ? undefined : "backup"}
+        >
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex min-w-0 items-start gap-3">
               <span

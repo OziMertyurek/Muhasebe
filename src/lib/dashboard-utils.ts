@@ -231,6 +231,11 @@ export async function getDashboardData() {
     activeRecurringExpenses,
     upcomingImportantDates,
     overdueImportantDateCount,
+    todayImportantDateCount,
+    overdueSalesInvoiceCount,
+    overduePurchaseInvoiceCount,
+    todayInvoiceCount,
+    failedAiExtractionCount,
     recentAuditLogs,
     dueInvoicesThisWeek,
     liquidFinancialAccounts,
@@ -290,6 +295,43 @@ export async function getDashboardData() {
         deletedAt: null,
         status: "PENDING",
         date: { lt: today },
+      },
+    }),
+    prisma.importantDate.count({
+      where: {
+        deletedAt: null,
+        status: "PENDING",
+        date: { gte: today, lt: tomorrow },
+      },
+    }),
+    prisma.invoice.count({
+      where: {
+        deletedAt: null,
+        type: "SALES",
+        status: { in: ["UNPAID", "PARTIAL"] },
+        dueDate: { lt: today },
+      },
+    }),
+    prisma.invoice.count({
+      where: {
+        deletedAt: null,
+        type: "PURCHASE",
+        status: { in: ["UNPAID", "PARTIAL"] },
+        dueDate: { lt: today },
+      },
+    }),
+    prisma.invoice.count({
+      where: {
+        deletedAt: null,
+        status: { in: ["UNPAID", "PARTIAL"] },
+        dueDate: { gte: today, lt: tomorrow },
+      },
+    }),
+    prisma.aiExtractionJob.count({
+      where: {
+        deletedAt: null,
+        status: "FAILED",
+        fileAttachment: { deletedAt: null },
       },
     }),
     prisma.auditLog.findMany({
@@ -455,6 +497,11 @@ export async function getDashboardData() {
       unpaidInvoiceRemaining: toMoneyItems(unpaidInvoiceRemaining),
       upcomingImportantDateCount: upcomingImportantDates.length,
       overdueImportantDateCount,
+      todayImportantDateCount,
+      overdueSalesInvoiceCount,
+      overduePurchaseInvoiceCount,
+      todayInvoiceCount,
+      failedAiExtractionCount,
       companyBreakdown,
     },
     lists: {
