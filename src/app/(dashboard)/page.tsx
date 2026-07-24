@@ -24,13 +24,10 @@ import {
   formatDashboardSignedMoney,
   getDashboardData,
 } from "@/lib/dashboard-utils";
-import { expenseStatusLabels } from "@/lib/expense-utils";
 import {
   importantDateCategoryLabels,
   priorityLabels,
 } from "@/lib/important-date-utils";
-import { invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
-import { paymentTypeLabels } from "@/lib/payment-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -260,6 +257,83 @@ function ListLink({
   );
 }
 
+function formatRelativeDashboardTime(date: Date) {
+  const diffMs = Date.now() - date.getTime();
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+
+  if (diffMs < minute) {
+    return "Şimdi";
+  }
+
+  if (diffMs < hour) {
+    return `${Math.floor(diffMs / minute)} dk önce`;
+  }
+
+  if (diffMs < day) {
+    return `${Math.floor(diffMs / hour)} saat önce`;
+  }
+
+  if (diffMs < 2 * day) {
+    return "Dün";
+  }
+
+  return `${Math.floor(diffMs / day)} gün önce`;
+}
+
+function TimelineRow({
+  item,
+}: {
+  item: {
+    id: string;
+    icon: string;
+    title: string;
+    subtitle: string;
+    createdAt: Date;
+    href: string | null;
+  };
+}) {
+  const content = (
+    <div className="flex min-w-0 items-start gap-3">
+      <span
+        aria-hidden="true"
+        className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-[#eef4ef] text-lg"
+      >
+        {item.icon}
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-[#16201b]">{item.title}</p>
+            <p className="mt-1 line-clamp-1 text-sm text-[#647067]">{item.subtitle}</p>
+          </div>
+          <p className="shrink-0 text-xs font-medium text-[#607167]">
+            {formatRelativeDashboardTime(item.createdAt)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!item.href) {
+    return (
+      <div className="rounded-md border border-[#e5e9e5] px-3 py-2.5">
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={item.href}
+      className="block rounded-md border border-[#e5e9e5] px-3 py-2.5 transition hover:border-[#aebdae] hover:bg-[#fbfcfa]"
+    >
+      {content}
+    </Link>
+  );
+}
+
 export default async function DashboardPage() {
   const [dashboard, backupReminder] = await Promise.all([
     getDashboardData(),
@@ -404,7 +478,7 @@ export default async function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
         {financialStats.map((stat) => (
           <MetricCard
             key={stat.id}
@@ -495,102 +569,13 @@ export default async function DashboardPage() {
       </section>
 
       <DashboardPanel>
-        <SectionHeader eyebrow="Son hareketler" title="Son hareketler" />
-        <div className="mt-4 grid gap-4 xl:grid-cols-3">
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-[#223028]">Son faturalar</h3>
-            <div className="mt-3 space-y-2.5">
-              {lists.recentInvoices.length === 0 ? (
-                <EmptyState
-                  text="Henüz fatura kaydı yok"
-                  action={
-                    <Link
-                      href="/invoices/new"
-                      className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-                    >
-                      İlk faturayı ekle
-                    </Link>
-                  }
-                />
-              ) : (
-                lists.recentInvoices.map((invoice) => (
-                  <ListLink
-                    key={invoice.id}
-                    href={`/invoices/${invoice.id}`}
-                    title={invoice.invoiceNumber}
-                    meta={`${invoice.company.name} - ${invoiceTypeLabels[invoice.type]} - ${
-                      invoiceStatusLabels[invoice.status]
-                    }`}
-                    trailing={formatDashboardMoney(invoice.totalAmount, invoice.currency)}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-[#223028]">
-              Son ödeme/tahsilat
-            </h3>
-            <div className="mt-3 space-y-2.5">
-              {lists.recentPayments.length === 0 ? (
-                <EmptyState
-                  text="Henüz ödeme veya tahsilat yok"
-                  action={
-                    <Link
-                      href="/payments/new"
-                      className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-                    >
-                      İlk hareketi ekle
-                    </Link>
-                  }
-                />
-              ) : (
-                lists.recentPayments.map((payment) => (
-                  <ListLink
-                    key={payment.id}
-                    href={`/payments/${payment.id}`}
-                    title={paymentTypeLabels[payment.type]}
-                    meta={`${
-                      payment.company?.name ?? payment.invoice?.invoiceNumber ?? "Genel hareket"
-                    } - ${formatDate(payment.paymentDate)}`}
-                    trailing={formatDashboardMoney(payment.amount, payment.currency)}
-                  />
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="min-w-0">
-            <h3 className="text-sm font-semibold text-[#223028]">Son giderler</h3>
-            <div className="mt-3 space-y-2.5">
-              {lists.recentExpenses.length === 0 ? (
-                <EmptyState
-                  text="Henüz gider kaydı yok"
-                  action={
-                    <Link
-                      href="/expenses/new"
-                      className="inline-flex h-9 items-center rounded-md border border-[#cfd8cf] bg-white px-3 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
-                    >
-                      İlk gideri ekle
-                    </Link>
-                  }
-                />
-              ) : (
-                lists.recentExpenses.map((expense) => (
-                  <ListLink
-                    key={expense.id}
-                    href={`/expenses/${expense.id}`}
-                    title={expense.title}
-                    meta={`${
-                      expense.category?.name ?? expense.company?.name ?? "Kategori yok"
-                    } - ${expenseStatusLabels[expense.status]} - ${formatDate(expense.expenseDate)}`}
-                    trailing={formatDashboardMoney(expense.amount, expense.currency)}
-                  />
-                ))
-              )}
-            </div>
-          </div>
+        <SectionHeader eyebrow="Son hareketler" title="İşlem zaman akışı" />
+        <div className="mt-4 space-y-2.5">
+          {lists.timeline.length === 0 ? (
+            <EmptyState text="Henüz görüntülenecek işlem bulunmuyor." />
+          ) : (
+            lists.timeline.map((item) => <TimelineRow key={item.id} item={item} />)
+          )}
         </div>
       </DashboardPanel>
 

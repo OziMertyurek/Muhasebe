@@ -1,8 +1,11 @@
 import { FinancialAccountType, Prisma } from "@prisma/client";
+import { getAuditEntityHref } from "@/lib/audit-log-utils";
 import { addDays, getLocalDateRange } from "@/lib/important-date-utils";
 import { prisma } from "@/lib/prisma";
 
 type MoneyMap = Map<string, Prisma.Decimal>;
+
+type AuditJson = Record<string, unknown>;
 
 function zero() {
   return new Prisma.Decimal(0);
@@ -38,6 +41,157 @@ function getInvoiceExpectedPaymentType(invoiceType: "SALES" | "PURCHASE") {
 }
 
 const liquidFinancialAccountTypes: FinancialAccountType[] = ["CASH", "BANK", "FOREIGN_CURRENCY"];
+
+function parseAuditJson(value: string | null): AuditJson | null {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed as AuditJson
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function getAuditStatus(log: {
+  beforeJson: string | null;
+  afterJson: string | null;
+  metadataJson: string | null;
+}) {
+  const after = parseAuditJson(log.afterJson);
+  const before = parseAuditJson(log.beforeJson);
+  const metadata = parseAuditJson(log.metadataJson);
+
+  return [after?.status, before?.status, metadata?.status]
+    .find((value): value is string => typeof value === "string");
+}
+
+function getTimelineTitle(log: {
+  entityType: string;
+  action: string;
+  title: string;
+  beforeJson: string | null;
+  afterJson: string | null;
+  metadataJson: string | null;
+}) {
+  const status = getAuditStatus(log);
+  const after = parseAuditJson(log.afterJson);
+  const before = parseAuditJson(log.beforeJson);
+  const paymentType = [after?.type, before?.type]
+    .find((value): value is string => typeof value === "string");
+
+  if (log.entityType === "INVOICE") {
+    if (log.action === "CREATE") return "Yeni Fatura";
+    if (log.action === "UPDATE") return "Fatura Güncellendi";
+    if (log.action === "SOFT_DELETE") return "Fatura Arşivlendi";
+    if (log.action === "RESTORE") return "Fatura Geri Yüklendi";
+    if (log.action === "STATUS_CHANGE") return "Fatura Durumu Değişti";
+  }
+
+  if (log.entityType === "PAYMENT") {
+    if (log.action === "CREATE") {
+      if (paymentType === "COLLECTION") return "Tahsilat Alındı";
+      if (paymentType === "PAYMENT") return "Ödeme Yapıldı";
+      return "Para Hareketi Eklendi";
+    }
+    if (log.action === "UPDATE") return "Para Hareketi Güncellendi";
+    if (log.action === "SOFT_DELETE") return "Para Hareketi Arşivlendi";
+    if (log.action === "RESTORE") return "Para Hareketi Geri Yüklendi";
+  }
+
+  if (log.entityType === "EXPENSE") {
+    if (log.action === "CREATE") return "Gider Kaydedildi";
+    if (log.action === "UPDATE") return "Gider Güncellendi";
+    if (log.action === "SOFT_DELETE") return "Gider Arşivlendi";
+    if (log.action === "RESTORE") return "Gider Geri Yüklendi";
+  }
+
+  if (log.entityType === "COMPANY") {
+    if (log.action === "CREATE") return "Yeni Firma";
+    if (log.action === "UPDATE") return "Firma Güncellendi";
+    if (log.action === "SOFT_DELETE") return "Firma Arşivlendi";
+    if (log.action === "RESTORE") return "Firma Geri Yüklendi";
+  }
+
+  if (log.entityType === "IMPORTANT_DATE") {
+    if (log.action === "CREATE") return "Hatırlatma Oluşturuldu";
+    if (log.action === "UPDATE") return "Hatırlatma Güncellendi";
+    if (log.action === "SOFT_DELETE") return "Hatırlatma Arşivlendi";
+    if (log.action === "RESTORE") return "Hatırlatma Geri Yüklendi";
+    if (log.action === "STATUS_CHANGE") return "Hatırlatma Durumu Değişti";
+  }
+
+  if (log.entityType === "FILE_ATTACHMENT") {
+    if (log.action === "CREATE") return "Dosya Yüklendi";
+    if (log.action === "SOFT_DELETE") return "Dosya Arşivlendi";
+    if (log.action === "RESTORE") return "Dosya Geri Yüklendi";
+    if (log.action === "UPDATE") return "Dosya Güncellendi";
+  }
+
+  if (log.entityType === "AI_EXTRACTION") {
+    if (log.action === "CREATE") return "AI Analizi Başlatıldı";
+    if (status === "FAILED" || log.title.toLocaleLowerCase("tr-TR").includes("hata")) {
+      return "AI Analizi Başarısız";
+    }
+    if (status === "COMPLETED" || status === "REVIEWED") return "AI Analizi Tamamlandı";
+    if (log.action === "SOFT_DELETE") return "AI Analizi Arşivlendi";
+    if (log.action === "RESTORE") return "AI Analizi Geri Yüklendi";
+    if (log.action === "STATUS_CHANGE") return "AI Analizi Güncellendi";
+    if (log.action === "UPDATE") return "AI Analizi Güncellendi";
+  }
+
+  if (log.entityType === "BACKUP") {
+    return "Backup Oluşturuldu";
+  }
+
+  if (log.entityType === "RESTORE") {
+    if (log.action === "BACKUP_VALIDATE") return "Backup Kontrol Edildi";
+    return "Backup Geri Yüklendi";
+  }
+
+  if (log.entityType === "SETTINGS") {
+    return "Ayarlar Güncellendi";
+  }
+
+  if (log.entityType === "FINANCIAL_ACCOUNT") {
+    if (log.action === "CREATE") return "Finansal Hesap Oluşturuldu";
+    if (log.action === "UPDATE") return "Finansal Hesap Güncellendi";
+    if (log.action === "SOFT_DELETE") return "Finansal Hesap Arşivlendi";
+    if (log.action === "RESTORE") return "Finansal Hesap Geri Yüklendi";
+  }
+
+  if (log.entityType === "RECURRING_EXPENSE") {
+    if (log.action === "CREATE") return "Sabit Gider Oluşturuldu";
+    if (log.action === "UPDATE") return "Sabit Gider Güncellendi";
+    if (log.action === "SOFT_DELETE") return "Sabit Gider Arşivlendi";
+    if (log.action === "RESTORE") return "Sabit Gider Geri Yüklendi";
+  }
+
+  return log.title;
+}
+
+function getTimelineIcon(entityType: string) {
+  const icons: Record<string, string> = {
+    INVOICE: "📄",
+    PAYMENT: "💰",
+    EXPENSE: "💸",
+    COMPANY: "🏢",
+    FINANCIAL_ACCOUNT: "💰",
+    RECURRING_EXPENSE: "💸",
+    IMPORTANT_DATE: "📅",
+    FILE_ATTACHMENT: "📎",
+    AI_EXTRACTION: "🤖",
+    BACKUP: "💾",
+    RESTORE: "♻️",
+    SETTINGS: "⚙️",
+  };
+
+  return icons[entityType] ?? "📄";
+}
 
 export function formatDashboardMoney(value: { toNumber: () => number }, currency: string) {
   return new Intl.NumberFormat("tr-TR", {
@@ -77,9 +231,7 @@ export async function getDashboardData() {
     activeRecurringExpenses,
     upcomingImportantDates,
     overdueImportantDateCount,
-    recentInvoices,
-    recentPayments,
-    recentExpenses,
+    recentAuditLogs,
     dueInvoicesThisWeek,
     liquidFinancialAccounts,
     companyCounts,
@@ -140,31 +292,9 @@ export async function getDashboardData() {
         date: { lt: today },
       },
     }),
-    prisma.invoice.findMany({
-      where: { deletedAt: null },
+    prisma.auditLog.findMany({
       orderBy: { createdAt: "desc" },
-      take: 5,
-      include: {
-        company: { select: { name: true } },
-      },
-    }),
-    prisma.payment.findMany({
-      where: { deletedAt: null },
-      orderBy: { paymentDate: "desc" },
-      take: 5,
-      include: {
-        company: { select: { name: true } },
-        invoice: { select: { invoiceNumber: true } },
-      },
-    }),
-    prisma.expense.findMany({
-      where: { deletedAt: null },
-      orderBy: { expenseDate: "desc" },
-      take: 5,
-      include: {
-        category: { select: { name: true } },
-        company: { select: { name: true } },
-      },
+      take: 8,
     }),
     prisma.invoice.findMany({
       where: {
@@ -300,6 +430,15 @@ export async function getDashboardData() {
     };
   });
 
+  const timeline = recentAuditLogs.map((log) => ({
+    id: log.id,
+    icon: getTimelineIcon(log.entityType),
+    title: getTimelineTitle(log),
+    subtitle: log.description ?? log.title,
+    createdAt: log.createdAt,
+    href: log.action === "SOFT_DELETE" ? null : getAuditEntityHref(log),
+  }));
+
   return {
     cards: {
       receivables: toMoneyItems(receivables),
@@ -319,9 +458,7 @@ export async function getDashboardData() {
       companyBreakdown,
     },
     lists: {
-      recentInvoices,
-      recentPayments,
-      recentExpenses,
+      timeline,
       upcomingImportantDates,
       dueInvoicesThisWeek: dueInvoiceRows,
     },
