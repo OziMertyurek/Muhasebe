@@ -13,8 +13,12 @@ type EditAiExtractionPageProps = {
 export default async function EditAiExtractionPage({ params }: EditAiExtractionPageProps) {
   const { id } = await params;
   const [job, fileOptions] = await Promise.all([
-    prisma.aiExtractionJob.findUnique({
-      where: { id },
+    prisma.aiExtractionJob.findFirst({
+      where: {
+        id,
+        deletedAt: null,
+        fileAttachment: { deletedAt: null },
+      },
       include: {
         fileAttachment: {
           select: { id: true, originalFileName: true },

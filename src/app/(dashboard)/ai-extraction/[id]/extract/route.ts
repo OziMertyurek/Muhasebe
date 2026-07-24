@@ -21,8 +21,12 @@ export async function POST(request: Request, { params }: ExtractRouteContext) {
 
   const { id } = await params;
   const detailUrl = new URL(`/ai-extraction/${id}`, request.url);
-  const job = await prisma.aiExtractionJob.findUnique({
-    where: { id },
+  const job = await prisma.aiExtractionJob.findFirst({
+    where: {
+      id,
+      deletedAt: null,
+      fileAttachment: { deletedAt: null },
+    },
     include: {
       fileAttachment: {
         select: {

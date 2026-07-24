@@ -36,6 +36,7 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
   const relatedType = getRelatedType(params?.relatedType);
   const files = await prisma.fileAttachment.findMany({
     where: {
+      deletedAt: null,
       ...(query
         ? {
             OR: [

@@ -76,7 +76,7 @@ export default async function CompanyDetailPage({
   const [statement, files] = await Promise.all([
     getCompanyStatement(id),
     prisma.fileAttachment.findMany({
-      where: { companyId: id },
+      where: { companyId: id, deletedAt: null },
       orderBy: { uploadedAt: "desc" },
       take: 5,
       select: {

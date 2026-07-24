@@ -344,6 +344,7 @@ model FileAttachment {
   paymentId        String?
   payment          Payment?          @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   uploadedAt       DateTime          @default(now())
+  deletedAt        DateTime?
   aiExtractionJobs AiExtractionJob[]
 
   @@index([relatedType])
@@ -351,6 +352,7 @@ model FileAttachment {
   @@index([expenseId])
   @@index([companyId])
   @@index([paymentId])
+  @@index([deletedAt])
 }
 
 model AiExtractionJob {
@@ -364,9 +366,11 @@ model AiExtractionJob {
   errorMessage      String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  deletedAt         DateTime?
 
   @@index([fileAttachmentId])
   @@index([status])
+  @@index([deletedAt])
 }
 
 model AppSetting {

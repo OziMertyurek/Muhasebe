@@ -1,12 +1,17 @@
 import { accountTypeLabels } from "@/lib/account-utils";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import {
+  aiExtractionStatusLabels,
+  formatConfidence,
+} from "@/lib/ai-extraction-utils";
+import {
   syncCreditCardReminders,
   syncInvoiceDueReminder,
   syncRecurringExpenseReminder,
 } from "@/lib/auto-reminder-utils";
 import { companyTypeLabels, formatDate } from "@/lib/company-utils";
 import { expenseStatusLabels } from "@/lib/expense-utils";
+import { fileRelatedTypeLabels, formatFileSize } from "@/lib/file-utils";
 import { importantDateCategoryLabels } from "@/lib/important-date-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
@@ -44,8 +49,8 @@ export const trashTabs: Array<{ type: TrashRecordType; label: string; supported:
   { type: "expenses", label: "Giderler", supported: true },
   { type: "recurring-expenses", label: "Sabit Giderler", supported: true },
   { type: "important-dates", label: "Önemli Tarihler", supported: true },
-  { type: "files", label: "Dosyalar", supported: false },
-  { type: "ai-extractions", label: "AI Analiz Kayıtları", supported: false },
+  { type: "files", label: "Dosyalar", supported: true },
+  { type: "ai-extractions", label: "AI Analiz Kayıtları", supported: true },
 ];
 
 const supportedTrashTypes = trashTabs
@@ -94,6 +99,8 @@ async function getDeletedRecordsByType(): Promise<Record<TrashRecordType, Delete
     expenses,
     recurringExpenses,
     importantDates,
+    files,
+    aiExtractionJobs,
   ] = await Promise.all([
     prisma.company.findMany({
       where: { deletedAt: { not: null } },
@@ -149,6 +156,30 @@ async function getDeletedRecordsByType(): Promise<Record<TrashRecordType, Delete
         invoice: { select: { invoiceNumber: true } },
         expense: { select: { title: true } },
         financialAccount: { select: { name: true } },
+      },
+    }),
+    prisma.fileAttachment.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+      include: {
+        invoice: { select: { invoiceNumber: true } },
+        expense: { select: { title: true } },
+        company: { select: { name: true } },
+        payment: { select: { description: true } },
+        _count: { select: { aiExtractionJobs: true } },
+      },
+    }),
+    prisma.aiExtractionJob.findMany({
+      where: { deletedAt: { not: null } },
+      orderBy: { deletedAt: "desc" },
+      include: {
+        fileAttachment: {
+          select: {
+            originalFileName: true,
+            relatedType: true,
+            deletedAt: true,
+          },
+        },
       },
     }),
   ]);
@@ -269,8 +300,42 @@ async function getDeletedRecordsByType(): Promise<Record<TrashRecordType, Delete
         .join(" · "),
       canRestore: true,
     })),
-    files: [],
-    "ai-extractions": [],
+    files: files.map((file) => ({
+      id: file.id,
+      type: "files",
+      typeLabel: "Dosya",
+      title: file.originalFileName,
+      deletedAt: file.deletedAt,
+      description: [
+        fileRelatedTypeLabels[file.relatedType],
+        file.mimeType,
+        formatFileSize(file.fileSize),
+        file.invoice?.invoiceNumber,
+        file.expense?.title,
+        file.company?.name,
+        file.payment?.description,
+        `${file._count.aiExtractionJobs} AI analiz`,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      canRestore: true,
+    })),
+    "ai-extractions": aiExtractionJobs.map((job) => ({
+      id: job.id,
+      type: "ai-extractions",
+      typeLabel: "AI Analiz",
+      title: job.fileAttachment.originalFileName,
+      deletedAt: job.deletedAt,
+      description: [
+        aiExtractionStatusLabels[job.status],
+        formatConfidence(job.confidence),
+        fileRelatedTypeLabels[job.fileAttachment.relatedType],
+        job.fileAttachment.deletedAt ? "Dosya arşivde" : null,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      canRestore: true,
+    })),
   } satisfies Record<TrashRecordType, DeletedRecord[]>;
 }
 
@@ -402,6 +467,95 @@ export async function restoreRecord(type: TrashRecordType, id: string) {
         after: importantDate,
       });
       return;
+    case "files": {
+      const file = await prisma.fileAttachment.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          originalFileName: true,
+          storedFileName: true,
+          filePath: true,
+          relatedType: true,
+          deletedAt: true,
+        },
+      });
+
+      if (!file?.deletedAt) {
+        throw new Error("Dosya arşivde değil veya bulunamadı.");
+      }
+
+      const restoredFile = await prisma.fileAttachment.update({
+        where: { id },
+        data: { deletedAt: null },
+        select: {
+          id: true,
+          originalFileName: true,
+          storedFileName: true,
+          filePath: true,
+          relatedType: true,
+        },
+      });
+      await createAuditLog({
+        entityType: "FILE_ATTACHMENT",
+        entityId: restoredFile.id,
+        action: "RESTORE",
+        title: `Dosya geri yüklendi: ${restoredFile.originalFileName}`,
+        description:
+          "Dosya kaydı arşivden geri yüklendi. Fiziksel dosya taşınmadı veya yeniden oluşturulmadı.",
+        before: file,
+        after: restoredFile,
+      });
+      return;
+    }
+    case "ai-extractions": {
+      const job = await prisma.aiExtractionJob.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          fileAttachmentId: true,
+          status: true,
+          confidence: true,
+          errorMessage: true,
+          deletedAt: true,
+          fileAttachment: { select: { originalFileName: true } },
+        },
+      });
+
+      if (!job?.deletedAt) {
+        throw new Error("AI analiz kaydı arşivde değil veya bulunamadı.");
+      }
+
+      const restoredJob = await prisma.aiExtractionJob.update({
+        where: { id },
+        data: { deletedAt: null },
+        select: {
+          id: true,
+          fileAttachmentId: true,
+          status: true,
+          confidence: true,
+          errorMessage: true,
+        },
+      });
+      await createAuditLog({
+        entityType: "AI_EXTRACTION",
+        entityId: restoredJob.id,
+        action: "RESTORE",
+        title: "AI analiz kaydı geri yüklendi",
+        description:
+          "AI analiz kaydı arşivden geri yüklendi. Bağlı dosya, fatura ve iş kayıtları değiştirilmedi.",
+        before: {
+          id: job.id,
+          fileAttachmentId: job.fileAttachmentId,
+          status: job.status,
+          confidence: job.confidence,
+          errorMessage: job.errorMessage,
+          deletedAt: job.deletedAt,
+          fileName: job.fileAttachment.originalFileName,
+        },
+        after: restoredJob,
+      });
+      return;
+    }
     default:
       throw new Error("Bu kayıt tipi çöp kutusundan geri yüklenemiyor.");
   }

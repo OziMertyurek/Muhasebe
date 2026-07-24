@@ -9,6 +9,7 @@ import {
 } from "@/lib/ai-extraction-utils";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
+import { requireLocalAuth } from "@/lib/security-utils";
 
 export type AiExtractionFormField =
   | "fileAttachmentId"
@@ -159,8 +160,8 @@ export async function updateAiExtractionAction(
   }
 
   try {
-    const before = await prisma.aiExtractionJob.findUnique({
-      where: { id: jobId },
+    const before = await prisma.aiExtractionJob.findFirst({
+      where: { id: jobId, deletedAt: null },
       select: {
         id: true,
         fileAttachmentId: true,
@@ -171,7 +172,7 @@ export async function updateAiExtractionAction(
     });
 
     await prisma.aiExtractionJob.update({
-      where: { id: jobId },
+      where: { id: jobId, deletedAt: null },
       data: {
         status: parsed.data.status,
         rawExtractedText: parsed.data.rawExtractedText,
@@ -209,12 +210,12 @@ export async function updateAiExtractionStatusAction(
   status: AiExtractionStatus,
 ) {
   try {
-    const before = await prisma.aiExtractionJob.findUnique({
-      where: { id: jobId },
+    const before = await prisma.aiExtractionJob.findFirst({
+      where: { id: jobId, deletedAt: null },
       select: { id: true, status: true },
     });
     const job = await prisma.aiExtractionJob.update({
-      where: { id: jobId },
+      where: { id: jobId, deletedAt: null },
       data: { status },
       select: { id: true, status: true },
     });
@@ -234,4 +235,186 @@ export async function updateAiExtractionStatusAction(
   revalidatePath("/ai-extraction");
   revalidatePath(`/ai-extraction/${jobId}`);
   redirect(`/ai-extraction/${jobId}`);
+}
+
+export async function archiveAiExtractionJobAction(jobId: string) {
+  await requireLocalAuth(`/ai-extraction/${jobId}`);
+
+  try {
+    const job = await prisma.aiExtractionJob.findUnique({
+      where: { id: jobId },
+      select: {
+        id: true,
+        fileAttachmentId: true,
+        status: true,
+        confidence: true,
+        errorMessage: true,
+        extractedJson: true,
+        deletedAt: true,
+        fileAttachment: {
+          select: {
+            originalFileName: true,
+          },
+        },
+      },
+    });
+
+    if (!job) {
+      redirect("/ai-extraction?error=archive-not-found");
+    }
+
+    if (job.deletedAt) {
+      redirect(`/ai-extraction/${job.id}?error=archive-already`);
+    }
+
+    const archivedJob = await prisma.aiExtractionJob.update({
+      where: { id: job.id, deletedAt: null },
+      data: { deletedAt: new Date() },
+      select: {
+        id: true,
+        fileAttachmentId: true,
+        status: true,
+        confidence: true,
+        errorMessage: true,
+        deletedAt: true,
+      },
+    });
+
+    await createAuditLog({
+      entityType: "AI_EXTRACTION",
+      entityId: archivedJob.id,
+      action: "SOFT_DELETE",
+      title: "AI analiz kaydı arşivlendi",
+      description:
+        "AI analiz kaydı arşivlendi. Bağlı dosya, oluşturulmuş fatura ve iş kayıtları değiştirilmedi.",
+      before: {
+        id: job.id,
+        fileAttachmentId: job.fileAttachmentId,
+        status: job.status,
+        confidence: job.confidence,
+        errorMessage: job.errorMessage,
+        fileName: job.fileAttachment.originalFileName,
+        createdInvoiceId: getCreatedInvoiceId(job.extractedJson),
+      },
+      after: archivedJob,
+    });
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    redirect(`/ai-extraction/${jobId}?error=archive`);
+  }
+
+  revalidatePath("/ai-extraction");
+  revalidatePath("/files");
+  revalidatePath("/trash");
+  redirect("/ai-extraction?archived=1");
+}
+
+export async function restoreAiExtractionJobAction(jobId: string) {
+  await requireLocalAuth("/trash?type=ai-extractions");
+
+  try {
+    const job = await prisma.aiExtractionJob.findUnique({
+      where: { id: jobId },
+      select: {
+        id: true,
+        fileAttachmentId: true,
+        status: true,
+        confidence: true,
+        errorMessage: true,
+        deletedAt: true,
+        fileAttachment: {
+          select: {
+            originalFileName: true,
+          },
+        },
+      },
+    });
+
+    if (!job) {
+      redirect("/trash?type=ai-extractions&error=restore-not-found");
+    }
+
+    if (!job.deletedAt) {
+      redirect("/trash?type=ai-extractions&error=restore-active");
+    }
+
+    const restoredJob = await prisma.aiExtractionJob.update({
+      where: { id: job.id },
+      data: { deletedAt: null },
+      select: {
+        id: true,
+        fileAttachmentId: true,
+        status: true,
+        confidence: true,
+        errorMessage: true,
+      },
+    });
+
+    await createAuditLog({
+      entityType: "AI_EXTRACTION",
+      entityId: restoredJob.id,
+      action: "RESTORE",
+      title: "AI analiz kaydı geri yüklendi",
+      description:
+        "AI analiz kaydı arşivden geri yüklendi. Bağlı dosya, fatura ve iş kayıtları değiştirilmedi.",
+      before: {
+        id: job.id,
+        fileAttachmentId: job.fileAttachmentId,
+        status: job.status,
+        confidence: job.confidence,
+        errorMessage: job.errorMessage,
+        deletedAt: job.deletedAt,
+        fileName: job.fileAttachment.originalFileName,
+      },
+      after: restoredJob,
+    });
+  } catch (error) {
+    if (isRedirectError(error)) {
+      throw error;
+    }
+
+    redirect("/trash?type=ai-extractions&error=restore");
+  }
+
+  revalidatePath("/ai-extraction");
+  revalidatePath("/files");
+  revalidatePath("/trash");
+  redirect("/trash?type=ai-extractions&restored=1");
+}
+
+function getCreatedInvoiceId(extractedJson: string | null) {
+  if (!extractedJson) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(extractedJson) as unknown;
+
+    if (
+      parsed &&
+      typeof parsed === "object" &&
+      !Array.isArray(parsed) &&
+      "createdInvoiceId" in parsed &&
+      typeof (parsed as { createdInvoiceId?: unknown }).createdInvoiceId === "string"
+    ) {
+      return (parsed as { createdInvoiceId: string }).createdInvoiceId;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function isRedirectError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "digest" in error &&
+    typeof (error as { digest?: unknown }).digest === "string" &&
+    (error as { digest: string }).digest.startsWith("NEXT_REDIRECT")
+  );
 }
