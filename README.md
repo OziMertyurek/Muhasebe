@@ -1,8 +1,16 @@
-# Local Muhasebe Takip Sistemi
+# Muhasebe Takip Sistemi
 
-Bu proje local çalışan, şirket içi kullanım için geliştirilmiş mini muhasebe, cari hesap, fatura, ödeme, gider ve raporlama sistemidir.
+Bu proje muhasebe, cari hesap, fatura, odeme, gider, dosya arsivi, raporlama ve yakinda stok temelini tasiyan bir is uygulamasidir.
 
-Uygulama online yayınlanmak için değil, yerel bilgisayarda çalışmak için tasarlanmıştır. Kod private GitHub repository içinde tutulabilir; veritabanı ve yüklenen dosyalar ayrıca yedeklenmelidir.
+Onaylanan urun yonu hosted web uygulamasidir: uygulama bir domain uzerinden acilacak, Cloudflare Free edge katmani kullanilacak, merkezi managed PostgreSQL hedeflenecek ve dosya ekleri icin Cloudflare R2 yonu izlenecektir. Bu hedef henuz uygulanmamistir; mevcut kod tabani halen Next.js + Prisma + SQLite + Electron/local runtime gecis durumundadir.
+
+Electron gecicidir, ancak hosted web paritesi kanitlanana kadar korunur. Eski desktop release belgeleri tarihsel baglam olarak kalabilir; yeni mimari kararlar icin `docs/architecture/decisions/` ve `docs/HOSTED_WEB_MIGRATION_ROADMAP.md` kaynak alinmalidir.
+
+## Documentation Status
+
+- Current architecture direction: `DEVELOPMENT_CHARTER.md`, `docs/HOSTED_WEB_MIGRATION_ROADMAP.md`, `docs/architecture/decisions/`, this README.
+- Migration guidance: `docs/HOSTED_WEB_MIGRATION_ROADMAP.md`, `docs/ROADMAP.md`.
+- Historical desktop documentation: desktop release notes, Electron packaging plans, AppData migration plans, macOS packaging plans, and release templates. These documents describe earlier desktop work and should not be rewritten as if history changed.
 
 ## v2.2.0 Desktop Release Durumu
 
@@ -73,7 +81,11 @@ macOS build denemeleri GitHub Actions uzerinden manuel workflow ile yapilir. Ger
 - TypeScript
 - Tailwind CSS
 - Prisma
-- SQLite
+- SQLite currently
+- Managed PostgreSQL target
+- Electron currently transitional
+- Cloudflare Free target edge layer
+- Cloudflare R2 preferred object-storage direction
 
 ## Local Kurulum
 
@@ -215,7 +227,9 @@ DATABASE_URL="file:./prisma/dev.db"
 
 ## Veritabanı
 
-Bu proje SQLite kullanır. Varsayılan local veritabanı dosyası `prisma/dev.db` yolundadır.
+Mevcut gecis durumunda proje SQLite kullanir. Varsayilan local veritabani dosyasi `prisma/dev.db` yolundadir.
+
+Hedef hosted mimaride merkezi managed PostgreSQL kullanilacaktir. PostgreSQL gecisi henuz uygulanmamistir; provider secimi ve migration plani ayrica onaylanmadan `prisma/schema.prisma`, migrations veya database provider degistirilmemelidir.
 
 - `prisma/dev.db` GitHub'a gönderilmez.
 - `prisma/dev.db-journal` GitHub'a gönderilmez.
@@ -224,7 +238,9 @@ Bu proje SQLite kullanır. Varsayılan local veritabanı dosyası `prisma/dev.db
 
 ## Dosya Yüklemeleri
 
-Yüklenen dosyalar `storage/uploads/` klasöründe tutulur.
+Mevcut gecis durumunda yuklenen dosyalar `storage/uploads/` klasorunde tutulur.
+
+Hedef hosted mimaride persistent object storage kullanilacaktir. Cloudflare R2 tercih edilen yondur, ancak henuz uygulanmamistir.
 
 - `storage/uploads/` GitHub'a gönderilmez.
 - Fatura PDF'leri, görseller ve ek dosyalar bu klasörde saklanır.
@@ -232,7 +248,9 @@ Yüklenen dosyalar `storage/uploads/` klasöründe tutulur.
 
 ## Yedekleme
 
-GitHub sadece kodu saklar. SQLite veritabanı ve upload dosyaları GitHub'a gitmez.
+GitHub sadece kodu saklar. Mevcut local SQLite veritabani ve upload dosyalari GitHub'a gitmez.
+
+Hosted mimaride kullaniciya acik is verisi exportlari ile altyapi backup/disaster recovery ayridir. CSV/PDF exportlar kullaniciya acik kalabilir; managed PostgreSQL backup/PITR ve object-storage backup/versioning altyapi sorumlulugudur. Normal kullanicilar production veritabanini restore ederek degistirememelidir.
 
 `Ayarlar > Yedekleme` sayfasından iki tür yedek alınabilir:
 
@@ -289,21 +307,21 @@ Hazır olan altyapı:
 - MarkItDown ile local dosyadan ham metin çıkarma
 - Ham metin, JSON, güven skoru ve hata mesajı alanları
 
-MarkItDown entegrasyonu sadece dosyadan metin çıkarır. OpenAI, LLM veya otomatik fatura oluşturma entegrasyonu henüz yoktur. İleride çıkarılan metni fatura alanlarına dönüştürme, kullanıcıya onaylatma ve onaydan sonra `Invoice` kaydı oluşturma akışı eklenebilir.
+MarkItDown entegrasyonu sadece dosyadan metin cikarir. OpenAI, LLM veya otomatik fatura olusturma entegrasyonu henuz yoktur. Hosted hedefte MarkItDown/Python akisi server-side worker/job modeline tasinacaktir; bundled desktop Python web paritesi kanitlanana kadar korunur.
 
 
 ## Güvenlik Notları
 
-- Veriler yerel bilgisayarda saklanır; GitHub veya harici bir sunucuya otomatik gönderilmez.
-- PIN uygulama erisimini sinirlar; bilgisayar erisimi olan kisilere karsi isletim sistemi kullanici hesabi da parola/PIN ile korunmalidir.
-- Desktop server paketli modda `127.0.0.1` ile sinirlandirilir ve local Host/Origin kontrolleri uygulanir.
+- Mevcut gecis durumunda veriler yerel bilgisayarda saklanir; GitHub'a otomatik gonderilmez.
+- Local PIN mevcut desktop/local model icin gecici korumadir. Hosted web hedefinde gercek kullanici hesaplari, guvenli oturum cookie'leri, logout, rate limiting ve parola sifirlama yetenegi gereklidir.
+- Desktop server paketli modda `127.0.0.1` ile sinirlandirilir ve local Host/Origin kontrolleri uygulanir. Bu hosted web authentication yerine gecmez.
 - Cok sayida hatali PIN denemesinde gecici kilit uygulanir.
 - Duzenli olarak `Ayarlar > Yedekleme > Tam Yedek Indir` ile tam yedek alinmalidir.
 - Hata raporu hassas verileri icermeyecek sekilde tasarlanmistir; `.env`, gercek `DATABASE_URL`, tam local path ve kullanici dosyalari rapora eklenmez.
 - Windows build henuz code signed degildir; SmartScreen uyarisi gorulebilir.
 - macOS build henuz Apple Developer ID ile signed/notarized degildir; Gatekeeper uyarisi gorulebilir.
 
-- Proje local kullanım içindir.
+- Mevcut calisma sekli local/desktop gecis durumudur; uzun vadeli hedef hosted web uygulamasidir.
 - `.env`, `prisma/dev.db`, `storage/uploads/` GitHub'a gönderilmez.
 - Upload dosyaları ve DB yedekleri dikkatli saklanmalıdır.
 - DB yedeği indirilebilir; bu dosyayı güvenli bir yerde tutmak kullanıcının sorumluluğundadır.

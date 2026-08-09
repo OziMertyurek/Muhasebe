@@ -1,6 +1,10 @@
 # Roadmap
 
-Bu dosya, Local Muhasebe Takip Sistemi için planlanan geliştirme başlıklarını içerir. Sıralama kesin öncelik anlamına gelmez.
+Bu dosya, Muhasebe Takip Sistemi icin planlanan islevsel gelistirme basliklarini icerir. Sıralama kesin oncelik anlamina gelmez.
+
+Onaylanan ana teknik yon hosted web gecisidir. Fazlara ayrilmis teknik migration plani icin `docs/HOSTED_WEB_MIGRATION_ROADMAP.md`, mimari kararlar icin `docs/architecture/decisions/` kaynak alinmalidir.
+
+Stok V1, hosted temel stabil hale geldikten sonra baslayacak ilk buyuk is moduludur. PostgreSQL, web authentication, persistent file storage ve core accounting parity tamamlanmadan stok gelistirmesine baslanmamalidir.
 
 ## AI/OCR Gerçek Entegrasyon
 
@@ -22,32 +26,39 @@ Bu dosya, Local Muhasebe Takip Sistemi için planlanan geliştirme başlıkları
 - Onaydan sonra `Invoice` kaydı oluşturmak.
 - Oluşturulan faturayı dosya eki ve analiz kaydı ile ilişkilendirmek.
 
-## Gelişmiş Restore
+## Business Export / Hosted Backup Policy
 
-Temel seviye tamamlandı:
+Mevcut local/desktop restore akisi gecis donemi davranisidir:
 
-- Tam yedek ZIP doğrulama.
-- Yanlış geri yüklemeyi önlemek için uyarı ve onay adımları.
-- Restore öncesi otomatik güvenlik yedeği.
-- `database/dev.db` ve `uploads/` içeriğini güvenli şekilde geri yükleme.
+- Tam yedek ZIP dogrulama.
+- Yanlis geri yuklemeyi onlemek icin uyari ve onay adimlari.
+- Restore oncesi otomatik guvenlik yedegi.
+- `database/dev.db` ve `uploads/` icerigini local ortamda geri yukleme.
 
-Gelecek geliştirmeler:
+Hosted hedef:
 
-- Restore geçmişi ekranı.
-- Otomatik zamanlanmış yedekleme.
-- Şifreli yedek dosyası.
-- Bulut yedek entegrasyonu.
+- CSV/PDF/business exportlar kullaniciya acik kalir.
+- Managed PostgreSQL backup/PITR altyapi sorumlulugudur.
+- Object storage backup/versioning politikasi altyapi tarafinda tasarlanir.
+- Normal kullanicilar production veritabanini restore ederek degistiremez.
 
-## Upload Klasörünü Zip Yedekleme
+## Persistent File Storage
 
-Temel seviye tamamlandı:
+Mevcut local davranis:
 
-- `storage/uploads/` klasörü tam yedek ZIP dosyasına dahil edilir.
-- DB yedeği ile upload yedeği aynı ekranda yönetilir.
-- Büyük ZIP dosyaları için boyut limiti ve kullanıcı uyarısı vardır.
+- `storage/uploads/` klasoru tam yedek ZIP dosyasina dahil edilir.
+- DB yedegi ile upload yedegi ayni ekranda yonetilir.
+- Buyuk ZIP dosyalari icin boyut limiti ve kullanici uyarisi vardir.
+
+Hosted hedef:
+
+- FileAttachment binary dosyalari persistent object storage uzerinde tutulur.
+- Cloudflare R2 tercih edilen yondur.
+- Local filesystem kalici hosted storage olarak kullanilmaz.
 
 ## Stok Takibi
 
+- Hosted web foundation tamamlanmadan baslamaz.
 - Ürün/hizmet kartları.
 - Stok giriş/çıkış hareketleri.
 - Fatura kalemleri ile stok bağlantısı.
@@ -60,11 +71,11 @@ Temel seviye tamamlandı:
 - PDF teklif çıktısı.
 - Teklif durum takibi.
 
-## Kullanıcı Girişi / Şifre
+## Web Authentication
 
-- Local kullanım için basit giriş ekranı.
-- Yönetici şifresi.
-- Oturum süresi ve güvenli çıkış.
+- Local PIN mevcut gecis davranisidir.
+- Hosted hedefte kullanici hesaplari, email/password veya managed credential handling, HttpOnly session cookie, logout, rate limiting ve password reset gerekir.
+- Exact authentication library/provider henuz secilmemistir.
 
 ## Gelişmiş Grafikler
 

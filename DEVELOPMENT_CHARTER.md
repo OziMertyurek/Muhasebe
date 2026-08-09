@@ -2,7 +2,9 @@
 
 This charter defines how this repository must be developed. It is for future developers, future ChatGPT/Codex sessions, and future maintainers.
 
-It is not a feature list and it does not replace the README. It describes the engineering workflow, product judgment, and quality standards expected for this project.
+The repository is the source of truth. Before changing behavior, inspect the actual code, configuration, migrations, documentation, and current Git state.
+
+It is not a feature list and it does not replace the README. It describes the engineering workflow, product judgment, architecture direction, and quality standards expected for this project.
 
 ## Table of Contents
 
@@ -26,57 +28,85 @@ Every development task should follow this sequence:
 
 Analysis
 
-↓
-
 Risk Assessment
-
-↓
 
 Implementation Plan
 
-↓
-
 Approval
-
-↓
 
 Development
 
-↓
-
 Verification
-
-↓
 
 Commit
 
-↓
-
 Push
 
-Do not skip directly to implementation for changes that affect UI, UX, database structure, business rules, or architecture. Understand the current repository first, identify the smallest safe change, and verify the result before committing.
+Do not skip directly to implementation for changes that affect UI, UX, database structure, business rules, security, deployment, or architecture. Understand the current repository first, identify the smallest safe change, and verify the result before committing.
+
+Do not invent business rules. If a requirement is unclear, state the uncertainty and ask for Product Owner approval before encoding assumptions into the product.
 
 ## Architecture Principles
 
-### Offline First
+### Hosted Web First
 
-The application must remain useful without depending on a remote server. Local data ownership, backup discipline, and predictable desktop behavior are core product values.
+The approved long-term product direction is a hosted web application accessed through a domain. New architecture work should move toward a secure hosted Next.js Node runtime, not deeper desktop-only coupling.
 
-### Electron
+Domain-specific values must come from environment variables or deployment configuration. Do not hardcode the production domain or environment-specific URLs into application source code.
 
-Electron provides the desktop shell and local application experience. Desktop-specific behavior should be handled carefully and should not weaken the web development workflow.
+### Incremental Migration
+
+Migration from desktop/local runtime to hosted web must be incremental. Preserve working accounting functionality while replacing infrastructure assumptions in safe phases.
+
+Do not use a large rewrite when a smaller verified migration step can preserve behavior and reduce rollback risk.
+
+### Electron Temporary Compatibility
+
+Electron is transitional. It must remain supported until hosted web parity is proven and the Product Owner approves retirement.
+
+Do not remove Electron, AppData helpers, desktop packaging, bundled runtime logic, or desktop documentation as an early migration shortcut. New work should avoid creating new Electron-only dependencies unless explicitly approved.
 
 ### Next.js
 
-Next.js is the main application framework. Follow existing routing, server action, rendering, and component patterns before introducing new abstractions.
+Next.js is the main application framework. Follow existing App Router, Server Action, Route Handler, rendering, and component patterns before introducing new abstractions.
+
+The target hosted runtime is a Next.js Node runtime. The application hosting provider has not been selected yet.
 
 ### Prisma
 
 Prisma is the database access layer and schema authority. Data changes should use typed Prisma APIs and should preserve clear model relationships.
 
-### SQLite
+Do not bypass Prisma for business data unless there is a documented technical reason and Product Owner approval.
 
-SQLite supports the offline-first local database model. Treat the database file as user data. Never run destructive database commands without explicit approval.
+### Centralized PostgreSQL
+
+Managed PostgreSQL is the approved target centralized relational database. The exact PostgreSQL provider has not been selected yet.
+
+SQLite remains part of the current transitional desktop/local architecture. Do not change the Prisma provider, migrations, adapter, or database configuration unless the task explicitly approves that migration step.
+
+### Persistent Object Storage
+
+Hosted file attachments must move toward persistent object storage. Cloudflare R2 is the preferred direction, but it has not been implemented yet.
+
+Do not rely on application instance disk as permanent hosted storage. Local `storage/uploads/` and AppData uploads remain transitional behavior while Electron/local support exists.
+
+### Cloudflare Free as Edge Layer
+
+Cloudflare Free is the approved initial edge/network layer for DNS, SSL/TLS, reverse proxy, CDN where appropriate, and free-tier security protections.
+
+Do not design core application behavior around Cloudflare paid-only features. Cloudflare is not automatically the application host, relational database, authentication system, or business logic layer.
+
+### Secure Web Authentication
+
+Local PIN authentication is transitional and suitable only for the current local/desktop model. Hosted public access requires real web authentication with user accounts, secure credential handling, HttpOnly session cookies, logout, rate limiting, password reset capability, and a path toward future roles/users.
+
+The exact authentication library or provider has not been approved yet. Do not implement one without Product Owner approval.
+
+### Infrastructure Backup Separate From Business Export
+
+Hosted production must distinguish business data export from infrastructure backup/disaster recovery.
+
+CSV/PDF and other business exports may remain user-facing. Managed PostgreSQL backups, PITR, object-storage backup/versioning, and production restore procedures are infrastructure responsibilities. Normal users must not be able to replace the live production database.
 
 ### Small Commits
 
@@ -84,7 +114,7 @@ Each commit should represent one logical change. Small commits are easier to rev
 
 ### Security First
 
-Local desktop software still handles sensitive financial data. Authentication, authorization, validation, and safe error handling must be considered before adding or changing behavior.
+The application handles sensitive financial data. Authentication, authorization, validation, error handling, auditability, rate limiting, and safe operational behavior must be considered before adding or changing behavior.
 
 ### Minimal UI
 
@@ -94,9 +124,11 @@ The interface should be calm, clear, and task-focused. Avoid adding controls, ca
 
 The goal is not to add as many features as possible.
 
-The goal is to create a professional, maintainable, and user-friendly desktop ERP platform. New functionality should make the product more reliable, understandable, and useful for real business operations.
+The goal is to create a professional, maintainable, secure, and user-friendly accounting platform for real business operations. New functionality should make the product more reliable, understandable, and useful.
 
 Feature count is less important than trust, clarity, data safety, and daily usability.
+
+Stock tracking is planned after the hosted foundation is stable. Do not start Stock V1 before PostgreSQL, web authentication, persistent file storage, and core accounting parity are proven.
 
 ## UI / UX Philosophy
 
@@ -112,9 +144,9 @@ Use small migrations with clear names.
 
 Do not make unnecessary schema changes. Before changing a model, confirm that the change is required by the product behavior and that it will not break existing records.
 
-Always consider backup and restore compatibility. Schema changes must preserve user data and must be safe for local SQLite databases.
+Always consider data migration, backup, rollback, and restore compatibility. During the transition, this includes both current SQLite/local data and the approved PostgreSQL target.
 
-Do not create migrations, reset databases, push schemas, or run destructive database commands unless the task explicitly approves that action.
+Do not create migrations, reset databases, push schemas, change database providers, or run destructive database commands unless the task explicitly approves that action.
 
 ## Security Rules
 
@@ -124,8 +156,10 @@ Before implementing new features, always verify:
 - Authorization
 - Validation
 - Error Handling
+- Rate limiting where relevant
+- Audit/log behavior where relevant
 
-Do not expose stack traces, sensitive file paths, raw extracted text, secrets, or private business data in the UI or logs unless there is a deliberate and safe diagnostic design.
+Do not expose stack traces, sensitive file paths, raw extracted text, secrets, database URLs, environment values, or private business data in the UI or logs unless there is a deliberate and safe diagnostic design.
 
 ## Verification Checklist
 
@@ -135,6 +169,7 @@ Before every commit, verify the relevant checks:
 - `npm.cmd run build`
 - Prisma validation, if schema or Prisma code changed
 - Smoke tests for affected workflows
+- Documentation review, if architecture or product direction changed
 
 Known warnings should be reported, never hidden. If a warning is accepted, explain why it is known and why it does not block the change.
 
@@ -149,7 +184,7 @@ Use Conventional Commits, such as:
 - `docs: ...`
 - `chore: ...`
 
-Never mix unrelated work. Never commit temporary code, debug scripts, generated build files, local databases, uploads, logs, or test artifacts.
+Never mix unrelated work. Never commit temporary code, debug scripts, generated build files, local databases, uploads, logs, backup ZIPs, build artifacts, or test artifacts.
 
 Do not amend, squash, force-push, or rewrite history unless explicitly requested and approved.
 
@@ -169,7 +204,7 @@ If something fails, report the exact failure and stop when continuing would be u
 
 Medium or large features must not be implemented immediately.
 
-For changes that affect UI, UX, database, business rules, or architecture, first provide:
+For changes that affect UI, UX, database, business rules, security, deployment, or architecture, first provide:
 
 - Analysis
 - Alternatives
@@ -195,6 +230,8 @@ Do not guess. Do not invent business rules.
 Always inspect the repository before making assumptions. Use actual code, configuration, migrations, and runtime behavior as the source of truth.
 
 When information is missing, state the uncertainty clearly and recommend the safest next step.
+
+MarkItDown/Python support is transitional. It may remain while Electron/local parity exists, but hosted document extraction should move toward a server-side worker/job model.
 
 ## Final Principle
 
