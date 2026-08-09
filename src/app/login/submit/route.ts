@@ -6,24 +6,11 @@ import {
   getAuthCookieOptions,
   getLocalPinHash,
   getPinConfiguredCookieOptions,
-  getPinLockoutMessage,
-  getPinRateLimitStatus,
   getSafeRedirectPath,
   pinConfiguredCookieName,
-  recordFailedPinAttempt,
   requireLocalRequestOrigin,
   verifyLocalPin,
 } from "@/lib/security-utils";
-
-function createPinLockoutResponse(retryAfterSeconds: number) {
-  return new Response(getPinLockoutMessage(), {
-    status: 429,
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "retry-after": String(retryAfterSeconds),
-    },
-  });
-}
 
 export async function POST(request: Request) {
   const localOriginResponse = requireLocalRequestOrigin(request);
@@ -41,19 +28,7 @@ export async function POST(request: Request) {
     return NextResponse.redirect(new URL(nextPath, request.url), 303);
   }
 
-  const rateLimitStatus = getPinRateLimitStatus();
-
-  if (rateLimitStatus.locked) {
-    return createPinLockoutResponse(rateLimitStatus.retryAfterSeconds);
-  }
-
   if (!pin || !(await verifyLocalPin(pin, storedHash))) {
-    const nextStatus = recordFailedPinAttempt();
-
-    if (nextStatus.locked) {
-      return createPinLockoutResponse(nextStatus.retryAfterSeconds);
-    }
-
     return NextResponse.redirect(
       new URL(`/login?error=invalid&next=${encodeURIComponent(nextPath)}`, request.url),
       303,

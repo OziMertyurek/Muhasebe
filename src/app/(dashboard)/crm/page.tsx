@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Download, Eye, Pencil, Plus, Search } from "lucide-react";
+import { Download, Eye, Pencil, Plus, Search, Upload } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HelpHint } from "@/components/ui/help-hint";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -80,6 +80,13 @@ export default async function CrmPage({ searchParams }: CrmPageProps) {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <Link
+            href="/crm/import"
+            className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
+          >
+            <Upload className="h-4 w-4" />
+            İçe Aktar
+          </Link>
           <a
             href={exportHref}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae]"
