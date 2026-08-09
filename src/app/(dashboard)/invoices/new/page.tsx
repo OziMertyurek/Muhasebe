@@ -47,6 +47,7 @@ export default async function NewInvoicePage() {
         <InvoiceForm
           action={createInvoiceAction}
           companies={companies}
+          lineItemsEnabled
           submitLabel="Faturayı kaydet"
         />
       )}
