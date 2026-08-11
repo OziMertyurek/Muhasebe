@@ -94,6 +94,16 @@ The health endpoint is:
 /api/health
 ```
 
+The temporary PostgreSQL connectivity diagnostic endpoint is:
+
+```text
+/api/diagnostics/postgres-select-1
+```
+
+This endpoint is for the Phase 2A cPanel runtime test only. It is not a
+permanent application health check. It does not use Prisma, does not run
+migrations, and does not change the application's current SQLite baseline.
+
 ## Artifact Contents
 
 The artifact should include:
@@ -170,6 +180,46 @@ DATABASE_URL=postgresql://...
 
 Do not set a real PostgreSQL value until Phase 2 is approved and implemented.
 
+Temporary Phase 2A PostgreSQL SELECT 1 diagnostic variables:
+
+```text
+POSTGRES_DIAGNOSTIC_ENABLED=true
+POSTGRES_DIAGNOSTIC_TOKEN=<random value with at least 32 characters>
+POSTGRES_DIAGNOSTIC_DATABASE_URL=postgresql://avornqik_avora_app:<password>@127.0.0.200:5432/avornqik_avora_erp?sslmode=disable
+```
+
+Set these only in cPanel Setup Node.js App environment variables. Do not put
+the real token, database password, or full connection URL in repository files,
+support tickets, screenshots, or deployment notes.
+
+Use the diagnostic with an authenticated request:
+
+```bash
+curl -X POST \
+  -H "Authorization: Bearer <POSTGRES_DIAGNOSTIC_TOKEN>" \
+  https://avorayazilim.com/api/diagnostics/postgres-select-1
+```
+
+Expected success response:
+
+```json
+{
+  "status": "ok",
+  "query": "SELECT 1",
+  "latencyMs": 12
+}
+```
+
+Enable these variables only during the cPanel PostgreSQL connectivity test.
+After the test succeeds or fails, immediately set:
+
+```text
+POSTGRES_DIAGNOSTIC_ENABLED=false
+```
+
+When the diagnostic is no longer needed, remove `POSTGRES_DIAGNOSTIC_TOKEN`
+and `POSTGRES_DIAGNOSTIC_DATABASE_URL` too, then restart the Node.js app.
+
 Do not use `NEXT_PUBLIC_*` for secrets.
 
 ## Environment Variable Inventory
@@ -182,6 +232,9 @@ Current variables used by the repository:
 | `PORT` | Runtime, cPanel-provided | Used by generated Next standalone server. Do not hardcode. |
 | `HOSTNAME` / `HOST` | Optional runtime | Electron uses these for localhost packaged mode. Hosted web should not force them. |
 | `DATABASE_URL` | Runtime now, future PostgreSQL | Currently SQLite. PostgreSQL target in Phase 2. |
+| `POSTGRES_DIAGNOSTIC_ENABLED` | Temporary runtime diagnostic | Enables the guarded `/api/diagnostics/postgres-select-1` endpoint only when set to `true`. |
+| `POSTGRES_DIAGNOSTIC_TOKEN` | Temporary runtime secret | Bearer token for the diagnostic endpoint. Use at least 32 random characters. |
+| `POSTGRES_DIAGNOSTIC_DATABASE_URL` | Temporary runtime secret | PostgreSQL URL used only by the diagnostic endpoint before Prisma migration. |
 | `APP_MODE` | Electron/local mode | `desktop` enables AppData paths. Do not set for hosted web. |
 | `DESKTOP_MODE` | Electron/local mode | Do not set for hosted web. |
 | `APP_PROJECT_ROOT` | Electron/local path override | Do not set for hosted web unless a path issue is explicitly diagnosed. |
