@@ -8,30 +8,32 @@ const staticSourceDir = path.join(projectRoot, ".next", "static");
 const publicSourceDir = path.join(projectRoot, "public");
 const startupSourcePath = path.join(projectRoot, "deployment", "hosted-web", "app.js");
 const artifactDir = path.join(projectRoot, "dist", "hosted-web");
-const nativePlatformArch = `${process.platform}-${process.arch}`;
-const nextCompiledServerRuntimePackagePath = path.join(
-  "next",
-  "dist",
-  "compiled",
-  "next-server",
-);
-const requiredNextServerRuntimeFiles = [
-  "app-route-turbo.runtime.prod.js",
-];
+const standaloneNextNodeModulesDir = path.join(standaloneDir, ".next", "node_modules");
 const forbiddenArtifactEntries = [
   ".env",
   ".env.local",
   ".env.production",
   ".git",
   ".next/cache",
+  path.join(".next", "node_modules"),
   "build",
+  "deployment",
   "dist",
+  "docs",
+  "electron",
+  "node_modules",
+  "python",
+  "python-worker",
+  "scripts",
+  "src",
   "storage",
   path.join("prisma", "dev.db"),
   path.join("prisma", "dev.db-journal"),
-  "python",
+  path.join("prisma", "dev.db.pin-reset-backup-20260724-104458.db"),
   "node",
-  "electron",
+  "start-dev.bat",
+  "start-prod.bat",
+  "stop-info.bat",
 ];
 
 function assertExists(targetPath, message) {
@@ -53,75 +55,6 @@ function copyDirectory(source, target) {
   });
 }
 
-function copyRuntimePackage(packageName) {
-  const sourcePackageDir = path.join(projectRoot, "node_modules", ...packageName.split("/"));
-  const targetPackageDir = path.join(artifactDir, "node_modules", ...packageName.split("/"));
-
-  assertExists(sourcePackageDir, `${packageName} runtime package is missing. Run npm install first.`);
-  copyDirectory(sourcePackageDir, targetPackageDir);
-}
-
-function copyNextCompiledServerRuntimes() {
-  const sourceRuntimeDir = path.join(
-    projectRoot,
-    "node_modules",
-    nextCompiledServerRuntimePackagePath,
-  );
-  const targetRuntimeDir = path.join(
-    artifactDir,
-    "node_modules",
-    nextCompiledServerRuntimePackagePath,
-  );
-
-  assertExists(sourceRuntimeDir, "Next compiled server runtime folder is missing. Run npm install first.");
-
-  for (const fileName of requiredNextServerRuntimeFiles) {
-    assertExists(
-      path.join(sourceRuntimeDir, fileName),
-      `Next compiled server runtime file is missing: ${fileName}`,
-    );
-  }
-
-  copyDirectory(sourceRuntimeDir, targetRuntimeDir);
-}
-
-function copyBetterSqliteNativeBinding() {
-  const sourceBindingPath = path.join(
-    projectRoot,
-    "node_modules",
-    "better-sqlite3",
-    "build",
-    "Release",
-    "better_sqlite3.node",
-  );
-
-  assertExists(sourceBindingPath, "better-sqlite3 native binding is missing. Run npm install first.");
-
-  const targetBetterSqliteDir = path.join(
-    artifactDir,
-    "node_modules",
-    "better-sqlite3",
-  );
-  const releaseTargetPath = path.join(
-    targetBetterSqliteDir,
-    "build",
-    "Release",
-    "better_sqlite3.node",
-  );
-  const bindingTargetPath = path.join(
-    targetBetterSqliteDir,
-    "lib",
-    "binding",
-    `node-v${process.versions.modules}-${nativePlatformArch}`,
-    "better_sqlite3.node",
-  );
-
-  for (const targetPath of [releaseTargetPath, bindingTargetPath]) {
-    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-    fs.copyFileSync(sourceBindingPath, targetPath);
-  }
-}
-
 function removeForbiddenEntries() {
   for (const entry of forbiddenArtifactEntries) {
     fs.rmSync(path.join(artifactDir, entry), {
@@ -131,15 +64,164 @@ function removeForbiddenEntries() {
   }
 }
 
+function getStandalonePackageAliases() {
+  const aliases = new Map();
+
+  if (!fs.existsSync(standaloneNextNodeModulesDir)) {
+    return aliases;
+  }
+
+  const entries = fs.readdirSync(standaloneNextNodeModulesDir, {
+    withFileTypes: true,
+  });
+
+  for (const entry of entries) {
+    if (!entry.isDirectory()) {
+      continue;
+    }
+
+    if (entry.name === "pg" || entry.name.startsWith("pg-")) {
+      aliases.set(entry.name, "pg");
+      continue;
+    }
+
+    if (entry.name === "better-sqlite3" || entry.name.startsWith("better-sqlite3-")) {
+      aliases.set(entry.name, "better-sqlite3");
+      continue;
+    }
+
+    if (entry.name !== "@prisma") {
+      continue;
+    }
+
+    const prismaDir = path.join(standaloneNextNodeModulesDir, entry.name);
+    const prismaEntries = fs.readdirSync(prismaDir, { withFileTypes: true });
+
+    for (const prismaEntry of prismaEntries) {
+      if (prismaEntry.isDirectory() && prismaEntry.name.startsWith("client-")) {
+        aliases.set(`@prisma/${prismaEntry.name}`, "@prisma/client");
+      }
+    }
+  }
+
+  return aliases;
+}
+
+function addFallbackStandalonePackageAliases(aliases) {
+  const patterns = [
+    {
+      pattern: /@prisma\/client-[0-9a-f]+/g,
+      packageName: "@prisma/client",
+    },
+    {
+      pattern: /better-sqlite3-[0-9a-f]+/g,
+      packageName: "better-sqlite3",
+    },
+    {
+      pattern: /pg-[0-9a-f]+/g,
+      packageName: "pg",
+    },
+  ];
+  const stack = [artifactDir];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+
+      if (!entry.isFile() || ![".js", ".mjs", ".cjs"].includes(path.extname(entry.name))) {
+        continue;
+      }
+
+      const content = fs.readFileSync(fullPath, "utf8");
+
+      for (const { pattern, packageName } of patterns) {
+        for (const match of content.matchAll(pattern)) {
+          aliases.set(match[0], packageName);
+        }
+      }
+    }
+  }
+}
+
+function rewriteStandaloneExternalAliases(aliases) {
+  addFallbackStandalonePackageAliases(aliases);
+
+  if (aliases.size === 0) {
+    return;
+  }
+
+  const extensions = new Set([".js", ".mjs", ".cjs"]);
+  const stack = [artifactDir];
+
+  while (stack.length > 0) {
+    const current = stack.pop();
+    const entries = fs.readdirSync(current, { withFileTypes: true });
+
+    for (const entry of entries) {
+      const fullPath = path.join(current, entry.name);
+
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+        continue;
+      }
+
+      if (!entry.isFile() || !extensions.has(path.extname(entry.name))) {
+        continue;
+      }
+
+      let content = fs.readFileSync(fullPath, "utf8");
+      let updated = content;
+
+      for (const [fromPackage, toPackage] of aliases) {
+        updated = updated.split(fromPackage).join(toPackage);
+      }
+
+      if (updated !== content) {
+        fs.writeFileSync(fullPath, updated);
+      }
+    }
+  }
+}
+
+function copyPrismaSchema() {
+  const sourceSchemaPath = path.join(projectRoot, "prisma", "schema.prisma");
+  const targetSchemaPath = path.join(artifactDir, "prisma", "schema.prisma");
+
+  assertExists(sourceSchemaPath, "Prisma schema is missing.");
+  fs.mkdirSync(path.dirname(targetSchemaPath), { recursive: true });
+  fs.copyFileSync(sourceSchemaPath, targetSchemaPath);
+}
+
 function failIfForbiddenFilesRemain() {
   const forbiddenPatterns = [
     /(^|[\\/])\.env($|[\\/])/,
     /(^|[\\/])\.env\./,
+    /(^|[\\/])\.git($|[\\/])/,
+    /(^|[\\/])node_modules($|[\\/])/,
+    /(^|[\\/])[^\\/]+\.node$/,
     /(^|[\\/])dev\.db(-journal)?$/,
     /^storage([\\/]|$)/,
     /^build([\\/]|$)/,
+    /^dist([\\/]|$)/,
+    /^docs([\\/]|$)/,
+    /^deployment([\\/]|$)/,
     /^electron([\\/]|$)/,
+    /^scripts([\\/]|$)/,
+    /^src([\\/]|$)/,
     /^python([\\/]|$)/,
+    /^python-worker([\\/]|$)/,
+    /(^|[\\/]).+\.bat$/,
+    /sharp-win32/,
+    /win32/,
+    /C:[\\/]Windows[\\/]Fonts/,
   ];
   const stack = [artifactDir];
 
@@ -183,6 +265,8 @@ assertExists(standaloneDir, "Next standalone output is missing. Run npm run web:
 assertExists(path.join(standaloneDir, "server.js"), "Next standalone server.js is missing.");
 assertExists(startupSourcePath, "Hosted web startup file template is missing.");
 
+const standalonePackageAliases = getStandalonePackageAliases();
+
 fs.rmSync(artifactDir, { recursive: true, force: true });
 fs.mkdirSync(path.dirname(artifactDir), { recursive: true });
 fs.cpSync(standaloneDir, artifactDir, {
@@ -191,12 +275,11 @@ fs.cpSync(standaloneDir, artifactDir, {
   dereference: true,
 });
 
+rewriteStandaloneExternalAliases(standalonePackageAliases);
 copyDirectory(staticSourceDir, path.join(artifactDir, ".next", "static"));
 copyDirectory(publicSourceDir, path.join(artifactDir, "public"));
 fs.copyFileSync(startupSourcePath, path.join(artifactDir, "app.js"));
-copyNextCompiledServerRuntimes();
-copyRuntimePackage("@prisma/client-runtime-utils");
-copyBetterSqliteNativeBinding();
+copyPrismaSchema();
 removeForbiddenEntries();
 writeArtifactMetadata();
 failIfForbiddenFilesRemain();

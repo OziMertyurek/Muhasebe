@@ -29,6 +29,7 @@ Selected model:
 npm run web:build
 npm run web:prepare
 upload dist/hosted-web contents to cPanel application root
+install dependencies on Namecheap Linux
 cPanel starts app.js
 app.js loads Next standalone server.js
 ```
@@ -40,6 +41,7 @@ Why this model:
 - It avoids a custom Next.js server.
 - It keeps hosted deployment separate from Electron packaging.
 - It lets the generated Next server bind to the port provided by the hosting environment through `process.env.PORT`.
+- It avoids uploading Windows-built `node_modules` or native `.node` binaries to Linux.
 
 Do not use Electron startup scripts for hosted web deployment.
 
@@ -68,6 +70,7 @@ npm ci
 npm.cmd run prisma:generate
 npm.cmd run web:build
 npm.cmd run web:prepare
+npm.cmd run web:package
 ```
 
 The deployment artifact is created at:
@@ -112,23 +115,38 @@ The artifact should include:
 - `server.js`
 - `.next/static/`
 - `.next/server/` and other traced standalone files
-- `node_modules/` traced by Next standalone output
+- `package.json`
+- `package-lock.json`
+- `prisma/schema.prisma`
 - `deploy-info.json`
 - `public/` if the repository has public assets
 
 The artifact must not include:
 
+- `node_modules/`
+- `.next/node_modules/`
+- native `.node` binaries
 - `.env` files
 - `prisma/dev.db`
 - SQLite journal files
 - `storage/`
 - uploads
 - restore backups
+- backups
+- `docs/`
+- `deployment/`
+- `scripts/`
+- `src/`
+- `*.bat`
 - `build/`
 - desktop `dist/` outputs outside `dist/hosted-web`
 - Electron wrapper files
 - bundled desktop Node runtime
 - bundled desktop Python runtime
+- Windows font files or Windows-specific native packages such as `sharp-win32`
+
+The artifact is intentionally Linux-installable rather than self-contained with
+local dependencies. Do not upload `node_modules` from a Windows workstation.
 
 ## Manual Deployment Workflow
 
@@ -139,14 +157,52 @@ The artifact must not include:
 5. Run `npm.cmd run web:prepare`.
 6. Inspect `dist/hosted-web/` and confirm forbidden files are absent.
 7. Create the cPanel Node.js app with the exact values above.
-8. Upload the contents of `dist/hosted-web/` into the cPanel application root `avorayazilim-app`.
-9. In cPanel Setup Node.js App, add environment variables from the approved inventory.
-10. Use cPanel's Run NPM Install only if Namecheap requires it for the uploaded artifact. The standalone artifact already contains traced runtime dependencies, but native module compatibility may still require server-side install/rebuild on shared hosting.
-11. Start or restart the application in cPanel.
-12. Verify `https://avorayazilim.com/api/health` only after the app URL is routed to the Node app.
-13. Keep Cloudflare DNS-only until the Namecheap origin is verified.
-14. Update Cloudflare origin DNS only after the Node app responds correctly.
-15. Enable Cloudflare proxying later, after HTTPS/cookie behavior is verified.
+8. Create `avorayazilim-hosted-web-clean.zip` from the contents of `dist/hosted-web/`, not from the parent folder.
+9. Upload the clean ZIP to `/home/avornqik/avorayazilim-app`.
+10. Extract the ZIP in `/home/avornqik/avorayazilim-app`.
+11. Verify that `app.js`, `server.js`, `package.json`, `package-lock.json`, `.next/`, and `prisma/schema.prisma` are present.
+12. Verify that `node_modules/`, `.next/node_modules/`, `.env`, `prisma/dev.db`, `storage/uploads`, Electron files, BAT files, and native `.node` binaries are absent before dependency install.
+13. In cPanel Setup Node.js App, add environment variables from the approved inventory.
+14. Install dependencies on Namecheap Linux before starting the app.
+15. Verify no dependency install errors.
+16. Start or restart the application in cPanel.
+17. Verify `https://avorayazilim.com/api/health` only after the app URL is routed to the Node app.
+18. Test the PostgreSQL diagnostic endpoint only with the temporary diagnostic variables enabled.
+19. Immediately disable the diagnostic afterward by setting `POSTGRES_DIAGNOSTIC_ENABLED=false`, and remove the diagnostic token and URL when the test is complete.
+20. Keep Cloudflare DNS-only until the Namecheap origin is verified.
+21. Update Cloudflare origin DNS only after the Node app responds correctly.
+22. Enable Cloudflare proxying later, after HTTPS/cookie behavior is verified.
+
+## Namecheap Dependency Install
+
+The clean artifact does not contain local `node_modules`. Dependencies must be
+installed on Namecheap Linux so native packages such as `better-sqlite3` and
+`sharp` are built or downloaded for the server OS.
+
+Preferred reproducible SSH command from the application root:
+
+```bash
+cd /home/avornqik/avorayazilim-app
+npm ci
+```
+
+Use `npm ci` because it installs exactly from `package-lock.json` and removes
+any stale dependency tree before installing. This is the safest option after
+uploading a clean artifact.
+
+cPanel's **Run NPM Install** button can be used when SSH is unavailable, but it
+normally runs `npm install` against `package.json`. That is less reproducible
+than `npm ci` because semver ranges may resolve newer compatible versions.
+
+If `@prisma/client` generation does not run during install, run this from the
+same Namecheap application root after `npm ci`:
+
+```bash
+npm run prisma:generate
+```
+
+Do not paste real database credentials or diagnostic tokens into shell history,
+support tickets, screenshots, or repository files.
 
 ## Environment Variables
 
