@@ -193,6 +193,14 @@ function copyPrismaSchema() {
   fs.copyFileSync(sourceSchemaPath, targetSchemaPath);
 }
 
+function copyPrismaConfig() {
+  const sourceConfigPath = path.join(projectRoot, "prisma.config.ts");
+  const targetConfigPath = path.join(artifactDir, "prisma.config.ts");
+
+  assertExists(sourceConfigPath, "Prisma config is missing.");
+  fs.copyFileSync(sourceConfigPath, targetConfigPath);
+}
+
 function copyPrismaMigrations() {
   const sourceMigrationsPath = path.join(projectRoot, "prisma", "migrations");
   const targetMigrationsPath = path.join(artifactDir, "prisma", "migrations");
@@ -295,6 +303,7 @@ copyDirectory(staticSourceDir, path.join(artifactDir, ".next", "static"));
 copyDirectory(publicSourceDir, path.join(artifactDir, "public"));
 fs.copyFileSync(startupSourcePath, path.join(artifactDir, "app.js"));
 copyPackageMetadata();
+copyPrismaConfig();
 copyPrismaSchema();
 copyPrismaMigrations();
 removeForbiddenEntries();
