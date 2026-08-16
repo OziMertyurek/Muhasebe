@@ -1,4 +1,4 @@
-import { CompanyType } from "@prisma/client";
+import { CompanyType } from "#prisma/client";
 import { companyTypeLabels } from "@/lib/company-utils";
 import {
   createCsv,
@@ -38,19 +38,19 @@ export async function GET(request: Request) {
   });
   const csv = createCsv(
     [
-      "Firma adı",
+      "Firma adÄ±",
       "Cari tipi",
       "Vergi no",
       "Vergi dairesi",
       "E-posta",
       "Telefon",
-      "Ülke",
-      "Şehir",
-      "Varsayılan para birimi",
+      "Ãœlke",
+      "Åehir",
+      "VarsayÄ±lan para birimi",
       "Risk limiti",
-      "Vade günü",
+      "Vade gÃ¼nÃ¼",
       "Notlar",
-      "Oluşturulma tarihi",
+      "OluÅŸturulma tarihi",
     ],
     companies.map((company) => [
       company.name,

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Company, InvoiceStatus, InvoiceType, ProductUnit } from "@prisma/client";
+import type { Company, InvoiceStatus, InvoiceType, ProductUnit } from "#prisma/client";
 import { useActionState, useMemo, useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import type { InvoiceFormState } from "@/app/(dashboard)/invoices/actions";
@@ -256,7 +256,7 @@ export function InvoiceForm({
       <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
         <h2 className="text-base font-semibold text-[#16201b]">Fatura bilgileri</h2>
         <p className="mt-2 text-sm leading-6 text-[#647067]">
-          Vade tarihi girerseniz sistem otomatik hatırlatma oluşturur.
+          Vade tarihi girerseniz sistem otomatik hatÄ±rlatma oluÅŸturur.
         </p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-semibold text-[#46534b]">
@@ -267,7 +267,7 @@ export function InvoiceForm({
               className={fieldClass(Boolean(state.errors?.companyId))}
               required
             >
-              <option value="">Seçin</option>
+              <option value="">SeÃ§in</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>
                   {company.name}
@@ -286,7 +286,7 @@ export function InvoiceForm({
               className={fieldClass(Boolean(state.errors?.type))}
               required
             >
-              <option value="">Seçin</option>
+              <option value="">SeÃ§in</option>
               {invoiceTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -357,7 +357,7 @@ export function InvoiceForm({
               </label>
 
               <label className="block text-sm font-semibold text-[#46534b]">
-                KDV tutarı
+                KDV tutarÄ±
                 <input
                   name="vatAmount"
                   type="number"
@@ -370,7 +370,7 @@ export function InvoiceForm({
               </label>
 
               <label className="block text-sm font-semibold text-[#46534b]">
-                İskonto tutarı
+                Ä°skonto tutarÄ±
                 <input
                   name="discountAmount"
                   type="number"
@@ -437,7 +437,7 @@ export function InvoiceForm({
               className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
             >
               <Plus className="h-4 w-4" />
-              Satır ekle
+              SatÄ±r ekle
             </button>
           </div>
 
@@ -477,7 +477,7 @@ export function InvoiceForm({
                     </label>
 
                     <label className="block min-w-0 text-sm font-semibold text-[#46534b]">
-                      Açıklama
+                      AÃ§Ä±klama
                       <input
                         value={line.description}
                         onChange={(event) => updateLine(line.id, "description", event.target.value)}
@@ -544,7 +544,7 @@ export function InvoiceForm({
                     </label>
 
                     <label className="block text-sm font-semibold text-[#46534b]">
-                      İndirim
+                      Ä°ndirim
                       <input
                         type="number"
                         min="0"
@@ -558,7 +558,7 @@ export function InvoiceForm({
                     </label>
 
                     <div className="flex flex-col justify-end text-sm">
-                      <p className="text-xs font-semibold uppercase text-[#607167]">Satır toplamı</p>
+                      <p className="text-xs font-semibold uppercase text-[#607167]">SatÄ±r toplamÄ±</p>
                       <p className="mt-2 min-h-11 rounded-md border border-[#dce2dc] bg-white px-3 py-3 font-semibold text-[#16201b]">
                         {formatPreviewMoney(previewLine.lineTotal, currency)}
                       </p>
@@ -570,7 +570,7 @@ export function InvoiceForm({
                         onClick={() => removeLine(line.id)}
                         disabled={lines.length === 1}
                         className="inline-flex h-11 w-11 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] shadow-sm transition hover:border-[#c79a92] disabled:cursor-not-allowed disabled:opacity-45"
-                        title={`${index + 1}. satırı kaldır`}
+                        title={`${index + 1}. satÄ±rÄ± kaldÄ±r`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -587,7 +587,7 @@ export function InvoiceForm({
               value={formatPreviewMoney(previewTotals.subtotal, currency)}
             />
             <SummaryItem
-              label="İndirim"
+              label="Ä°ndirim"
               value={formatPreviewMoney(previewTotals.discountAmount, currency)}
             />
             <SummaryItem label="KDV" value={formatPreviewMoney(previewTotals.vatAmount, currency)} />
@@ -600,7 +600,7 @@ export function InvoiceForm({
       ) : (
         <div className="rounded-lg border border-dashed border-[#cfd8cf] bg-white p-5">
           <h2 className="text-sm font-semibold text-[#223028]">Fatura kalemleri ve dosyalar</h2>
-          <p className="mt-2 text-sm text-[#647067]">Bu alan sonraki aşamada bağlanacak.</p>
+          <p className="mt-2 text-sm text-[#647067]">Bu alan sonraki aÅŸamada baÄŸlanacak.</p>
         </div>
       )}
 

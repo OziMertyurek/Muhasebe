@@ -3,7 +3,7 @@ import {
   FinancialAccountType,
   InvoiceType,
   Prisma,
-} from "@prisma/client";
+} from "#prisma/client";
 import { getExpectedPaymentType } from "@/lib/accounting-core";
 import { prisma } from "@/lib/prisma";
 

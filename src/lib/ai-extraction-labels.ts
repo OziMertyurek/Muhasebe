@@ -1,11 +1,11 @@
-import type { AiExtractionStatus, FileRelatedType } from "@prisma/client";
+import type { AiExtractionStatus, FileRelatedType } from "#prisma/client";
 
 export const aiExtractionStatusLabels: Record<AiExtractionStatus, string> = {
   PENDING: "Bekliyor",
-  PROCESSING: "İşleniyor",
-  COMPLETED: "İnceleme Hazır",
+  PROCESSING: "Ä°ÅŸleniyor",
+  COMPLETED: "Ä°nceleme HazÄ±r",
   FAILED: "Hata",
-  REVIEWED: "İnceleme Tamamlandı",
+  REVIEWED: "Ä°nceleme TamamlandÄ±",
   POSTED: "Faturaya Kaydedildi",
 };
 
@@ -17,8 +17,8 @@ export const aiExtractionRelatedTypeLabels: Record<FileRelatedType, string> = {
   INVOICE: "Fatura",
   EXPENSE: "Gider",
   COMPANY: "Cari / Firma",
-  PAYMENT: "Tahsilat / Ödeme",
-  OTHER: "Diğer",
+  PAYMENT: "Tahsilat / Ã–deme",
+  OTHER: "DiÄŸer",
 };
 
 export const aiExtractionRelatedTypeOptions = [

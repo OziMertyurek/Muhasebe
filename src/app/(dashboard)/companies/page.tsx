@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CompanyType } from "@prisma/client";
+import { CompanyType } from "#prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteCompanyAction } from "@/app/(dashboard)/companies/actions";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -50,7 +50,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             Cari hesaplar
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Müşteri ve tedarikçi firmaları tek merkezden yönetin.
+            MÃ¼ÅŸteri ve tedarikÃ§i firmalarÄ± tek merkezden yÃ¶netin.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -59,7 +59,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
-            CSV Dışa Aktar
+            CSV DÄ±ÅŸa Aktar
           </a>
           <Link
             href="/companies/new"
@@ -88,7 +88,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             <input
               name="q"
               defaultValue={query}
-              placeholder="Firma adına göre ara"
+              placeholder="Firma adÄ±na gÃ¶re ara"
               className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
@@ -97,7 +97,7 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             defaultValue={type ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm cari tipleri</option>
+            <option value="">TÃ¼m cari tipleri</option>
             {companyTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -113,8 +113,8 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {companies.length === 0 ? (
           <EmptyState
-            title="Henüz cari eklenmedi"
-            description="İlk müşteri veya tedarikçi kaydınızı Yeni Cari butonuyla ekleyebilirsiniz."
+            title="HenÃ¼z cari eklenmedi"
+            description="Ä°lk mÃ¼ÅŸteri veya tedarikÃ§i kaydÄ±nÄ±zÄ± Yeni Cari butonuyla ekleyebilirsiniz."
             actionHref="/companies/new"
             actionLabel="Yeni Cari"
           />
@@ -123,15 +123,15 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
-                  <th className="px-4 py-3">Firma adı</th>
+                  <th className="px-4 py-3">Firma adÄ±</th>
                   <th className="px-4 py-3">Cari tipi</th>
-                  <th className="px-4 py-3">Şehir</th>
-                  <th className="px-4 py-3">Ülke</th>
+                  <th className="px-4 py-3">Åehir</th>
+                  <th className="px-4 py-3">Ãœlke</th>
                   <th className="px-4 py-3">E-posta</th>
                   <th className="px-4 py-3">Telefon</th>
                   <th className="px-4 py-3">Para birimi</th>
-                  <th className="px-4 py-3">Oluşturulma</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3">OluÅŸturulma</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -157,14 +157,14 @@ export default async function CompaniesPage({ searchParams }: CompaniesPageProps
                         <Link
                           href={`/companies/${company.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteCompanyAction.bind(null, company.id)}>
                           <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
-                            message="Bu cariyi silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı faturalar, ödemeler ve giderler geçmiş kayıtlarda etkilenebilir."
+                            message="Bu cariyi silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak. BaÄŸlÄ± faturalar, Ã¶demeler ve giderler geÃ§miÅŸ kayÄ±tlarda etkilenebilir."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />

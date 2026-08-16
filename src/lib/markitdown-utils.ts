@@ -1,4 +1,4 @@
-import type { FileAttachment } from "@prisma/client";
+import type { FileAttachment } from "#prisma/client";
 import { getPythonWorkerScriptPath } from "./app-paths.ts";
 import { resolveStoredDocumentPath } from "./document-storage.ts";
 import { resolvePythonRuntime } from "./python-runtime-utils.ts";

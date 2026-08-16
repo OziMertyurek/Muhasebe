@@ -1,4 +1,4 @@
-import type { CompanyType } from "@prisma/client";
+import type { CompanyType } from "#prisma/client";
 import {
   normalizeTaxIdentity,
   type AiMatchStatus,
@@ -43,13 +43,13 @@ export function normalizeSearchName(value: string | null | undefined) {
 
   return value
     .toLocaleLowerCase("tr-TR")
-    .replace(/İ/g, "i")
-    .replace(/ı/g, "i")
-    .replace(/ş/g, "s")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
+    .replace(/Ä°/g, "i")
+    .replace(/Ä±/g, "i")
+    .replace(/ÅŸ/g, "s")
+    .replace(/ÄŸ/g, "g")
+    .replace(/Ã¼/g, "u")
+    .replace(/Ã¶/g, "o")
+    .replace(/Ã§/g, "c")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/\b(ltd|sti|limited|anonim|as|a s|ticaret|sanayi|sirketi|sirket|ve)\b/giu, " ")
@@ -144,8 +144,8 @@ export function matchProductDeterministic(
 export function normalizeCode(value: string | null | undefined) {
   return value
     ?.replace(/\s+/g, "")
-    .replace(/İ/g, "I")
-    .replace(/ı/g, "i")
+    .replace(/Ä°/g, "I")
+    .replace(/Ä±/g, "i")
     .toUpperCase()
     .trim() ?? "";
 }

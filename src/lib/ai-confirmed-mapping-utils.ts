@@ -1,4 +1,4 @@
-import type { AiConfirmedMappingType } from "@prisma/client";
+import type { AiConfirmedMappingType } from "#prisma/client";
 import { normalizeCode, normalizeSearchName } from "./ai-matching-core.ts";
 import { normalizeTaxIdentity } from "./ai-invoice-extraction-core.ts";
 

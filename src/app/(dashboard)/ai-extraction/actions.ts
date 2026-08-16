@@ -1,6 +1,6 @@
 "use server";
 
-import { AiExtractionStatus } from "@prisma/client";
+import { AiExtractionStatus } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
@@ -53,15 +53,15 @@ async function parseAiExtractionForm(
   const confidenceValue = readText(formData, "confidence").replace(",", ".");
 
   if (requireFile && !fileAttachmentId) {
-    errors.fileAttachmentId = "Dosya seçilmeli.";
+    errors.fileAttachmentId = "Dosya seÃ§ilmeli.";
   }
 
   if (!Object.values(AiExtractionStatus).includes(status as AiExtractionStatus)) {
-    errors.status = "Geçerli bir durum seçin.";
+    errors.status = "GeÃ§erli bir durum seÃ§in.";
   }
 
   if (extractedJson && !validateJsonText(extractedJson)) {
-    errors.extractedJson = "Geçerli bir JSON girin.";
+    errors.extractedJson = "GeÃ§erli bir JSON girin.";
   }
 
   let confidence: number | null = null;
@@ -70,9 +70,9 @@ async function parseAiExtractionForm(
     const parsedConfidence = Number(confidenceValue);
 
     if (Number.isNaN(parsedConfidence)) {
-      errors.confidence = "Güven skoru sayısal olmalı.";
+      errors.confidence = "GÃ¼ven skoru sayÄ±sal olmalÄ±.";
     } else if (parsedConfidence < 0 || parsedConfidence > 1) {
-      errors.confidence = "Güven skoru 0 ile 1 arasında olmalı.";
+      errors.confidence = "GÃ¼ven skoru 0 ile 1 arasÄ±nda olmalÄ±.";
     } else {
       confidence = parsedConfidence;
     }
@@ -88,7 +88,7 @@ async function parseAiExtractionForm(
     });
 
     if (!file) {
-      errors.fileAttachmentId = "Seçilen dosya AI analiz için uygun değil.";
+      errors.fileAttachmentId = "SeÃ§ilen dosya AI analiz iÃ§in uygun deÄŸil.";
     }
   }
 
@@ -116,7 +116,7 @@ export async function createAiExtractionAction(
   const parsed = await parseAiExtractionForm(formData, { requireFile: true });
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   let jobId: string;
@@ -131,8 +131,8 @@ export async function createAiExtractionAction(
       entityType: "AI_EXTRACTION",
       entityId: jobId,
       action: "CREATE",
-      title: "AI analiz kaydı oluşturuldu",
-      description: "Gerçek OCR çalışmadan analiz hazırlık kaydı oluşturuldu.",
+      title: "AI analiz kaydÄ± oluÅŸturuldu",
+      description: "GerÃ§ek OCR Ã§alÄ±ÅŸmadan analiz hazÄ±rlÄ±k kaydÄ± oluÅŸturuldu.",
       after: {
         fileAttachmentId: parsed.data.fileAttachmentId,
         status: parsed.data.status,
@@ -140,7 +140,7 @@ export async function createAiExtractionAction(
       },
     });
   } catch {
-    return { message: "AI analiz kaydı oluşturulurken bir hata oluştu." };
+    return { message: "AI analiz kaydÄ± oluÅŸturulurken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/ai-extraction");
@@ -156,7 +156,7 @@ export async function updateAiExtractionAction(
   const parsed = await parseAiExtractionForm(formData, { requireFile: true });
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   try {
@@ -186,8 +186,8 @@ export async function updateAiExtractionAction(
       entityType: "AI_EXTRACTION",
       entityId: jobId,
       action: before?.status !== parsed.data.status ? "STATUS_CHANGE" : "UPDATE",
-      title: "AI analiz kaydı güncellendi",
-      description: "AI analiz hazırlık kaydında değişiklik yapıldı.",
+      title: "AI analiz kaydÄ± gÃ¼ncellendi",
+      description: "AI analiz hazÄ±rlÄ±k kaydÄ±nda deÄŸiÅŸiklik yapÄ±ldÄ±.",
       before,
       after: {
         fileAttachmentId: parsed.data.fileAttachmentId,
@@ -197,7 +197,7 @@ export async function updateAiExtractionAction(
       },
     });
   } catch {
-    return { message: "AI analiz kaydı güncellenirken bir hata oluştu." };
+    return { message: "AI analiz kaydÄ± gÃ¼ncellenirken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/ai-extraction");
@@ -223,7 +223,7 @@ export async function updateAiExtractionStatusAction(
       entityType: "AI_EXTRACTION",
       entityId: job.id,
       action: "STATUS_CHANGE",
-      title: "AI analiz durumu değişti",
+      title: "AI analiz durumu deÄŸiÅŸti",
       description: `${before?.status ?? "-"} -> ${job.status}`,
       before,
       after: job,
@@ -284,9 +284,9 @@ export async function archiveAiExtractionJobAction(jobId: string) {
       entityType: "AI_EXTRACTION",
       entityId: archivedJob.id,
       action: "SOFT_DELETE",
-      title: "AI analiz kaydı arşivlendi",
+      title: "AI analiz kaydÄ± arÅŸivlendi",
       description:
-        "AI analiz kaydı arşivlendi. Bağlı dosya, oluşturulmuş fatura ve iş kayıtları değiştirilmedi.",
+        "AI analiz kaydÄ± arÅŸivlendi. BaÄŸlÄ± dosya, oluÅŸturulmuÅŸ fatura ve iÅŸ kayÄ±tlarÄ± deÄŸiÅŸtirilmedi.",
       before: {
         id: job.id,
         fileAttachmentId: job.fileAttachmentId,
@@ -357,9 +357,9 @@ export async function restoreAiExtractionJobAction(jobId: string) {
       entityType: "AI_EXTRACTION",
       entityId: restoredJob.id,
       action: "RESTORE",
-      title: "AI analiz kaydı geri yüklendi",
+      title: "AI analiz kaydÄ± geri yÃ¼klendi",
       description:
-        "AI analiz kaydı arşivden geri yüklendi. Bağlı dosya, fatura ve iş kayıtları değiştirilmedi.",
+        "AI analiz kaydÄ± arÅŸivden geri yÃ¼klendi. BaÄŸlÄ± dosya, fatura ve iÅŸ kayÄ±tlarÄ± deÄŸiÅŸtirilmedi.",
       before: {
         id: job.id,
         fileAttachmentId: job.fileAttachmentId,

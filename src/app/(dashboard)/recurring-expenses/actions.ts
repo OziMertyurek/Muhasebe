@@ -1,6 +1,6 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
@@ -72,7 +72,7 @@ async function parseRecurringExpenseForm(formData: FormData): Promise<{
   const endDateValue = readText(formData, "endDate");
 
   if (!title) {
-    errors.title = "Gider adı boş olamaz.";
+    errors.title = "Gider adÄ± boÅŸ olamaz.";
   }
 
   let amount: Prisma.Decimal | null = null;
@@ -83,9 +83,9 @@ async function parseRecurringExpenseForm(formData: FormData): Promise<{
     const numericAmount = Number(amountValue);
 
     if (Number.isNaN(numericAmount)) {
-      errors.amount = "Tutar sayı olmalı.";
+      errors.amount = "Tutar sayÄ± olmalÄ±.";
     } else if (numericAmount <= 0) {
-      errors.amount = "Tutar 0'dan büyük olmalı.";
+      errors.amount = "Tutar 0'dan bÃ¼yÃ¼k olmalÄ±.";
     } else {
       amount = new Prisma.Decimal(amountValue);
     }
@@ -94,23 +94,23 @@ async function parseRecurringExpenseForm(formData: FormData): Promise<{
   const dayOfMonth = Number(dayOfMonthValue);
 
   if (!Number.isInteger(dayOfMonth) || dayOfMonth < 1 || dayOfMonth > 31) {
-    errors.dayOfMonth = "Ayın günü 1-31 arasında olmalı.";
+    errors.dayOfMonth = "AyÄ±n gÃ¼nÃ¼ 1-31 arasÄ±nda olmalÄ±.";
   }
 
   const startDate = parseDate(startDateValue);
 
   if (!startDate) {
-    errors.startDate = "Başlangıç tarihi boş olamaz.";
+    errors.startDate = "BaÅŸlangÄ±Ã§ tarihi boÅŸ olamaz.";
   }
 
   const endDate = parseDate(endDateValue);
 
   if (endDateValue && !endDate) {
-    errors.endDate = "Geçerli bir bitiş tarihi girin.";
+    errors.endDate = "GeÃ§erli bir bitiÅŸ tarihi girin.";
   }
 
   if (startDate && endDate && endDate < startDate) {
-    errors.endDate = "Bitiş tarihi başlangıç tarihinden önce olamaz.";
+    errors.endDate = "BitiÅŸ tarihi baÅŸlangÄ±Ã§ tarihinden Ã¶nce olamaz.";
   }
 
   if (categoryId) {
@@ -120,7 +120,7 @@ async function parseRecurringExpenseForm(formData: FormData): Promise<{
     });
 
     if (!category) {
-      errors.categoryId = "Geçerli bir kategori seçin.";
+      errors.categoryId = "GeÃ§erli bir kategori seÃ§in.";
     }
   }
 
@@ -151,7 +151,7 @@ export async function createRecurringExpenseAction(
   const parsed = await parseRecurringExpenseForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   let recurringExpenseId: string;
@@ -166,13 +166,13 @@ export async function createRecurringExpenseAction(
       entityType: "RECURRING_EXPENSE",
       entityId: recurringExpenseId,
       action: "CREATE",
-      title: `Sabit gider oluşturuldu: ${parsed.data.title}`,
-      description: `${parsed.data.amount.toString()} ${parsed.data.currency} tutarlı sabit gider oluşturuldu.`,
+      title: `Sabit gider oluÅŸturuldu: ${parsed.data.title}`,
+      description: `${parsed.data.amount.toString()} ${parsed.data.currency} tutarlÄ± sabit gider oluÅŸturuldu.`,
       after: parsed.data,
     });
     await syncRecurringExpenseReminder(recurringExpense);
   } catch {
-    return { message: "Sabit gider kaydı oluşturulurken bir hata oluştu." };
+    return { message: "Sabit gider kaydÄ± oluÅŸturulurken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/recurring-expenses");
@@ -188,7 +188,7 @@ export async function updateRecurringExpenseAction(
   const parsed = await parseRecurringExpenseForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   try {
@@ -206,13 +206,13 @@ export async function updateRecurringExpenseAction(
       entityType: "RECURRING_EXPENSE",
       entityId: recurringExpenseId,
       action: "UPDATE",
-      title: `Sabit gider güncellendi: ${parsed.data.title}`,
-      description: "Sabit gider bilgilerinde değişiklik yapıldı.",
+      title: `Sabit gider gÃ¼ncellendi: ${parsed.data.title}`,
+      description: "Sabit gider bilgilerinde deÄŸiÅŸiklik yapÄ±ldÄ±.",
       before,
       after: parsed.data,
     });
   } catch {
-    return { message: "Sabit gider kaydı güncellenirken bir hata oluştu." };
+    return { message: "Sabit gider kaydÄ± gÃ¼ncellenirken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/recurring-expenses");
@@ -242,7 +242,7 @@ export async function deleteRecurringExpenseAction(recurringExpenseId: string) {
       entityId: recurringExpense.id,
       action: "SOFT_DELETE",
       title: `Sabit gider silindi: ${recurringExpense.title}`,
-      description: "Kayıt çöp kutusuna taşındı.",
+      description: "KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±ndÄ±.",
       before: recurringExpense,
     });
   } catch {

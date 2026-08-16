@@ -1,4 +1,4 @@
-import type { InvoiceStatus, InvoiceType } from "@prisma/client";
+import type { InvoiceStatus, InvoiceType } from "#prisma/client";
 
 export const invoiceTypeLabels: Record<InvoiceType, string> = {
   SALES: "Ben fatura kestim",
@@ -6,10 +6,10 @@ export const invoiceTypeLabels: Record<InvoiceType, string> = {
 };
 
 export const invoiceStatusLabels: Record<InvoiceStatus, string> = {
-  UNPAID: "Ödenmedi",
-  PARTIAL: "Kısmi ödendi",
-  PAID: "Ödendi",
-  CANCELLED: "İptal",
+  UNPAID: "Ã–denmedi",
+  PARTIAL: "KÄ±smi Ã¶dendi",
+  PAID: "Ã–dendi",
+  CANCELLED: "Ä°ptal",
 };
 
 export const invoiceTypeOptions: Array<{ value: InvoiceType; label: string }> = [

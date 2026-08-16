@@ -1,6 +1,6 @@
 "use server";
 
-import { ProductUnit, StockMovementType, Prisma } from "@prisma/client";
+import { ProductUnit, StockMovementType, Prisma } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {

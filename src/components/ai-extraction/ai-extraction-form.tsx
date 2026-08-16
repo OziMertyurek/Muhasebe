@@ -1,6 +1,6 @@
 "use client";
 
-import type { AiExtractionStatus } from "@prisma/client";
+import type { AiExtractionStatus } from "#prisma/client";
 import { useActionState } from "react";
 import { FileText, Save, ShieldCheck } from "lucide-react";
 import type { AiExtractionFormState } from "@/app/(dashboard)/ai-extraction/actions";
@@ -80,13 +80,13 @@ export function AiExtractionForm({
           </span>
           <div>
             <p className="text-xs font-semibold uppercase tracking-normal text-[#607167]">
-              Analiz hazırlığı
+              Analiz hazÄ±rlÄ±ÄŸÄ±
             </p>
-            <h2 className="mt-1 text-lg font-semibold text-[#16201b]">AI analiz kaydı</h2>
+            <h2 className="mt-1 text-lg font-semibold text-[#16201b]">AI analiz kaydÄ±</h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-[#647067]">
-              Dosyayı seçin, gerekirse çıkarılan metni ve JSON sonucunu kontrol edin. Kaydetme
-              işlemi yalnızca analiz kaydını günceller; fatura veya cari bilgisi siz onaylamadan
-              değişmez.
+              DosyayÄ± seÃ§in, gerekirse Ã§Ä±karÄ±lan metni ve JSON sonucunu kontrol edin. Kaydetme
+              iÅŸlemi yalnÄ±zca analiz kaydÄ±nÄ± gÃ¼nceller; fatura veya cari bilgisi siz onaylamadan
+              deÄŸiÅŸmez.
             </p>
           </div>
         </div>
@@ -95,8 +95,8 @@ export function AiExtractionForm({
           <div className="flex items-start gap-2">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#1f6f54]" />
             <p>
-              Önerilen akış: dosyayı yükle, metni çıkar, alanları kontrol et, cari eşleşmesini
-              doğrula ve son olarak kaydı fatura akışına aktar.
+              Ã–nerilen akÄ±ÅŸ: dosyayÄ± yÃ¼kle, metni Ã§Ä±kar, alanlarÄ± kontrol et, cari eÅŸleÅŸmesini
+              doÄŸrula ve son olarak kaydÄ± fatura akÄ±ÅŸÄ±na aktar.
             </p>
           </div>
         </div>
@@ -111,7 +111,7 @@ export function AiExtractionForm({
               required
               disabled={lockFile}
             >
-              <option value="">Dosya seçin</option>
+              <option value="">Dosya seÃ§in</option>
               {fileOptions.map((file) => (
                 <option key={file.id} value={file.id}>
                   {file.label}
@@ -145,7 +145,7 @@ export function AiExtractionForm({
           </label>
 
           <label className="block text-sm font-medium text-[#46534b]">
-            Güven skoru
+            GÃ¼ven skoru
             <input
               name="confidence"
               type="number"
@@ -161,17 +161,17 @@ export function AiExtractionForm({
         </div>
 
         <label className="mt-4 block text-sm font-medium text-[#46534b]">
-          Ham çıkarılan metin
+          Ham Ã§Ä±karÄ±lan metin
           <textarea
             name="rawExtractedText"
             defaultValue={initialValues?.rawExtractedText ?? ""}
             className={textareaClass(Boolean(state.errors?.rawExtractedText))}
-            placeholder="MarkItDown tarafından çıkarılan metin burada görüntülenir."
+            placeholder="MarkItDown tarafÄ±ndan Ã§Ä±karÄ±lan metin burada gÃ¶rÃ¼ntÃ¼lenir."
           />
         </label>
 
         <label className="mt-4 block text-sm font-medium text-[#46534b]">
-          Çıkarılan JSON
+          Ã‡Ä±karÄ±lan JSON
           <textarea
             name="extractedJson"
             defaultValue={initialValues?.extractedJson ?? ""}
@@ -182,12 +182,12 @@ export function AiExtractionForm({
         </label>
 
         <label className="mt-4 block text-sm font-medium text-[#46534b]">
-          Hata mesajı
+          Hata mesajÄ±
           <textarea
             name="errorMessage"
             defaultValue={initialValues?.errorMessage ?? ""}
             className={textareaClass(Boolean(state.errors?.errorMessage))}
-            placeholder="Varsa kullanıcıya gösterilecek kısa ve anlaşılır hata notu."
+            placeholder="Varsa kullanÄ±cÄ±ya gÃ¶sterilecek kÄ±sa ve anlaÅŸÄ±lÄ±r hata notu."
           />
         </label>
       </div>

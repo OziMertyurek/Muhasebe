@@ -20,7 +20,7 @@ import {
   resolveStoredDocumentPath,
   storedDocumentExists,
 } from "../src/lib/document-storage.ts";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 
 test("provider abstraction selects local mode for local development by default", () => {
   assert.equal(getDocumentProcessorMode({ NODE_ENV: "development" } as NodeJS.ProcessEnv), "LOCAL");

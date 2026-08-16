@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import {
   createCsv,
   createCsvResponse,
@@ -42,12 +42,12 @@ export async function GET(request: Request) {
   const csv = createCsv(
     [
       "Para birimi",
-      "Satış faturaları toplamı",
-      "Alış faturaları toplamı",
-      "Tahsilat toplamı",
-      "Ödeme toplamı",
-      "Giderler toplamı",
-      "Ödenmiş giderler toplamı",
+      "SatÄ±ÅŸ faturalarÄ± toplamÄ±",
+      "AlÄ±ÅŸ faturalarÄ± toplamÄ±",
+      "Tahsilat toplamÄ±",
+      "Ã–deme toplamÄ±",
+      "Giderler toplamÄ±",
+      "Ã–denmiÅŸ giderler toplamÄ±",
       "Net durum",
     ],
     currencies.map((currency) => [

@@ -1,6 +1,6 @@
 "use server";
 
-import { FinancialAccountType, Prisma } from "@prisma/client";
+import { FinancialAccountType, Prisma } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
@@ -69,7 +69,7 @@ function parseDecimal(
   const numericValue = Number(normalizedValue);
 
   if (Number.isNaN(numericValue)) {
-    errors[field] = `${label} sayı olmalı.`;
+    errors[field] = `${label} sayÄ± olmalÄ±.`;
     return null;
   }
 
@@ -94,7 +94,7 @@ function parseOptionalDay(
   const numericValue = Number(value);
 
   if (!Number.isInteger(numericValue) || numericValue < 1 || numericValue > 31) {
-    errors[field] = `${label} 1-31 arasında olmalı.`;
+    errors[field] = `${label} 1-31 arasÄ±nda olmalÄ±.`;
     return null;
   }
 
@@ -111,7 +111,7 @@ function parseAccountForm(formData: FormData): {
   const currency = readText(formData, "currency").toUpperCase() || "TRY";
   const openingBalance = parseDecimal(
     readText(formData, "openingBalance"),
-    "Açılış bakiyesi",
+    "AÃ§Ä±lÄ±ÅŸ bakiyesi",
     "openingBalance",
     errors,
     { defaultValue: "0", allowNegative: true },
@@ -130,18 +130,18 @@ function parseAccountForm(formData: FormData): {
     : null;
   const statementDay = parseOptionalDay(
     readText(formData, "statementDay"),
-    "Hesap kesim günü",
+    "Hesap kesim gÃ¼nÃ¼",
     "statementDay",
     errors,
   );
-  const dueDay = parseOptionalDay(readText(formData, "dueDay"), "Son ödeme günü", "dueDay", errors);
+  const dueDay = parseOptionalDay(readText(formData, "dueDay"), "Son Ã¶deme gÃ¼nÃ¼", "dueDay", errors);
 
   if (!name) {
-    errors.name = "Hesap adı boş olamaz.";
+    errors.name = "Hesap adÄ± boÅŸ olamaz.";
   }
 
   if (!typeValue || !Object.values(FinancialAccountType).includes(typeValue as FinancialAccountType)) {
-    errors.type = "Hesap tipi seçilmeli.";
+    errors.type = "Hesap tipi seÃ§ilmeli.";
   }
 
   if (Object.keys(errors).length > 0 || !openingBalance || !currentBalance) {
@@ -174,7 +174,7 @@ export async function createAccountAction(
   const parsed = parseAccountForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   let accountId: string;
@@ -189,13 +189,13 @@ export async function createAccountAction(
       entityType: "FINANCIAL_ACCOUNT",
       entityId: accountId,
       action: "CREATE",
-      title: `Finansal hesap oluşturuldu: ${parsed.data.name}`,
-      description: `${parsed.data.currency} para birimli hesap oluşturuldu.`,
+      title: `Finansal hesap oluÅŸturuldu: ${parsed.data.name}`,
+      description: `${parsed.data.currency} para birimli hesap oluÅŸturuldu.`,
       after: parsed.data,
     });
     await syncCreditCardReminders(account);
   } catch {
-    return { message: "Hesap kaydı oluşturulurken bir hata oluştu." };
+    return { message: "Hesap kaydÄ± oluÅŸturulurken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/accounts");
@@ -211,7 +211,7 @@ export async function updateAccountAction(
   const parsed = parseAccountForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   try {
@@ -235,13 +235,13 @@ export async function updateAccountAction(
       entityType: "FINANCIAL_ACCOUNT",
       entityId: accountId,
       action: "UPDATE",
-      title: `Finansal hesap güncellendi: ${parsed.data.name}`,
-      description: "Finansal hesap bilgilerinde değişiklik yapıldı.",
+      title: `Finansal hesap gÃ¼ncellendi: ${parsed.data.name}`,
+      description: "Finansal hesap bilgilerinde deÄŸiÅŸiklik yapÄ±ldÄ±.",
       before,
       after: parsed.data,
     });
   } catch {
-    return { message: "Hesap kaydı güncellenirken bir hata oluştu." };
+    return { message: "Hesap kaydÄ± gÃ¼ncellenirken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/accounts");
@@ -262,10 +262,10 @@ export async function deleteAccountAction(accountId: string) {
       entityId: account.id,
       action: "SOFT_DELETE",
       title: `Finansal hesap silindi: ${account.name}`,
-      description: "Kayıt çöp kutusuna taşındı.",
+      description: "KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±ndÄ±.",
       before: account,
     });
-    await cancelCreditCardReminders(account.id, "Finansal hesap silindiği için kredi kartı hatırlatmaları iptal edildi.");
+    await cancelCreditCardReminders(account.id, "Finansal hesap silindiÄŸi iÃ§in kredi kartÄ± hatÄ±rlatmalarÄ± iptal edildi.");
   } catch {
     redirect(`/accounts/${accountId}?error=delete`);
   }

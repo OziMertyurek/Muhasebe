@@ -1,4 +1,4 @@
-import { InvoiceStatus, InvoiceType, PaymentType, Prisma } from "@prisma/client";
+import { InvoiceStatus, InvoiceType, PaymentType, Prisma } from "#prisma/client";
 
 type InvoicePaymentRecord = {
   type: PaymentType;
@@ -150,22 +150,22 @@ export function assertPaymentMatchesInvoice(
     throw new AccountingValidationError(
       "type",
       invoice.type === "SALES"
-        ? "Satış faturası için işlem tipi Para aldım olmalı."
-        : "Alış faturası için işlem tipi Para ödedim olmalı.",
+        ? "SatÄ±ÅŸ faturasÄ± iÃ§in iÅŸlem tipi Para aldÄ±m olmalÄ±."
+        : "AlÄ±ÅŸ faturasÄ± iÃ§in iÅŸlem tipi Para Ã¶dedim olmalÄ±.",
     );
   }
 
   if (payment.companyId && payment.companyId !== invoice.companyId) {
     throw new AccountingValidationError(
       "invoiceId",
-      "Seçilen fatura ile cari firma uyumlu olmalı.",
+      "SeÃ§ilen fatura ile cari firma uyumlu olmalÄ±.",
     );
   }
 
   if (payment.currency !== invoice.currency) {
     throw new AccountingValidationError(
       "currency",
-      "Faturaya bağlı hareketin para birimi fatura para birimiyle aynı olmalı.",
+      "Faturaya baÄŸlÄ± hareketin para birimi fatura para birimiyle aynÄ± olmalÄ±.",
     );
   }
 
@@ -175,7 +175,7 @@ export function assertPaymentMatchesInvoice(
   if (paidAfter.greaterThan(invoice.totalAmount)) {
     throw new AccountingValidationError(
       "amount",
-      "Fatura tutarını aşan tahsilat / ödeme kaydedilemez.",
+      "Fatura tutarÄ±nÄ± aÅŸan tahsilat / Ã¶deme kaydedilemez.",
     );
   }
 }

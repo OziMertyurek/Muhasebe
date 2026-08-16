@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 
 export type InvoiceLineDecimalInput = Prisma.Decimal | string | number;
 
@@ -63,7 +63,7 @@ export class InvoiceLineValidationException extends Error {
   readonly errors: InvoiceLineValidationError[];
 
   constructor(errors: InvoiceLineValidationError[]) {
-    super("Fatura kalemi doğrulama hatası.");
+    super("Fatura kalemi doÄŸrulama hatasÄ±.");
     this.name = "InvoiceLineValidationException";
     this.errors = errors;
   }
@@ -150,7 +150,7 @@ export function validateInvoiceLine(
     errors.push({
       field: "description",
       code: "DESCRIPTION_REQUIRED",
-      message: "Kalem açıklaması boş olamaz.",
+      message: "Kalem aÃ§Ä±klamasÄ± boÅŸ olamaz.",
     });
   }
 
@@ -163,13 +163,13 @@ export function validateInvoiceLine(
     errors.push({
       field: "quantity",
       code: "QUANTITY_REQUIRED",
-      message: "Miktar geçerli bir sayı olmalı.",
+      message: "Miktar geÃ§erli bir sayÄ± olmalÄ±.",
     });
   } else if (quantity.lessThanOrEqualTo(0)) {
     errors.push({
       field: "quantity",
       code: "QUANTITY_POSITIVE",
-      message: "Miktar 0'dan büyük olmalı.",
+      message: "Miktar 0'dan bÃ¼yÃ¼k olmalÄ±.",
     });
   }
 
@@ -177,7 +177,7 @@ export function validateInvoiceLine(
     errors.push({
       field: "unitPrice",
       code: "UNIT_PRICE_REQUIRED",
-      message: "Birim fiyat geçerli bir sayı olmalı.",
+      message: "Birim fiyat geÃ§erli bir sayÄ± olmalÄ±.",
     });
   } else if (unitPrice.lessThan(0)) {
     errors.push({
@@ -191,13 +191,13 @@ export function validateInvoiceLine(
     errors.push({
       field: "vatRate",
       code: "VAT_RATE_REQUIRED",
-      message: "KDV oranı geçerli bir sayı olmalı.",
+      message: "KDV oranÄ± geÃ§erli bir sayÄ± olmalÄ±.",
     });
   } else if (vatRate.lessThan(0)) {
     errors.push({
       field: "vatRate",
       code: "VAT_RATE_NON_NEGATIVE",
-      message: "KDV oranı negatif olamaz.",
+      message: "KDV oranÄ± negatif olamaz.",
     });
   }
 
@@ -205,13 +205,13 @@ export function validateInvoiceLine(
     errors.push({
       field: "discountAmount",
       code: "DISCOUNT_NON_NEGATIVE",
-      message: "İskonto tutarı geçerli bir sayı olmalı.",
+      message: "Ä°skonto tutarÄ± geÃ§erli bir sayÄ± olmalÄ±.",
     });
   } else if (discountAmount.lessThan(0)) {
     errors.push({
       field: "discountAmount",
       code: "DISCOUNT_NON_NEGATIVE",
-      message: "İskonto tutarı negatif olamaz.",
+      message: "Ä°skonto tutarÄ± negatif olamaz.",
     });
   }
 
@@ -229,7 +229,7 @@ export function validateInvoiceLine(
       errors.push({
         field: "discountAmount",
         code: "DISCOUNT_EXCEEDS_GROSS",
-        message: "İskonto tutarı KDV öncesi satır tutarını aşamaz.",
+        message: "Ä°skonto tutarÄ± KDV Ã¶ncesi satÄ±r tutarÄ±nÄ± aÅŸamaz.",
       });
     }
   }

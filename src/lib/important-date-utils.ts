@@ -3,38 +3,38 @@ import type {
   Priority,
   ReminderStatus,
   RepeatType,
-} from "@prisma/client";
+} from "#prisma/client";
 
 export const importantDateCategoryLabels: Record<ImportantDateCategory, string> = {
   GENERAL: "Genel",
-  CREDIT_CARD: "Kredi Kartı",
+  CREDIT_CARD: "Kredi KartÄ±",
   TAX: "Vergi",
-  CONTRACT: "Sözleşme",
-  VEHICLE: "Araç",
+  CONTRACT: "SÃ¶zleÅŸme",
+  VEHICLE: "AraÃ§",
   INVOICE: "Fatura",
   EXPENSE: "Gider",
   COMPANY: "Cari / Firma",
-  OTHER: "Diğer",
+  OTHER: "DiÄŸer",
 };
 
 export const repeatTypeLabels: Record<RepeatType, string> = {
   NONE: "Tek seferlik",
-  DAILY: "Günlük",
-  WEEKLY: "Haftalık",
-  MONTHLY: "Aylık",
-  YEARLY: "Yıllık",
+  DAILY: "GÃ¼nlÃ¼k",
+  WEEKLY: "HaftalÄ±k",
+  MONTHLY: "AylÄ±k",
+  YEARLY: "YÄ±llÄ±k",
 };
 
 export const priorityLabels: Record<Priority, string> = {
-  LOW: "Düşük",
+  LOW: "DÃ¼ÅŸÃ¼k",
   NORMAL: "Normal",
-  HIGH: "Yüksek",
+  HIGH: "YÃ¼ksek",
 };
 
 export const reminderStatusLabels: Record<ReminderStatus, string> = {
   PENDING: "Bekliyor",
-  DONE: "Tamamlandı",
-  CANCELLED: "İptal",
+  DONE: "TamamlandÄ±",
+  CANCELLED: "Ä°ptal",
 };
 
 export const importantDateCategoryOptions = Object.entries(importantDateCategoryLabels).map(
@@ -64,7 +64,7 @@ export function formatReminderDays(value: number | null) {
     return "-";
   }
 
-  return `${value} gün önce`;
+  return `${value} gÃ¼n Ã¶nce`;
 }
 
 export function formatOptionalTime(value: string | null) {

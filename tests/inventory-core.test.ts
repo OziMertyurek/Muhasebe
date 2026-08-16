@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { Prisma, StockMovementType } from "@prisma/client";
+import { Prisma, StockMovementType } from "#prisma/client";
 import {
   InventoryValidationError,
   assertPositiveQuantity,

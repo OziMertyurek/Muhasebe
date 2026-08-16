@@ -1,4 +1,4 @@
-import { ExpenseStatus } from "@prisma/client";
+import { ExpenseStatus } from "#prisma/client";
 import {
   formatTodayForFileName,
   getDateToExclusive,
@@ -68,14 +68,14 @@ export async function GET(request: Request) {
   });
   const buffer = await createPdfDocument(
     "Gider Raporu",
-    "Sistemde kayıtlı aktif gider listesi.",
+    "Sistemde kayÄ±tlÄ± aktif gider listesi.",
     (doc) => {
       drawSectionTitle(doc, "Giderler");
       drawTable(
         doc,
         [
           { header: "Gider tarihi", width: 66, value: (row) => formatPdfDate(row.expenseDate) },
-          { header: "Başlık", width: 125, value: (row) => row.title },
+          { header: "BaÅŸlÄ±k", width: 125, value: (row) => row.title },
           { header: "Kategori", width: 88, value: (row) => row.category?.name ?? "-" },
           { header: "Cari firma", width: 105, value: (row) => row.company?.name ?? "-" },
           {
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
           },
           { header: "PB", width: 34, value: (row) => row.currency },
           { header: "Durum", width: 62, value: (row) => expenseStatusLabels[row.status] },
-          { header: "Ödeme", width: 56, value: (row) => formatPdfDate(row.paymentDate) },
+          { header: "Ã–deme", width: 56, value: (row) => formatPdfDate(row.paymentDate) },
         ],
         expenses,
       );

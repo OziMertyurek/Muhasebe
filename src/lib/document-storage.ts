@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import { basename, relative, resolve, sep } from "node:path";
-import type { FileRelatedType } from "@prisma/client";
+import type { FileRelatedType } from "#prisma/client";
 import {
   getSafeFileExtension,
   isAllowedUploadType,

@@ -1,4 +1,4 @@
-import type { FileRelatedType } from "@prisma/client";
+import type { FileRelatedType } from "#prisma/client";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { uploadFileAction } from "@/app/(dashboard)/files/actions";
@@ -40,12 +40,12 @@ export default async function NewFilePage({ searchParams }: NewFilePageProps) {
           className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#1f6f54] hover:text-[#195d47]"
         >
           <ArrowLeft className="h-4 w-4" />
-          Dosya arşivine dön
+          Dosya arÅŸivine dÃ¶n
         </Link>
         <div>
           <p className="text-sm font-medium text-[#607167]">Yeni dosya</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
-            Dosya yükle
+            Dosya yÃ¼kle
           </h1>
         </div>
       </section>

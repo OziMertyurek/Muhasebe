@@ -1,6 +1,6 @@
 "use server";
 
-import { PaymentMethod, PaymentType, Prisma } from "@prisma/client";
+import { PaymentMethod, PaymentType, Prisma } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {

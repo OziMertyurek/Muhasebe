@@ -1,4 +1,4 @@
-import { InvoiceStatus, InvoiceType } from "@prisma/client";
+import { InvoiceStatus, InvoiceType } from "#prisma/client";
 import { formatTodayForFileName } from "@/lib/export-utils";
 import { invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { createPdfDocument, createPdfResponse, drawSectionTitle, drawTable, formatPdfDate, formatPdfMoney } from "@/lib/pdf-utils";
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
   });
   const buffer = await createPdfDocument(
     "Fatura Listesi",
-    "Sistemde kayıtlı aktif fatura listesi.",
+    "Sistemde kayÄ±tlÄ± aktif fatura listesi.",
     (doc) => {
       drawSectionTitle(doc, "Faturalar");
       drawTable(

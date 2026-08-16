@@ -1,12 +1,12 @@
-import type { FinancialAccountType } from "@prisma/client";
+import type { FinancialAccountType } from "#prisma/client";
 
 export const accountTypeLabels: Record<FinancialAccountType, string> = {
   CASH: "Nakit Kasa",
-  BANK: "Banka Hesabı",
-  CREDIT_CARD: "Kredi Kartı",
-  POS: "POS Hesabı",
-  FOREIGN_CURRENCY: "Döviz Hesabı",
-  OTHER: "Diğer",
+  BANK: "Banka HesabÄ±",
+  CREDIT_CARD: "Kredi KartÄ±",
+  POS: "POS HesabÄ±",
+  FOREIGN_CURRENCY: "DÃ¶viz HesabÄ±",
+  OTHER: "DiÄŸer",
 };
 
 export const accountTypeOptions: Array<{ value: FinancialAccountType; label: string }> = [

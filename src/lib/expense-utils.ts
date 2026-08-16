@@ -1,9 +1,9 @@
-import type { ExpenseStatus } from "@prisma/client";
+import type { ExpenseStatus } from "#prisma/client";
 
 export const expenseStatusLabels: Record<ExpenseStatus, string> = {
-  UNPAID: "Ödenmedi",
-  PAID: "Ödendi",
-  CANCELLED: "İptal",
+  UNPAID: "Ã–denmedi",
+  PAID: "Ã–dendi",
+  CANCELLED: "Ä°ptal",
 };
 
 export const expenseStatusOptions: Array<{ value: ExpenseStatus; label: string }> = [

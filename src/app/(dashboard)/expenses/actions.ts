@@ -1,6 +1,6 @@
 "use server";
 
-import { ExpenseStatus, Prisma } from "@prisma/client";
+import { ExpenseStatus, Prisma } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
@@ -75,7 +75,7 @@ async function parseExpenseForm(formData: FormData): Promise<{
   const paymentDateValue = readText(formData, "paymentDate");
 
   if (!title) {
-    errors.title = "Gider başlığı boş olamaz.";
+    errors.title = "Gider baÅŸlÄ±ÄŸÄ± boÅŸ olamaz.";
   }
 
   let amount: Prisma.Decimal | null = null;
@@ -86,9 +86,9 @@ async function parseExpenseForm(formData: FormData): Promise<{
     const numericAmount = Number(amountValue);
 
     if (Number.isNaN(numericAmount)) {
-      errors.amount = "Tutar sayı olmalı.";
+      errors.amount = "Tutar sayÄ± olmalÄ±.";
     } else if (numericAmount <= 0) {
-      errors.amount = "Tutar 0'dan büyük olmalı.";
+      errors.amount = "Tutar 0'dan bÃ¼yÃ¼k olmalÄ±.";
     } else {
       amount = new Prisma.Decimal(amountValue);
     }
@@ -97,17 +97,17 @@ async function parseExpenseForm(formData: FormData): Promise<{
   const expenseDate = parseDate(expenseDateValue);
 
   if (!expenseDate) {
-    errors.expenseDate = "Gider tarihi boş olamaz.";
+    errors.expenseDate = "Gider tarihi boÅŸ olamaz.";
   }
 
   if (!Object.values(ExpenseStatus).includes(statusValue as ExpenseStatus)) {
-    errors.status = "Geçerli bir gider durumu seçin.";
+    errors.status = "GeÃ§erli bir gider durumu seÃ§in.";
   }
 
   const paymentDate = parseDate(paymentDateValue);
 
   if (paymentDateValue && !paymentDate) {
-    errors.paymentDate = "Geçerli bir ödeme tarihi girin.";
+    errors.paymentDate = "GeÃ§erli bir Ã¶deme tarihi girin.";
   }
 
   if (categoryId) {
@@ -117,7 +117,7 @@ async function parseExpenseForm(formData: FormData): Promise<{
     });
 
     if (!category) {
-      errors.categoryId = "Geçerli bir kategori seçin.";
+      errors.categoryId = "GeÃ§erli bir kategori seÃ§in.";
     }
   }
 
@@ -128,7 +128,7 @@ async function parseExpenseForm(formData: FormData): Promise<{
     });
 
     if (!company) {
-      errors.companyId = "Silinmiş veya geçersiz cari seçilemez.";
+      errors.companyId = "SilinmiÅŸ veya geÃ§ersiz cari seÃ§ilemez.";
     }
   }
 
@@ -139,7 +139,7 @@ async function parseExpenseForm(formData: FormData): Promise<{
     });
 
     if (!financialAccount) {
-      errors.financialAccountId = "Silinmiş veya geçersiz finansal hesap seçilemez.";
+      errors.financialAccountId = "SilinmiÅŸ veya geÃ§ersiz finansal hesap seÃ§ilemez.";
     }
   }
 
@@ -171,7 +171,7 @@ export async function createExpenseAction(
   const parsed = await parseExpenseForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   let expenseId: string;
@@ -186,12 +186,12 @@ export async function createExpenseAction(
       entityType: "EXPENSE",
       entityId: expenseId,
       action: "CREATE",
-      title: `Gider oluşturuldu: ${parsed.data.title}`,
-      description: `${parsed.data.amount.toString()} ${parsed.data.currency} tutarlı gider oluşturuldu.`,
+      title: `Gider oluÅŸturuldu: ${parsed.data.title}`,
+      description: `${parsed.data.amount.toString()} ${parsed.data.currency} tutarlÄ± gider oluÅŸturuldu.`,
       after: parsed.data,
     });
   } catch {
-    return { message: "Gider kaydı oluşturulurken bir hata oluştu." };
+    return { message: "Gider kaydÄ± oluÅŸturulurken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/expenses");
@@ -209,7 +209,7 @@ export async function updateExpenseAction(
   const parsed = await parseExpenseForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   let previousFinancialAccountId: string | null = null;
@@ -220,7 +220,7 @@ export async function updateExpenseAction(
     });
 
     if (!existingExpense) {
-      return { message: "Düzenlenecek gider bulunamadı." };
+      return { message: "DÃ¼zenlenecek gider bulunamadÄ±." };
     }
 
     previousFinancialAccountId = existingExpense.financialAccountId;
@@ -234,13 +234,13 @@ export async function updateExpenseAction(
       entityType: "EXPENSE",
       entityId: expenseId,
       action: "UPDATE",
-      title: `Gider güncellendi: ${parsed.data.title}`,
-      description: "Gider bilgilerinde değişiklik yapıldı.",
+      title: `Gider gÃ¼ncellendi: ${parsed.data.title}`,
+      description: "Gider bilgilerinde deÄŸiÅŸiklik yapÄ±ldÄ±.",
       before: existingExpense,
       after: parsed.data,
     });
   } catch {
-    return { message: "Gider kaydı güncellenirken bir hata oluştu." };
+    return { message: "Gider kaydÄ± gÃ¼ncellenirken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/expenses");
@@ -276,7 +276,7 @@ export async function deleteExpenseAction(expenseId: string) {
       entityId: expense.id,
       action: "SOFT_DELETE",
       title: `Gider silindi: ${expense.title}`,
-      description: "Kayıt çöp kutusuna taşındı.",
+      description: "KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±ndÄ±.",
       before: expense,
     });
   } catch {

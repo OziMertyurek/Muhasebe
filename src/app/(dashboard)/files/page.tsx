@@ -12,7 +12,7 @@ import {
   getRelatedRecordLabel,
 } from "@/lib/file-utils";
 import { prisma } from "@/lib/prisma";
-import { FileRelatedType } from "@prisma/client";
+import { FileRelatedType } from "#prisma/client";
 
 type FilesPageProps = {
   searchParams?: Promise<{
@@ -61,12 +61,12 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
     <div className="space-y-6">
       <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-[#607167]">Dosya Arşivi</p>
+          <p className="text-sm font-medium text-[#607167]">Dosya ArÅŸivi</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             Ek dosyalar
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Fatura PDF dosyası, dekont, sözleşme ve gider belgelerini ilişkili kayıtlarla saklayın.
+            Fatura PDF dosyasÄ±, dekont, sÃ¶zleÅŸme ve gider belgelerini iliÅŸkili kayÄ±tlarla saklayÄ±n.
           </p>
         </div>
         <Link
@@ -85,7 +85,7 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
             <input
               name="q"
               defaultValue={query}
-              placeholder="Dosya adına göre ara"
+              placeholder="Dosya adÄ±na gÃ¶re ara"
               className="h-10 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54]"
             />
           </label>
@@ -94,7 +94,7 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
             defaultValue={relatedType ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           >
-            <option value="">Tüm ilişki tipleri</option>
+            <option value="">TÃ¼m iliÅŸki tipleri</option>
             {fileRelatedTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -106,9 +106,9 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
             defaultValue={params?.kind ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           >
-            <option value="">Tüm dosya türleri</option>
+            <option value="">TÃ¼m dosya tÃ¼rleri</option>
             <option value="pdf">PDF</option>
-            <option value="image">Görsel</option>
+            <option value="image">GÃ¶rsel</option>
             <option value="document">Word</option>
             <option value="sheet">Excel</option>
           </select>
@@ -121,8 +121,8 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {files.length === 0 ? (
           <EmptyState
-            title="Henüz dosya eklenmedi"
-            description="İlk dosyanızı Dosya Ekle butonuyla yükleyebilirsiniz."
+            title="HenÃ¼z dosya eklenmedi"
+            description="Ä°lk dosyanÄ±zÄ± Dosya Ekle butonuyla yÃ¼kleyebilirsiniz."
             actionHref="/files/new"
             actionLabel="Dosya Ekle"
           />
@@ -131,13 +131,13 @@ export default async function FilesPage({ searchParams }: FilesPageProps) {
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
                 <tr>
-                  <th className="px-4 py-3">Yüklenme tarihi</th>
-                  <th className="px-4 py-3">Orijinal dosya adı</th>
-                  <th className="px-4 py-3">İlişki tipi</th>
-                  <th className="px-4 py-3">İlişkili kayıt</th>
-                  <th className="px-4 py-3">Dosya türü</th>
+                  <th className="px-4 py-3">YÃ¼klenme tarihi</th>
+                  <th className="px-4 py-3">Orijinal dosya adÄ±</th>
+                  <th className="px-4 py-3">Ä°liÅŸki tipi</th>
+                  <th className="px-4 py-3">Ä°liÅŸkili kayÄ±t</th>
+                  <th className="px-4 py-3">Dosya tÃ¼rÃ¼</th>
                   <th className="px-4 py-3">Dosya boyutu</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>

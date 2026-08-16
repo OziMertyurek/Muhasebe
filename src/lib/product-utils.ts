@@ -1,4 +1,4 @@
-import type { ProductUnit, StockMovementType } from "@prisma/client";
+import type { ProductUnit, StockMovementType } from "#prisma/client";
 
 export const productUnitLabels: Record<ProductUnit, string> = {
   ADET: "Adet",

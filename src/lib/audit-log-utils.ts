@@ -1,4 +1,4 @@
-import type { AuditLog, Prisma } from "@prisma/client";
+import type { AuditLog, Prisma } from "#prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type AuditEntityType =
@@ -51,31 +51,31 @@ export type AuditLogFilters = {
 export const auditEntityTypeLabels: Record<AuditEntityType, string> = {
   COMPANY: "Cari",
   INVOICE: "Fatura",
-  PAYMENT: "Tahsilat / Ödeme",
+  PAYMENT: "Tahsilat / Ã–deme",
   PRODUCT: "Urun",
   STOCK_MOVEMENT: "Stok Hareketi",
   FINANCIAL_ACCOUNT: "Finansal Hesap",
   EXPENSE: "Gider",
   RECURRING_EXPENSE: "Sabit Gider",
-  IMPORTANT_DATE: "Önemli Tarih",
+  IMPORTANT_DATE: "Ã–nemli Tarih",
   FILE_ATTACHMENT: "Dosya",
   AI_EXTRACTION: "AI Analiz",
   BACKUP: "Yedekleme",
-  RESTORE: "Geri Yükleme",
+  RESTORE: "Geri YÃ¼kleme",
   SETTINGS: "Ayarlar",
 };
 
 export const auditActionLabels: Record<AuditAction, string> = {
-  CREATE: "Oluşturma",
-  UPDATE: "Güncelleme",
-  SOFT_DELETE: "Çöp kutusuna taşıma",
-  RESTORE: "Geri yükleme",
-  EXPORT: "Dışa aktarma",
-  BACKUP_DOWNLOAD: "Veritabanı yedeği indirme",
+  CREATE: "OluÅŸturma",
+  UPDATE: "GÃ¼ncelleme",
+  SOFT_DELETE: "Ã‡Ã¶p kutusuna taÅŸÄ±ma",
+  RESTORE: "Geri yÃ¼kleme",
+  EXPORT: "DÄ±ÅŸa aktarma",
+  BACKUP_DOWNLOAD: "VeritabanÄ± yedeÄŸi indirme",
   FULL_BACKUP_DOWNLOAD: "Tam yedek indirme",
-  BACKUP_RESTORE: "Yedek geri yükleme",
-  BACKUP_VALIDATE: "Yedek doğrulama",
-  STATUS_CHANGE: "Durum değişikliği",
+  BACKUP_RESTORE: "Yedek geri yÃ¼kleme",
+  BACKUP_VALIDATE: "Yedek doÄŸrulama",
+  STATUS_CHANGE: "Durum deÄŸiÅŸikliÄŸi",
 };
 
 export const auditEntityTypeOptions = Object.entries(auditEntityTypeLabels).map(
@@ -105,7 +105,7 @@ export async function createAuditLog(input: AuditLogInput, client: PrismaClientL
       select: { id: true },
     });
   } catch (error) {
-    console.error("Audit log yazılamadı", error);
+    console.error("Audit log yazÄ±lamadÄ±", error);
   }
 }
 
@@ -145,7 +145,7 @@ export function formatAuditDate(date: Date) {
 
 export function formatAuditJson(value: string | null) {
   if (!value) {
-    return "Kayıt yok";
+    return "KayÄ±t yok";
   }
 
   try {

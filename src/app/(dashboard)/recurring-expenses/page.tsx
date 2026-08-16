@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteRecurringExpenseAction } from "@/app/(dashboard)/recurring-expenses/actions";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -92,10 +92,10 @@ export default async function RecurringExpensesPage({
         <div>
           <p className="text-sm font-medium text-[#607167]">Sabit Giderler</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
-            Sabit gider tanımları
+            Sabit gider tanÄ±mlarÄ±
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Her ay tekrar eden kira, abonelik ve düzenli ödemeleri şablon olarak takip edin.
+            Her ay tekrar eden kira, abonelik ve dÃ¼zenli Ã¶demeleri ÅŸablon olarak takip edin.
           </p>
         </div>
         <Link
@@ -123,7 +123,7 @@ export default async function RecurringExpensesPage({
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{activeCount}</p>
         </div>
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Aylık toplam sabit gider</p>
+          <p className="text-sm font-medium text-[#607167]">AylÄ±k toplam sabit gider</p>
           {monthlyTotals.length === 0 ? (
             <p className="mt-2 text-2xl font-semibold text-[#16201b]">-</p>
           ) : (
@@ -149,7 +149,7 @@ export default async function RecurringExpensesPage({
             <input
               name="q"
               defaultValue={query}
-              placeholder="Gider adı veya açıklama ara"
+              placeholder="Gider adÄ± veya aÃ§Ä±klama ara"
               className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
@@ -158,7 +158,7 @@ export default async function RecurringExpensesPage({
             defaultValue={categoryId ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm kategoriler</option>
+            <option value="">TÃ¼m kategoriler</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -170,7 +170,7 @@ export default async function RecurringExpensesPage({
             defaultValue={params?.status ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm durumlar</option>
+            <option value="">TÃ¼m durumlar</option>
             <option value="active">Aktif</option>
             <option value="passive">Pasif</option>
           </select>
@@ -183,8 +183,8 @@ export default async function RecurringExpensesPage({
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {recurringExpenses.length === 0 ? (
           <EmptyState
-            title="Henüz sabit gider eklenmedi"
-            description="İlk sabit gider tanımınızı Yeni Sabit Gider butonuyla ekleyebilirsiniz."
+            title="HenÃ¼z sabit gider eklenmedi"
+            description="Ä°lk sabit gider tanÄ±mÄ±nÄ±zÄ± Yeni Sabit Gider butonuyla ekleyebilirsiniz."
             actionHref="/recurring-expenses/new"
             actionLabel="Yeni Sabit Gider"
           />
@@ -193,15 +193,15 @@ export default async function RecurringExpensesPage({
             <table className="min-w-[1080px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
-                  <th className="px-4 py-3">Gider adı</th>
+                  <th className="px-4 py-3">Gider adÄ±</th>
                   <th className="px-4 py-3">Kategori</th>
                   <th className="px-4 py-3">Tutar</th>
                   <th className="px-4 py-3">Para birimi</th>
-                  <th className="px-4 py-3">Ayın günü</th>
-                  <th className="px-4 py-3">Başlangıç tarihi</th>
-                  <th className="px-4 py-3">Bitiş tarihi</th>
+                  <th className="px-4 py-3">AyÄ±n gÃ¼nÃ¼</th>
+                  <th className="px-4 py-3">BaÅŸlangÄ±Ã§ tarihi</th>
+                  <th className="px-4 py-3">BitiÅŸ tarihi</th>
                   <th className="px-4 py-3">Durum</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -245,14 +245,14 @@ export default async function RecurringExpensesPage({
                         <Link
                           href={`/recurring-expenses/${recurringExpense.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteRecurringExpenseAction.bind(null, recurringExpense.id)}>
                           <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
-                            message="Bu sabit gider tanımını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
+                            message="Bu sabit gider tanÄ±mÄ±nÄ± silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak ve daha sonra geri yÃ¼klenebilecek."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />

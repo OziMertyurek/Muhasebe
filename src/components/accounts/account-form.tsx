@@ -1,6 +1,6 @@
 "use client";
 
-import type { FinancialAccountType } from "@prisma/client";
+import type { FinancialAccountType } from "#prisma/client";
 import { useActionState, useState } from "react";
 import { Save } from "lucide-react";
 import type { AccountFormState } from "@/app/(dashboard)/accounts/actions";
@@ -70,7 +70,7 @@ export function AccountForm({ action, submitLabel, initialValues }: AccountFormP
         <h2 className="text-lg font-semibold text-[#16201b]">Hesap bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-medium text-[#46534b]">
-            Hesap adı
+            Hesap adÄ±
             <input
               name="name"
               defaultValue={initialValues?.name ?? ""}
@@ -89,7 +89,7 @@ export function AccountForm({ action, submitLabel, initialValues }: AccountFormP
               className={fieldClass(Boolean(state.errors?.type))}
               required
             >
-              <option value="">Seçin</option>
+              <option value="">SeÃ§in</option>
               {accountTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -100,7 +100,7 @@ export function AccountForm({ action, submitLabel, initialValues }: AccountFormP
           </label>
 
           <label className="block text-sm font-medium text-[#46534b]">
-            Banka adı
+            Banka adÄ±
             <input
               name="bankName"
               defaultValue={initialValues?.bankName ?? ""}
@@ -128,7 +128,7 @@ export function AccountForm({ action, submitLabel, initialValues }: AccountFormP
           </label>
 
           <label className="block text-sm font-medium text-[#46534b]">
-            Açılış bakiyesi
+            AÃ§Ä±lÄ±ÅŸ bakiyesi
             <input
               name="openingBalance"
               type="number"
@@ -164,10 +164,10 @@ export function AccountForm({ action, submitLabel, initialValues }: AccountFormP
 
         {isCreditCard ? (
           <div className="mt-5 rounded-lg border border-[#dce2dc] bg-[#fbfcfa] p-4">
-            <h3 className="text-sm font-semibold text-[#223028]">Kredi kartı bilgileri</h3>
+            <h3 className="text-sm font-semibold text-[#223028]">Kredi kartÄ± bilgileri</h3>
             <p className="mt-2 text-sm leading-6 text-[#647067]">
-              Hesap kesim günü ve son ödeme günü girerseniz sistem otomatik aylık
-              hatırlatma oluşturur.
+              Hesap kesim gÃ¼nÃ¼ ve son Ã¶deme gÃ¼nÃ¼ girerseniz sistem otomatik aylÄ±k
+              hatÄ±rlatma oluÅŸturur.
             </p>
             <div className="mt-4 grid gap-4 md:grid-cols-3">
               <label className="block text-sm font-medium text-[#46534b]">
@@ -184,7 +184,7 @@ export function AccountForm({ action, submitLabel, initialValues }: AccountFormP
               </label>
 
               <label className="block text-sm font-medium text-[#46534b]">
-                Hesap kesim günü
+                Hesap kesim gÃ¼nÃ¼
                 <input
                   name="statementDay"
                   type="number"
@@ -198,7 +198,7 @@ export function AccountForm({ action, submitLabel, initialValues }: AccountFormP
               </label>
 
               <label className="block text-sm font-medium text-[#46534b]">
-                Son ödeme günü
+                Son Ã¶deme gÃ¼nÃ¼
                 <input
                   name="dueDay"
                   type="number"

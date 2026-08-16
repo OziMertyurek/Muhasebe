@@ -1,4 +1,4 @@
-import { PaymentMethod, PaymentType } from "@prisma/client";
+import { PaymentMethod, PaymentType } from "#prisma/client";
 import {
   createCsv,
   createCsvResponse,
@@ -74,14 +74,14 @@ export async function GET(request: Request) {
   const csv = createCsv(
     [
       "Tarih",
-      "İşlem tipi",
+      "Ä°ÅŸlem tipi",
       "Cari firma",
-      "İlgili fatura",
+      "Ä°lgili fatura",
       "Finansal hesap",
       "Tutar",
       "Para birimi",
-      "Ödeme yöntemi",
-      "Açıklama",
+      "Ã–deme yÃ¶ntemi",
+      "AÃ§Ä±klama",
     ],
     payments.map((payment) => [
       formatCsvDate(payment.paymentDate),

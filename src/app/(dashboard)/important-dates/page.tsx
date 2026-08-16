@@ -4,7 +4,7 @@ import {
   Prisma,
   Priority,
   ReminderStatus,
-} from "@prisma/client";
+} from "#prisma/client";
 import { CheckCircle2, Eye, Pencil, Plus, RotateCcw, Search, Trash2 } from "lucide-react";
 import {
   deleteImportantDateAction,
@@ -141,12 +141,12 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
     <div className="space-y-6">
       <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-[#607167]">Önemli Tarihler</p>
+          <p className="text-sm font-medium text-[#607167]">Ã–nemli Tarihler</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
-            Hatırlatmalar
+            HatÄ±rlatmalar
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Vergi günü, sözleşme bitişi, kredi kartı tarihleri ve ödeme sözlerini takip edin.
+            Vergi gÃ¼nÃ¼, sÃ¶zleÅŸme bitiÅŸi, kredi kartÄ± tarihleri ve Ã¶deme sÃ¶zlerini takip edin.
           </p>
         </div>
         <Link
@@ -154,7 +154,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
           className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
         >
           <Plus className="h-4 w-4" />
-          Hatırlatma Ekle
+          HatÄ±rlatma Ekle
         </Link>
       </section>
 
@@ -170,11 +170,11 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
 
       <section className="grid gap-4 md:grid-cols-4">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Bugünkü önemli tarihler</p>
+          <p className="text-sm font-medium text-[#607167]">BugÃ¼nkÃ¼ Ã¶nemli tarihler</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{todayCount}</p>
         </div>
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <p className="text-sm font-medium text-[#607167]">Bu hafta yaklaşanlar</p>
+          <p className="text-sm font-medium text-[#607167]">Bu hafta yaklaÅŸanlar</p>
           <p className="mt-2 text-2xl font-semibold text-[#16201b]">{weekCount}</p>
         </div>
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
@@ -194,7 +194,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
             <input
               name="q"
               defaultValue={query}
-              placeholder="Başlık veya açıklama ara"
+              placeholder="BaÅŸlÄ±k veya aÃ§Ä±klama ara"
               className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
@@ -203,7 +203,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
             defaultValue={category ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm kategoriler</option>
+            <option value="">TÃ¼m kategoriler</option>
             {importantDateCategoryOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -215,7 +215,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
             defaultValue={status ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm durumlar</option>
+            <option value="">TÃ¼m durumlar</option>
             {reminderStatusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -227,7 +227,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
             defaultValue={priority ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm öncelikler</option>
+            <option value="">TÃ¼m Ã¶ncelikler</option>
             {priorityOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -239,11 +239,11 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
             defaultValue={params?.upcoming ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tümü</option>
-            <option value="today">Bugün</option>
+            <option value="">TÃ¼mÃ¼</option>
+            <option value="today">BugÃ¼n</option>
             <option value="week">Bu hafta</option>
             <option value="month">Bu ay</option>
-            <option value="past">Geçmiş</option>
+            <option value="past">GeÃ§miÅŸ</option>
           </select>
           <button className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 text-sm font-semibold text-[#223028] transition hover:border-[#aebdae] hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]">
             Filtrele
@@ -254,10 +254,10 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {importantDates.length === 0 ? (
           <EmptyState
-            title="Henüz önemli tarih eklenmedi"
-            description="İlk hatırlatmanızı Hatırlatma Ekle butonuyla oluşturabilirsiniz."
+            title="HenÃ¼z Ã¶nemli tarih eklenmedi"
+            description="Ä°lk hatÄ±rlatmanÄ±zÄ± HatÄ±rlatma Ekle butonuyla oluÅŸturabilirsiniz."
             actionHref="/important-dates/new"
-            actionLabel="Hatırlatma Ekle"
+            actionLabel="HatÄ±rlatma Ekle"
           />
         ) : (
           <div className="overflow-x-auto">
@@ -266,13 +266,13 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
                   <th className="px-4 py-3">Saat</th>
-                  <th className="px-4 py-3">Başlık</th>
+                  <th className="px-4 py-3">BaÅŸlÄ±k</th>
                   <th className="px-4 py-3">Kategori</th>
-                  <th className="px-4 py-3">Öncelik</th>
+                  <th className="px-4 py-3">Ã–ncelik</th>
                   <th className="px-4 py-3">Tekrar</th>
                   <th className="px-4 py-3">Durum</th>
-                  <th className="px-4 py-3">İlişkili kayıt</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3">Ä°liÅŸkili kayÄ±t</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -310,7 +310,7 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
                           <form action={markImportantDateDoneAction.bind(null, importantDate.id)}>
                             <button
                               className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#1f6f54] transition hover:border-[#aebdae]"
-                              title="Tamamlandı olarak işaretle"
+                              title="TamamlandÄ± olarak iÅŸaretle"
                             >
                               <CheckCircle2 className="h-4 w-4" />
                             </button>
@@ -337,14 +337,14 @@ export default async function ImportantDatesPage({ searchParams }: ImportantDate
                         <Link
                           href={`/important-dates/${importantDate.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteImportantDateAction.bind(null, importantDate.id)}>
                           <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
-                            message="Bu önemli tarih / hatırlatma kaydını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
+                            message="Bu Ã¶nemli tarih / hatÄ±rlatma kaydÄ±nÄ± silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak ve daha sonra geri yÃ¼klenebilecek."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />

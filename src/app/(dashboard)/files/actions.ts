@@ -1,6 +1,6 @@
 "use server";
 
-import { FileRelatedType } from "@prisma/client";
+import { FileRelatedType } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
@@ -97,19 +97,19 @@ async function validateRelation(relation: RelationFields) {
   ]);
 
   if (relation.invoiceId && !invoice) {
-    return "Geçerli bir fatura seçin.";
+    return "GeÃ§erli bir fatura seÃ§in.";
   }
 
   if (relation.expenseId && !expense) {
-    return "Geçerli bir gider seçin.";
+    return "GeÃ§erli bir gider seÃ§in.";
   }
 
   if (relation.companyId && !company) {
-    return "Geçerli bir cari seçin.";
+    return "GeÃ§erli bir cari seÃ§in.";
   }
 
   if (relation.paymentId && !payment) {
-    return "Geçerli bir tahsilat / ödeme hareketi seçin.";
+    return "GeÃ§erli bir tahsilat / Ã¶deme hareketi seÃ§in.";
   }
 
   return null;
@@ -124,11 +124,11 @@ export async function uploadFileAction(
   const relatedType = getRelatedType(readText(formData, "relatedType"));
 
   if (!relatedType) {
-    errors.relatedType = "İlişki tipi seçilmeli.";
+    errors.relatedType = "Ä°liÅŸki tipi seÃ§ilmeli.";
   }
 
   if (!(fileValue instanceof File) || fileValue.size === 0) {
-    errors.file = "Dosya seçilmeden kaydedilemez.";
+    errors.file = "Dosya seÃ§ilmeden kaydedilemez.";
   }
 
   if (fileValue instanceof File && fileValue.size > maxUploadSize) {
@@ -142,12 +142,12 @@ export async function uploadFileAction(
   ) {
     errors.file =
       relatedType === "INVOICE"
-        ? "Bu dosya türü desteklenmiyor. Fatura dosyaları için PDF, PNG, JPG, WebP veya HTML yükleyebilirsiniz."
-        : "Bu dosya türü desteklenmiyor. PDF, PNG, JPG, WebP, DOC/DOCX veya XLS/XLSX yükleyebilirsiniz.";
+        ? "Bu dosya tÃ¼rÃ¼ desteklenmiyor. Fatura dosyalarÄ± iÃ§in PDF, PNG, JPG, WebP veya HTML yÃ¼kleyebilirsiniz."
+        : "Bu dosya tÃ¼rÃ¼ desteklenmiyor. PDF, PNG, JPG, WebP, DOC/DOCX veya XLS/XLSX yÃ¼kleyebilirsiniz.";
   }
 
   if (!relatedType || !(fileValue instanceof File) || Object.keys(errors).length > 0) {
-    return { errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   const relation = await parseRelation(formData, relatedType);
@@ -156,7 +156,7 @@ export async function uploadFileAction(
   if (relationError) {
     return {
       errors: { relatedId: relationError },
-      message: "Lütfen formdaki hataları düzeltin.",
+      message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin.",
     };
   }
 
@@ -185,8 +185,8 @@ export async function uploadFileAction(
       entityType: "FILE_ATTACHMENT",
       entityId: fileId,
       action: "CREATE",
-      title: `Dosya yüklendi: ${fileValue.name}`,
-      description: "Dosya arşivine yeni ek yüklendi.",
+      title: `Dosya yÃ¼klendi: ${fileValue.name}`,
+      description: "Dosya arÅŸivine yeni ek yÃ¼klendi.",
       after: {
         originalFileName: storedDocument.originalFileName,
         storedFileName: storedDocument.storedFileName,
@@ -198,7 +198,7 @@ export async function uploadFileAction(
       },
     });
   } catch {
-    return { message: "Dosya yüklenirken bir hata oluştu." };
+    return { message: "Dosya yÃ¼klenirken bir hata oluÅŸtu." };
   }
 
   redirect(`/files/${fileId}`);
@@ -261,9 +261,9 @@ export async function archiveFileAttachmentAction(fileId: string) {
       entityType: "FILE_ATTACHMENT",
       entityId: archivedFile.id,
       action: "SOFT_DELETE",
-      title: `Dosya arşivlendi: ${archivedFile.originalFileName}`,
+      title: `Dosya arÅŸivlendi: ${archivedFile.originalFileName}`,
       description:
-        "Dosya kaydı arşivlendi. Fiziksel dosya ve iş kayıtları değiştirilmedi.",
+        "Dosya kaydÄ± arÅŸivlendi. Fiziksel dosya ve iÅŸ kayÄ±tlarÄ± deÄŸiÅŸtirilmedi.",
       before: {
         id: file.id,
         originalFileName: file.originalFileName,
@@ -326,9 +326,9 @@ export async function restoreFileAttachmentAction(fileId: string) {
       entityType: "FILE_ATTACHMENT",
       entityId: restoredFile.id,
       action: "RESTORE",
-      title: `Dosya geri yÃ¼klendi: ${restoredFile.originalFileName}`,
+      title: `Dosya geri yÃƒÂ¼klendi: ${restoredFile.originalFileName}`,
       description:
-        "Dosya kaydı arşivden geri yüklendi. Fiziksel dosya taşınmadı veya yeniden oluşturulmadı.",
+        "Dosya kaydÄ± arÅŸivden geri yÃ¼klendi. Fiziksel dosya taÅŸÄ±nmadÄ± veya yeniden oluÅŸturulmadÄ±.",
       before: file,
       after: restoredFile,
     });

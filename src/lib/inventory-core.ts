@@ -1,4 +1,4 @@
-import { Prisma, StockMovementType } from "@prisma/client";
+import { Prisma, StockMovementType } from "#prisma/client";
 
 export type MinimumStockState = "OK" | "LOW" | "OUT";
 

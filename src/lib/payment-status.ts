@@ -1,4 +1,4 @@
-import { InvoiceStatus, Prisma } from "@prisma/client";
+import { InvoiceStatus, Prisma } from "#prisma/client";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { syncInvoiceDueReminder } from "@/lib/auto-reminder-utils";
 import { deriveInvoiceStatus, getInvoicePaidTotal } from "@/lib/accounting-core";

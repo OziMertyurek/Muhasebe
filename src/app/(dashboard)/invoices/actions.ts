@@ -1,6 +1,6 @@
 "use server";
 
-import { InvoiceStatus, InvoiceType, ProductUnit } from "@prisma/client";
+import { InvoiceStatus, InvoiceType, ProductUnit } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {

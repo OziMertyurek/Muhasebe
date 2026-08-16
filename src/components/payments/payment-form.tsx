@@ -1,6 +1,6 @@
 "use client";
 
-import type { InvoiceType, PaymentMethod, PaymentType } from "@prisma/client";
+import type { InvoiceType, PaymentMethod, PaymentType } from "#prisma/client";
 import { useActionState, useMemo, useState } from "react";
 import { Save } from "lucide-react";
 import type { PaymentFormState } from "@/app/(dashboard)/payments/actions";
@@ -109,7 +109,7 @@ export function PaymentForm({
         <h2 className="text-base font-semibold text-[#16201b]">Para hareketi bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-semibold text-[#46534b]">
-            İşlem tipi
+            Ä°ÅŸlem tipi
             <select
               name="type"
               value={selectedPaymentType}
@@ -117,7 +117,7 @@ export function PaymentForm({
               className={fieldClass(Boolean(state.errors?.type))}
               required
             >
-              <option value="">Seçin</option>
+              <option value="">SeÃ§in</option>
               {paymentTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -144,7 +144,7 @@ export function PaymentForm({
               }}
               className={fieldClass(Boolean(state.errors?.companyId))}
             >
-              <option value="">Seçin</option>
+              <option value="">SeÃ§in</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>
                   {company.name}
@@ -155,7 +155,7 @@ export function PaymentForm({
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            İlgili fatura
+            Ä°lgili fatura
             <select
               name="invoiceId"
               value={selectedInvoiceId}
@@ -169,7 +169,7 @@ export function PaymentForm({
               }}
               className={fieldClass(Boolean(state.errors?.invoiceId))}
             >
-              <option value="">Fatura seçilmedi</option>
+              <option value="">Fatura seÃ§ilmedi</option>
               {filteredInvoices.map((invoice) => (
                 <option key={invoice.id} value={invoice.id}>
                   {invoice.invoiceNumber} - {invoice.companyName}
@@ -191,7 +191,7 @@ export function PaymentForm({
               defaultValue={initialValues?.financialAccountId ?? ""}
               className={fieldClass(Boolean(state.errors?.financialAccountId))}
             >
-              <option value="">Hesap seçilmedi</option>
+              <option value="">Hesap seÃ§ilmedi</option>
               {financialAccounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name}
@@ -238,14 +238,14 @@ export function PaymentForm({
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            Ödeme yöntemi
+            Ã–deme yÃ¶ntemi
             <select
               name="method"
               defaultValue={initialValues?.method ?? ""}
               className={fieldClass(Boolean(state.errors?.method))}
               required
             >
-              <option value="">Seçin</option>
+              <option value="">SeÃ§in</option>
               {paymentMethodOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -258,13 +258,13 @@ export function PaymentForm({
 
         {hasDirectionWarning ? (
           <div className="mt-4 rounded-md border border-[#ead7a8] bg-[#fff9e8] px-4 py-3 text-sm text-[#765116]">
-            Satış faturası için genelde “Para aldım”, alış faturası için genelde “Para ödedim”
-            seçilir.
+            SatÄ±ÅŸ faturasÄ± iÃ§in genelde â€œPara aldÄ±mâ€, alÄ±ÅŸ faturasÄ± iÃ§in genelde â€œPara Ã¶dedimâ€
+            seÃ§ilir.
           </div>
         ) : null}
 
         <label className="mt-5 block text-sm font-semibold text-[#46534b]">
-          Açıklama
+          AÃ§Ä±klama
           <textarea
             name="description"
             defaultValue={initialValues?.description ?? ""}

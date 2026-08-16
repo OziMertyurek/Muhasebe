@@ -17,3 +17,4 @@ prisma/dev.db-journal
 storage/uploads/
 storage/restore-backups/
 storage/restore-temp/
+src/generated/prisma/

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { InvoiceStatus, InvoiceType } from "@prisma/client";
+import { InvoiceStatus, InvoiceType } from "#prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -101,10 +101,10 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
         <div>
           <p className="text-sm font-medium text-[#607167]">Faturalar</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
-            Fatura kayıtları
+            Fatura kayÄ±tlarÄ±
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Kestiğiniz ve size kesilen faturaları cari firmalarla birlikte takip edin.
+            KestiÄŸiniz ve size kesilen faturalarÄ± cari firmalarla birlikte takip edin.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -113,14 +113,14 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
-            CSV Dışa Aktar
+            CSV DÄ±ÅŸa Aktar
           </a>
           <a
             href={pdfHref}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
-            PDF İndir
+            PDF Ä°ndir
           </a>
           <Link
             href="/invoices/new"
@@ -149,7 +149,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
             <input
               name="q"
               defaultValue={query}
-              placeholder="Fatura no veya firma adına göre ara"
+              placeholder="Fatura no veya firma adÄ±na gÃ¶re ara"
               className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
@@ -158,7 +158,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
             defaultValue={type ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm fatura tipleri</option>
+            <option value="">TÃ¼m fatura tipleri</option>
             {invoiceTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -170,7 +170,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
             defaultValue={status ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm durumlar</option>
+            <option value="">TÃ¼m durumlar</option>
             {invoiceStatusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -186,8 +186,8 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {invoices.length === 0 ? (
           <EmptyState
-            title="Henüz fatura eklenmedi"
-            description="İlk satış veya alış faturanızı Yeni Fatura butonuyla ekleyebilirsiniz."
+            title="HenÃ¼z fatura eklenmedi"
+            description="Ä°lk satÄ±ÅŸ veya alÄ±ÅŸ faturanÄ±zÄ± Yeni Fatura butonuyla ekleyebilirsiniz."
             actionHref="/invoices/new"
             actionLabel="Yeni Fatura"
           />
@@ -204,7 +204,7 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                   <th className="px-4 py-3">Genel toplam</th>
                   <th className="px-4 py-3">Para birimi</th>
                   <th className="px-4 py-3">Durum</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -244,14 +244,14 @@ export default async function InvoicesPage({ searchParams }: InvoicesPageProps) 
                         <Link
                           href={`/invoices/${invoice.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteInvoiceAction.bind(null, invoice.id)}>
                           <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
-                            message="Bu faturayı silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı ödeme durumu etkilenebilir."
+                            message="Bu faturayÄ± silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak. BaÄŸlÄ± Ã¶deme durumu etkilenebilir."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />

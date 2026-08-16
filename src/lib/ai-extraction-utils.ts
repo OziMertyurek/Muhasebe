@@ -1,4 +1,4 @@
-import type { FileRelatedType } from "@prisma/client";
+import type { FileRelatedType } from "#prisma/client";
 import { aiExtractionRelatedTypeLabels } from "@/lib/ai-extraction-labels";
 export {
   aiExtractionRelatedTypeLabels,
@@ -78,7 +78,7 @@ export async function getAiExtractionFileOptions() {
   }));
 }
 
-// Gelecek aşama notu:
-// 1. PDF/görsel dosyadan OCR metni çıkarılacak.
-// 2. AI ile metin fatura alanlarını içeren JSON yapısına dönüştürülecek.
-// 3. Kullanıcı onayından sonra bu JSON üzerinden Invoice kaydı oluşturulacak.
+// Gelecek aÅŸama notu:
+// 1. PDF/gÃ¶rsel dosyadan OCR metni Ã§Ä±karÄ±lacak.
+// 2. AI ile metin fatura alanlarÄ±nÄ± iÃ§eren JSON yapÄ±sÄ±na dÃ¶nÃ¼ÅŸtÃ¼rÃ¼lecek.
+// 3. KullanÄ±cÄ± onayÄ±ndan sonra bu JSON Ã¼zerinden Invoice kaydÄ± oluÅŸturulacak.

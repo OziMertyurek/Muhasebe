@@ -5,7 +5,7 @@ import type {
   Priority,
   ReminderStatus,
   RepeatType,
-} from "@prisma/client";
+} from "#prisma/client";
 import { useActionState, useState } from "react";
 import { Save } from "lucide-react";
 import type { ImportantDateFormState } from "@/app/(dashboard)/important-dates/actions";
@@ -50,10 +50,10 @@ type ImportantDateFormProps = {
 const initialState: ImportantDateFormState = {};
 
 const categoryNotes: Partial<Record<ImportantDateCategory, string>> = {
-  CREDIT_CARD: "Kredi kartı hatırlatmaları için finansal hesap seçmeniz önerilir.",
-  INVOICE: "Fatura hatırlatmaları için ilgili faturayı seçmeniz önerilir.",
-  EXPENSE: "Gider hatırlatmaları için ilgili gideri seçmeniz önerilir.",
-  COMPANY: "Firma ödeme sözü gibi hatırlatmalarda cari seçmeniz önerilir.",
+  CREDIT_CARD: "Kredi kartÄ± hatÄ±rlatmalarÄ± iÃ§in finansal hesap seÃ§meniz Ã¶nerilir.",
+  INVOICE: "Fatura hatÄ±rlatmalarÄ± iÃ§in ilgili faturayÄ± seÃ§meniz Ã¶nerilir.",
+  EXPENSE: "Gider hatÄ±rlatmalarÄ± iÃ§in ilgili gideri seÃ§meniz Ã¶nerilir.",
+  COMPANY: "Firma Ã¶deme sÃ¶zÃ¼ gibi hatÄ±rlatmalarda cari seÃ§meniz Ã¶nerilir.",
 };
 
 function fieldClass(hasError?: boolean) {
@@ -102,10 +102,10 @@ export function ImportantDateForm({
       ) : null}
 
       <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
-        <h2 className="text-base font-semibold text-[#16201b]">Hatırlatma bilgileri</h2>
+        <h2 className="text-base font-semibold text-[#16201b]">HatÄ±rlatma bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-semibold text-[#46534b]">
-            Başlık
+            BaÅŸlÄ±k
             <input
               name="title"
               defaultValue={initialValues?.title ?? ""}
@@ -174,7 +174,7 @@ export function ImportantDateForm({
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            Kaç gün önce hatırlatılsın
+            KaÃ§ gÃ¼n Ã¶nce hatÄ±rlatÄ±lsÄ±n
             <input
               name="reminderDaysBefore"
               type="number"
@@ -187,7 +187,7 @@ export function ImportantDateForm({
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            Öncelik
+            Ã–ncelik
             <select
               name="priority"
               defaultValue={initialValues?.priority ?? "NORMAL"}
@@ -224,7 +224,7 @@ export function ImportantDateForm({
         ) : null}
 
         <label className="mt-5 block text-sm font-semibold text-[#46534b]">
-          Açıklama
+          AÃ§Ä±klama
           <textarea
             name="description"
             defaultValue={initialValues?.description ?? ""}
@@ -234,7 +234,7 @@ export function ImportantDateForm({
       </div>
 
       <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
-        <h2 className="text-base font-semibold text-[#16201b]">İlişkili kayıtlar</h2>
+        <h2 className="text-base font-semibold text-[#16201b]">Ä°liÅŸkili kayÄ±tlar</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-semibold text-[#46534b]">
             Cari firma
@@ -243,7 +243,7 @@ export function ImportantDateForm({
               defaultValue={initialValues?.companyId ?? ""}
               className={fieldClass(Boolean(state.errors?.companyId))}
             >
-              <option value="">Cari seçilmedi</option>
+              <option value="">Cari seÃ§ilmedi</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>
                   {company.label}
@@ -260,7 +260,7 @@ export function ImportantDateForm({
               defaultValue={initialValues?.invoiceId ?? ""}
               className={fieldClass(Boolean(state.errors?.invoiceId))}
             >
-              <option value="">Fatura seçilmedi</option>
+              <option value="">Fatura seÃ§ilmedi</option>
               {invoices.map((invoice) => (
                 <option key={invoice.id} value={invoice.id}>
                   {invoice.label}
@@ -277,7 +277,7 @@ export function ImportantDateForm({
               defaultValue={initialValues?.expenseId ?? ""}
               className={fieldClass(Boolean(state.errors?.expenseId))}
             >
-              <option value="">Gider seçilmedi</option>
+              <option value="">Gider seÃ§ilmedi</option>
               {expenses.map((expense) => (
                 <option key={expense.id} value={expense.id}>
                   {expense.label}
@@ -294,7 +294,7 @@ export function ImportantDateForm({
               defaultValue={initialValues?.financialAccountId ?? ""}
               className={fieldClass(Boolean(state.errors?.financialAccountId))}
             >
-              <option value="">Hesap seçilmedi</option>
+              <option value="">Hesap seÃ§ilmedi</option>
               {financialAccounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.label}

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { InvoiceType, Prisma, ProductUnit, StockMovementType } from "@prisma/client";
+import { InvoiceType, Prisma, ProductUnit, StockMovementType } from "#prisma/client";
 import {
   InvoiceStockValidationError,
   reconcileInvoiceStockMovements,

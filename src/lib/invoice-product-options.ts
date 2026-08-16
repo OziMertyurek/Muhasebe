@@ -1,4 +1,4 @@
-import type { ProductUnit } from "@prisma/client";
+import type { ProductUnit } from "#prisma/client";
 import { calculateCurrentStock } from "@/lib/inventory-core";
 import { prisma } from "@/lib/prisma";
 

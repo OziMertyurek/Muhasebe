@@ -25,7 +25,6 @@ const forbiddenArtifactEntries = [
   "python",
   "python-worker",
   "scripts",
-  "src",
   "storage",
   "tests",
   path.join("prisma", "dev.db"),
@@ -212,6 +211,29 @@ function copyPrismaMigrations() {
   copyDirectory(sourceMigrationsPath, targetMigrationsPath);
 }
 
+function copyGeneratedPrismaClient() {
+  const sourceGeneratedClientPath = path.join(projectRoot, "src", "generated", "prisma");
+  const targetGeneratedClientPath = path.join(artifactDir, "src", "generated", "prisma");
+
+  assertExists(sourceGeneratedClientPath, "Generated Prisma client is missing. Run prisma generate first.");
+  copyDirectory(sourceGeneratedClientPath, targetGeneratedClientPath);
+}
+
+function pruneSourceExceptGeneratedPrismaClient() {
+  const artifactSourcePath = path.join(artifactDir, "src");
+  const generatedPrismaPath = path.join(artifactSourcePath, "generated", "prisma");
+  const preservedClientPath = path.join(artifactDir, ".prisma-generated-client-tmp");
+
+  if (!fs.existsSync(generatedPrismaPath)) {
+    return;
+  }
+
+  copyDirectory(generatedPrismaPath, preservedClientPath);
+  fs.rmSync(artifactSourcePath, { recursive: true, force: true });
+  copyDirectory(preservedClientPath, generatedPrismaPath);
+  fs.rmSync(preservedClientPath, { recursive: true, force: true });
+}
+
 function copyPackageMetadata() {
   for (const fileName of ["package.json", "package-lock.json"]) {
     const sourcePath = path.join(projectRoot, fileName);
@@ -237,7 +259,6 @@ function failIfForbiddenFilesRemain() {
     /^deployment([\\/]|$)/,
     /^electron([\\/]|$)/,
     /^scripts([\\/]|$)/,
-    /^src([\\/]|$)/,
     /^tests([\\/]|$)/,
     /^python([\\/]|$)/,
     /^python-worker([\\/]|$)/,
@@ -255,6 +276,16 @@ function failIfForbiddenFilesRemain() {
     for (const entry of entries) {
       const fullPath = path.join(current, entry.name);
       const relativePath = path.relative(artifactDir, fullPath);
+      const normalizedRelativePath = relativePath.split(path.sep).join("/");
+
+      if (
+        normalizedRelativePath.startsWith("src/")
+        && normalizedRelativePath !== "src/generated"
+        && normalizedRelativePath !== "src/generated/prisma"
+        && !normalizedRelativePath.startsWith("src/generated/prisma/")
+      ) {
+        throw new Error(`Forbidden deployment artifact entry found: ${relativePath}`);
+      }
 
       if (forbiddenPatterns.some((pattern) => pattern.test(relativePath))) {
         throw new Error(`Forbidden deployment artifact entry found: ${relativePath}`);
@@ -306,7 +337,9 @@ copyPackageMetadata();
 copyPrismaConfig();
 copyPrismaSchema();
 copyPrismaMigrations();
+copyGeneratedPrismaClient();
 removeForbiddenEntries();
+pruneSourceExceptGeneratedPrismaClient();
 writeArtifactMetadata();
 failIfForbiddenFilesRemain();
 

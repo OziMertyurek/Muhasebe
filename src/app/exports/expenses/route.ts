@@ -1,4 +1,4 @@
-import { ExpenseStatus } from "@prisma/client";
+import { ExpenseStatus } from "#prisma/client";
 import {
   createCsv,
   createCsvResponse,
@@ -66,15 +66,15 @@ export async function GET(request: Request) {
   const csv = createCsv(
     [
       "Gider tarihi",
-      "Başlık",
+      "BaÅŸlÄ±k",
       "Kategori",
       "Cari firma",
       "Finansal hesap",
       "Tutar",
       "Para birimi",
       "Durum",
-      "Ödeme tarihi",
-      "Açıklama",
+      "Ã–deme tarihi",
+      "AÃ§Ä±klama",
     ],
     expenses.map((expense) => [
       formatCsvDate(expense.expenseDate),

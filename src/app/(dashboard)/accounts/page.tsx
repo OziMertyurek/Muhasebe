@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FinancialAccountType } from "@prisma/client";
+import { FinancialAccountType } from "#prisma/client";
 import { Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteAccountAction } from "@/app/(dashboard)/accounts/actions";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -65,7 +65,7 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
             Finansal hesaplar
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Nakit kasa, banka, kredi kartı, POS ve döviz hesaplarını yönetin.
+            Nakit kasa, banka, kredi kartÄ±, POS ve dÃ¶viz hesaplarÄ±nÄ± yÃ¶netin.
           </p>
         </div>
         <Link
@@ -84,7 +84,7 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
             <input
               name="q"
               defaultValue={query}
-              placeholder="Hesap adı veya banka adına göre ara"
+              placeholder="Hesap adÄ± veya banka adÄ±na gÃ¶re ara"
               className="h-10 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54]"
             />
           </label>
@@ -93,7 +93,7 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
             defaultValue={type ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           >
-            <option value="">Tüm hesap tipleri</option>
+            <option value="">TÃ¼m hesap tipleri</option>
             {accountTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -105,7 +105,7 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
             defaultValue={params?.active ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           >
-            <option value="">Tüm durumlar</option>
+            <option value="">TÃ¼m durumlar</option>
             <option value="active">Aktif</option>
             <option value="passive">Pasif</option>
           </select>
@@ -118,8 +118,8 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {accounts.length === 0 ? (
           <EmptyState
-            title="Henüz hesap eklenmedi"
-            description="İlk kasa, banka veya kredi kartı hesabınızı Yeni Hesap butonuyla ekleyebilirsiniz."
+            title="HenÃ¼z hesap eklenmedi"
+            description="Ä°lk kasa, banka veya kredi kartÄ± hesabÄ±nÄ±zÄ± Yeni Hesap butonuyla ekleyebilirsiniz."
             actionHref="/accounts/new"
             actionLabel="Yeni Hesap"
           />
@@ -128,14 +128,14 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
                 <tr>
-                  <th className="px-4 py-3">Hesap adı</th>
+                  <th className="px-4 py-3">Hesap adÄ±</th>
                   <th className="px-4 py-3">Hesap tipi</th>
                   <th className="px-4 py-3">Banka</th>
                   <th className="px-4 py-3">Para birimi</th>
-                  <th className="px-4 py-3">Açılış bakiyesi</th>
+                  <th className="px-4 py-3">AÃ§Ä±lÄ±ÅŸ bakiyesi</th>
                   <th className="px-4 py-3">Mevcut bakiye</th>
                   <th className="px-4 py-3">Aktif mi?</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -170,14 +170,14 @@ export default async function AccountsPage({ searchParams }: AccountsPageProps) 
                         <Link
                           href={`/accounts/${account.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteAccountAction.bind(null, account.id)}>
                           <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] text-[#8b2f28] transition hover:border-[#c79a92]"
-                            message="Bu finansal hesabı silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı hareketler geçmişte görünmeye devam edebilir."
+                            message="Bu finansal hesabÄ± silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak. BaÄŸlÄ± hareketler geÃ§miÅŸte gÃ¶rÃ¼nmeye devam edebilir."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />

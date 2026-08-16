@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExpenseStatus } from "@prisma/client";
+import { ExpenseStatus } from "#prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deleteExpenseAction } from "@/app/(dashboard)/expenses/actions";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -114,10 +114,10 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         <div>
           <p className="text-sm font-medium text-[#607167]">Giderler</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
-            Gider kayıtları
+            Gider kayÄ±tlarÄ±
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Tek seferlik veya gerçekleşmiş giderleri kategori, cari ve hesapla takip edin.
+            Tek seferlik veya gerÃ§ekleÅŸmiÅŸ giderleri kategori, cari ve hesapla takip edin.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -126,14 +126,14 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
-            CSV Dışa Aktar
+            CSV DÄ±ÅŸa Aktar
           </a>
           <a
             href={pdfHref}
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
-            PDF İndir
+            PDF Ä°ndir
           </a>
           <Link
             href="/expenses/new"
@@ -162,7 +162,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
             <input
               name="q"
               defaultValue={query}
-              placeholder="Başlık, açıklama veya firma ara"
+              placeholder="BaÅŸlÄ±k, aÃ§Ä±klama veya firma ara"
               className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
@@ -171,7 +171,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
             defaultValue={categoryId ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm kategoriler</option>
+            <option value="">TÃ¼m kategoriler</option>
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}
@@ -183,7 +183,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
             defaultValue={status ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm durumlar</option>
+            <option value="">TÃ¼m durumlar</option>
             {expenseStatusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -211,8 +211,8 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {expenses.length === 0 ? (
           <EmptyState
-            title="Henüz gider eklenmedi"
-            description="İlk gider kaydınızı Yeni Gider butonuyla ekleyebilirsiniz."
+            title="HenÃ¼z gider eklenmedi"
+            description="Ä°lk gider kaydÄ±nÄ±zÄ± Yeni Gider butonuyla ekleyebilirsiniz."
             actionHref="/expenses/new"
             actionLabel="Yeni Gider"
           />
@@ -222,14 +222,14 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
               <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
-                  <th className="px-4 py-3">Gider başlığı</th>
+                  <th className="px-4 py-3">Gider baÅŸlÄ±ÄŸÄ±</th>
                   <th className="px-4 py-3">Kategori</th>
                   <th className="px-4 py-3">Cari firma</th>
                   <th className="px-4 py-3">Tutar</th>
                   <th className="px-4 py-3">Para birimi</th>
                   <th className="px-4 py-3">Durum</th>
                   <th className="px-4 py-3">Finansal hesap</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -265,14 +265,14 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                         <Link
                           href={`/expenses/${expense.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deleteExpenseAction.bind(null, expense.id)}>
                           <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
-                            message="Bu gider kaydını silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve daha sonra geri yüklenebilecek."
+                            message="Bu gider kaydÄ±nÄ± silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak ve daha sonra geri yÃ¼klenebilecek."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />

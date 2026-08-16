@@ -3,7 +3,7 @@ import type {
   Invoice,
   Prisma,
   RecurringExpense,
-} from "@prisma/client";
+} from "#prisma/client";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -29,7 +29,7 @@ type RecurringReminderExpense = Pick<
 
 export async function syncCreditCardReminders(account: CreditCardReminderAccount) {
   if (account.type !== "CREDIT_CARD") {
-    await cancelCreditCardReminders(account.id, "Finansal hesap kredi kartı olmadığı için hatırlatma iptal edildi.");
+    await cancelCreditCardReminders(account.id, "Finansal hesap kredi kartÄ± olmadÄ±ÄŸÄ± iÃ§in hatÄ±rlatma iptal edildi.");
     return;
   }
 
@@ -45,7 +45,7 @@ export async function syncCreditCardReminders(account: CreditCardReminderAccount
       },
       data: {
         title: `${account.name} hesap kesim tarihi`,
-        description: `${creditCardStatementMarker}\nBu kredi kartı için aylık hesap kesim tarihi hatırlatması.`,
+        description: `${creditCardStatementMarker}\nBu kredi kartÄ± iÃ§in aylÄ±k hesap kesim tarihi hatÄ±rlatmasÄ±.`,
         category: "CREDIT_CARD",
         repeatType: "MONTHLY",
         reminderDaysBefore: 3,
@@ -54,7 +54,7 @@ export async function syncCreditCardReminders(account: CreditCardReminderAccount
         date: getNextMonthlyDate(account.statementDay),
         financialAccountId: account.id,
       },
-      auditTitle: `Kredi kartı hatırlatması güncellendi: ${account.name} hesap kesim tarihi`,
+      auditTitle: `Kredi kartÄ± hatÄ±rlatmasÄ± gÃ¼ncellendi: ${account.name} hesap kesim tarihi`,
     });
   } else {
     await cancelCreditCardReminder(account.id, creditCardStatementMarker);
@@ -67,12 +67,12 @@ export async function syncCreditCardReminders(account: CreditCardReminderAccount
         category: "CREDIT_CARD",
         OR: [
           { description: { contains: creditCardDueMarker } },
-          { title: `${account.name} son ödeme tarihi` },
+          { title: `${account.name} son Ã¶deme tarihi` },
         ],
       },
       data: {
-        title: `${account.name} son ödeme tarihi`,
-        description: `${creditCardDueMarker}\nBu kredi kartı için aylık son ödeme tarihi hatırlatması.`,
+        title: `${account.name} son Ã¶deme tarihi`,
+        description: `${creditCardDueMarker}\nBu kredi kartÄ± iÃ§in aylÄ±k son Ã¶deme tarihi hatÄ±rlatmasÄ±.`,
         category: "CREDIT_CARD",
         repeatType: "MONTHLY",
         reminderDaysBefore: 3,
@@ -81,7 +81,7 @@ export async function syncCreditCardReminders(account: CreditCardReminderAccount
         date: getNextMonthlyDate(account.dueDay),
         financialAccountId: account.id,
       },
-      auditTitle: `Kredi kartı hatırlatması güncellendi: ${account.name} son ödeme tarihi`,
+      auditTitle: `Kredi kartÄ± hatÄ±rlatmasÄ± gÃ¼ncellendi: ${account.name} son Ã¶deme tarihi`,
     });
   } else {
     await cancelCreditCardReminder(account.id, creditCardDueMarker);
@@ -99,7 +99,7 @@ export async function cancelCreditCardReminders(financialAccountId: string, reas
         { description: { contains: creditCardStatementMarker } },
         { description: { contains: creditCardDueMarker } },
         { title: { contains: "hesap kesim tarihi" } },
-        { title: { contains: "son ödeme tarihi" } },
+        { title: { contains: "son Ã¶deme tarihi" } },
       ],
     },
     select: { id: true, title: true, status: true },
@@ -117,7 +117,7 @@ export async function cancelCreditCardReminders(financialAccountId: string, reas
   await createAuditLog({
     entityType: "IMPORTANT_DATE",
     action: "STATUS_CHANGE",
-    title: "Kredi kartı hatırlatmaları iptal edildi",
+    title: "Kredi kartÄ± hatÄ±rlatmalarÄ± iptal edildi",
     description: reason,
     metadata: { financialAccountId, reminderIds: reminders.map((reminder) => reminder.id) },
   });
@@ -147,8 +147,8 @@ export async function syncInvoiceDueReminder(invoice: InvoiceReminderInvoice) {
         entityType: "IMPORTANT_DATE",
         entityId: existing.id,
         action: "STATUS_CHANGE",
-        title: `Fatura vade hatırlatması iptal edildi: ${invoice.invoiceNumber}`,
-        description: "Fatura vadesi kaldırıldı, iptal edildi veya fatura silindi.",
+        title: `Fatura vade hatÄ±rlatmasÄ± iptal edildi: ${invoice.invoiceNumber}`,
+        description: "Fatura vadesi kaldÄ±rÄ±ldÄ±, iptal edildi veya fatura silindi.",
       });
     }
     return;
@@ -157,8 +157,8 @@ export async function syncInvoiceDueReminder(invoice: InvoiceReminderInvoice) {
   const status = invoice.status === "PAID" ? "DONE" : "PENDING";
   const description =
     invoice.type === "SALES"
-      ? `${invoiceDueMarker}\nBu satış faturasının vadesi yaklaşıyor.`
-      : `${invoiceDueMarker}\nBu alış faturasının ödeme vadesi yaklaşıyor.`;
+      ? `${invoiceDueMarker}\nBu satÄ±ÅŸ faturasÄ±nÄ±n vadesi yaklaÅŸÄ±yor.`
+      : `${invoiceDueMarker}\nBu alÄ±ÅŸ faturasÄ±nÄ±n Ã¶deme vadesi yaklaÅŸÄ±yor.`;
 
   await upsertImportantDate({
     existing,
@@ -175,7 +175,7 @@ export async function syncInvoiceDueReminder(invoice: InvoiceReminderInvoice) {
       invoiceId: invoice.id,
       companyId: invoice.companyId,
     },
-    auditTitle: `Fatura vade hatırlatması güncellendi: ${invoice.invoiceNumber}`,
+    auditTitle: `Fatura vade hatÄ±rlatmasÄ± gÃ¼ncellendi: ${invoice.invoiceNumber}`,
   });
 }
 
@@ -203,8 +203,8 @@ export async function syncRecurringExpenseReminder(recurringExpense: RecurringRe
         entityType: "IMPORTANT_DATE",
         entityId: existing.id,
         action: "STATUS_CHANGE",
-        title: `Sabit gider hatırlatması iptal edildi: ${recurringExpense.title}`,
-        description: "Sabit gider pasif yapıldı veya silindi.",
+        title: `Sabit gider hatÄ±rlatmasÄ± iptal edildi: ${recurringExpense.title}`,
+        description: "Sabit gider pasif yapÄ±ldÄ± veya silindi.",
       });
     }
     return;
@@ -215,7 +215,7 @@ export async function syncRecurringExpenseReminder(recurringExpense: RecurringRe
     where: { category: "EXPENSE", description: { contains: marker }, deletedAt: null },
     data: {
       title: `Sabit gider: ${recurringExpense.title}`,
-      description: `${marker}\nBu sabit gider için aylık ödeme hatırlatması.`,
+      description: `${marker}\nBu sabit gider iÃ§in aylÄ±k Ã¶deme hatÄ±rlatmasÄ±.`,
       category: "EXPENSE",
       repeatType: "MONTHLY",
       reminderDaysBefore: 3,
@@ -223,7 +223,7 @@ export async function syncRecurringExpenseReminder(recurringExpense: RecurringRe
       status: "PENDING",
       date: getNextMonthlyDate(recurringExpense.dayOfMonth),
     },
-    auditTitle: `Sabit gider hatırlatması güncellendi: ${recurringExpense.title}`,
+    auditTitle: `Sabit gider hatÄ±rlatmasÄ± gÃ¼ncellendi: ${recurringExpense.title}`,
   });
 }
 
@@ -306,8 +306,8 @@ async function upsertImportantDate({
     title: auditTitle,
     description:
       action === "CREATE"
-        ? "Otomatik hatırlatma oluşturuldu."
-        : "Otomatik hatırlatma güncellendi.",
+        ? "Otomatik hatÄ±rlatma oluÅŸturuldu."
+        : "Otomatik hatÄ±rlatma gÃ¼ncellendi.",
     after: data,
   });
 }

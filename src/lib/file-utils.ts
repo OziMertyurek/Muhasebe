@@ -1,4 +1,4 @@
-import type { FileRelatedType } from "@prisma/client";
+import type { FileRelatedType } from "#prisma/client";
 
 export const maxUploadSize = 10 * 1024 * 1024;
 
@@ -6,8 +6,8 @@ export const fileRelatedTypeLabels: Record<FileRelatedType, string> = {
   INVOICE: "Fatura",
   EXPENSE: "Gider",
   COMPANY: "Cari / Firma",
-  PAYMENT: "Tahsilat / Ödeme",
-  OTHER: "Diğer",
+  PAYMENT: "Tahsilat / Ã–deme",
+  OTHER: "DiÄŸer",
 };
 
 export const fileRelatedTypeOptions = Object.entries(fileRelatedTypeLabels).map(
@@ -119,7 +119,7 @@ export function getFileKind(mimeType: string | null | undefined) {
   }
 
   if (mimeType.startsWith("image/")) {
-    return "Görsel";
+    return "GÃ¶rsel";
   }
 
   if (mimeType.includes("word")) {
@@ -152,7 +152,7 @@ export function getRelatedRecordLabel(file: {
   }
 
   if (file.payment) {
-    return file.payment.description || "Tahsilat / Ödeme";
+    return file.payment.description || "Tahsilat / Ã–deme";
   }
 
   return "-";

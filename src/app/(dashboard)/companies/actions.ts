@@ -1,6 +1,6 @@
 "use server";
 
-import { CompanyType, Prisma } from "@prisma/client";
+import { CompanyType, Prisma } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
@@ -66,15 +66,15 @@ function parseCompanyForm(formData: FormData): {
   const paymentTermDaysValue = readText(formData, "paymentTermDays");
 
   if (!name) {
-    errors.name = "Firma adı boş olamaz.";
+    errors.name = "Firma adÄ± boÅŸ olamaz.";
   }
 
   if (!type || !Object.values(CompanyType).includes(type as CompanyType)) {
-    errors.type = "Cari tipi seçilmeli.";
+    errors.type = "Cari tipi seÃ§ilmeli.";
   }
 
   if (email && !emailPattern.test(email)) {
-    errors.email = "Geçerli bir e-posta adresi girin.";
+    errors.email = "GeÃ§erli bir e-posta adresi girin.";
   }
 
   let riskLimit: Prisma.Decimal | null = null;
@@ -83,7 +83,7 @@ function parseCompanyForm(formData: FormData): {
     const parsedRiskLimit = Number(riskLimitValue);
 
     if (Number.isNaN(parsedRiskLimit)) {
-      errors.riskLimit = "Risk limiti sayı olmalı.";
+      errors.riskLimit = "Risk limiti sayÄ± olmalÄ±.";
     } else if (parsedRiskLimit < 0) {
       errors.riskLimit = "Risk limiti negatif olamaz.";
     } else {
@@ -97,9 +97,9 @@ function parseCompanyForm(formData: FormData): {
     const parsedPaymentTermDays = Number(paymentTermDaysValue);
 
     if (!Number.isInteger(parsedPaymentTermDays)) {
-      errors.paymentTermDays = "Vade günü tam sayı olmalı.";
+      errors.paymentTermDays = "Vade gÃ¼nÃ¼ tam sayÄ± olmalÄ±.";
     } else if (parsedPaymentTermDays < 0) {
-      errors.paymentTermDays = "Vade günü negatif olamaz.";
+      errors.paymentTermDays = "Vade gÃ¼nÃ¼ negatif olamaz.";
     } else {
       paymentTermDays = parsedPaymentTermDays;
     }
@@ -136,7 +136,7 @@ export async function createCompanyAction(
   const parsed = parseCompanyForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   let companyId: string;
@@ -151,12 +151,12 @@ export async function createCompanyAction(
       entityType: "COMPANY",
       entityId: companyId,
       action: "CREATE",
-      title: `Cari oluşturuldu: ${parsed.data.name}`,
-      description: `${parsed.data.defaultCurrency} para birimli cari kaydı oluşturuldu.`,
+      title: `Cari oluÅŸturuldu: ${parsed.data.name}`,
+      description: `${parsed.data.defaultCurrency} para birimli cari kaydÄ± oluÅŸturuldu.`,
       after: parsed.data,
     });
   } catch {
-    return { message: "Cari kaydı oluşturulurken bir hata oluştu." };
+    return { message: "Cari kaydÄ± oluÅŸturulurken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/companies");
@@ -171,7 +171,7 @@ export async function updateCompanyAction(
   const parsed = parseCompanyForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   try {
@@ -188,13 +188,13 @@ export async function updateCompanyAction(
       entityType: "COMPANY",
       entityId: companyId,
       action: "UPDATE",
-      title: `Cari güncellendi: ${parsed.data.name}`,
-      description: "Cari bilgilerinde değişiklik yapıldı.",
+      title: `Cari gÃ¼ncellendi: ${parsed.data.name}`,
+      description: "Cari bilgilerinde deÄŸiÅŸiklik yapÄ±ldÄ±.",
       before,
       after: parsed.data,
     });
   } catch {
-    return { message: "Cari kaydı güncellenirken bir hata oluştu." };
+    return { message: "Cari kaydÄ± gÃ¼ncellenirken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/companies");
@@ -225,7 +225,7 @@ export async function deleteCompanyAction(companyId: string) {
       entityId: company.id,
       action: "SOFT_DELETE",
       title: `Cari silindi: ${company.name}`,
-      description: "Kayıt çöp kutusuna taşındı.",
+      description: "KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±ndÄ±.",
       before: company,
     });
   } catch {

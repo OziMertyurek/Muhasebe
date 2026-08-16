@@ -4,7 +4,7 @@ import {
   ProductUnit,
   StockMovementType,
   type PrismaClient,
-} from "@prisma/client";
+} from "#prisma/client";
 import { calculateCurrentStock } from "./inventory-core.ts";
 
 type PrismaClientLike = PrismaClient | Prisma.TransactionClient;

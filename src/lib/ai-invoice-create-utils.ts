@@ -1,4 +1,4 @@
-import { InvoiceType, Prisma, type CompanyType } from "@prisma/client";
+import { InvoiceType, Prisma, type CompanyType } from "#prisma/client";
 import type { CompanyMatchResult } from "@/lib/company-matcher";
 import type { ParsedInvoiceData } from "@/lib/invoice-parser";
 
@@ -129,7 +129,7 @@ export function mergeAiInvoiceCreatedInvoiceId(
   const parsed = JSON.parse(extractedJson) as unknown;
 
   if (!isRecord(parsed)) {
-    throw new Error("AI analiz JSON formatı okunamadı.");
+    throw new Error("AI analiz JSON formatÄ± okunamadÄ±.");
   }
 
   return JSON.stringify(

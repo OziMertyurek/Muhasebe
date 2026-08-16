@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProductUnit } from "@prisma/client";
+import type { ProductUnit } from "#prisma/client";
 import { useActionState } from "react";
 import { Save } from "lucide-react";
 import type { ProductFormState } from "@/app/(dashboard)/products/actions";

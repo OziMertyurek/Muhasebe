@@ -3,6 +3,9 @@
   "version": "2.3.0",
   "private": true,
   "main": "electron/main.js",
+  "imports": {
+    "#prisma/client": "./src/generated/prisma/client.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

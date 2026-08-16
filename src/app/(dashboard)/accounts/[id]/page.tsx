@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { deleteAccountAction } from "@/app/(dashboard)/accounts/actions";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
@@ -77,7 +77,7 @@ export default async function AccountDetailPage({
             className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#1f6f54] hover:text-[#195d47]"
           >
             <ArrowLeft className="h-4 w-4" />
-            Hesaplara dön
+            Hesaplara dÃ¶n
           </Link>
           <p className="mt-4 text-sm font-medium text-[#607167]">Hesap detay</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
@@ -90,12 +90,12 @@ export default async function AccountDetailPage({
             className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Pencil className="h-4 w-4" />
-            Düzenle
+            DÃ¼zenle
           </Link>
           <form action={deleteAccountAction.bind(null, account.id)}>
             <ConfirmSubmitButton
               className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92]"
-              message="Bu finansal hesabı silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı hareketler geçmişte görünmeye devam edebilir."
+              message="Bu finansal hesabÄ± silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak. BaÄŸlÄ± hareketler geÃ§miÅŸte gÃ¶rÃ¼nmeye devam edebilir."
             >
               <Trash2 className="h-4 w-4" />
               Sil
@@ -106,7 +106,7 @@ export default async function AccountDetailPage({
 
       {query?.error === "delete" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
-          Hesap silinirken bir hata oluştu.
+          Hesap silinirken bir hata oluÅŸtu.
         </div>
       ) : null}
 
@@ -114,12 +114,12 @@ export default async function AccountDetailPage({
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
           <h2 className="text-lg font-semibold text-[#16201b]">Hesap ana bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <InfoItem label="Hesap adı" value={account.name} />
+            <InfoItem label="Hesap adÄ±" value={account.name} />
             <InfoItem label="Hesap tipi" value={accountTypeLabels[account.type]} />
             <InfoItem label="Aktif mi?" value={account.isActive ? "Aktif" : "Pasif"} />
             <InfoItem label="Para birimi" value={account.currency} />
             <InfoItem
-              label="Açılış bakiyesi"
+              label="AÃ§Ä±lÄ±ÅŸ bakiyesi"
               value={formatMoney(account.openingBalance, account.currency)}
             />
             <InfoItem
@@ -139,7 +139,7 @@ export default async function AccountDetailPage({
 
         {account.type === "CREDIT_CARD" ? (
           <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-            <h2 className="text-lg font-semibold text-[#16201b]">Kredi kartı bilgileri</h2>
+            <h2 className="text-lg font-semibold text-[#16201b]">Kredi kartÄ± bilgileri</h2>
             <div className="mt-5 grid gap-4 sm:grid-cols-3">
               <InfoItem
                 label="Kredi limiti"
@@ -148,30 +148,30 @@ export default async function AccountDetailPage({
                 }
               />
               <InfoItem
-                label="Hesap kesim günü"
-                value={account.statementDay ? `${account.statementDay}. gün` : "-"}
+                label="Hesap kesim gÃ¼nÃ¼"
+                value={account.statementDay ? `${account.statementDay}. gÃ¼n` : "-"}
               />
               <InfoItem
-                label="Son ödeme günü"
-                value={account.dueDay ? `${account.dueDay}. gün` : "-"}
+                label="Son Ã¶deme gÃ¼nÃ¼"
+                value={account.dueDay ? `${account.dueDay}. gÃ¼n` : "-"}
               />
             </div>
           </div>
         ) : null}
 
         <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-          <h2 className="text-lg font-semibold text-[#16201b]">Hareket özeti</h2>
+          <h2 className="text-lg font-semibold text-[#16201b]">Hareket Ã¶zeti</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-3">
             <InfoItem
-              label="Giriş toplamı"
+              label="GiriÅŸ toplamÄ±"
               value={formatMoney(collectionTotal, account.currency)}
             />
-            <InfoItem label="Çıkış toplamı" value={formatMoney(paymentTotal, account.currency)} />
+            <InfoItem label="Ã‡Ä±kÄ±ÅŸ toplamÄ±" value={formatMoney(paymentTotal, account.currency)} />
             <InfoItem
               label="Tahmini bakiye"
               value={formatMoney(estimatedBalance, account.currency)}
             />
-            <InfoItem label="Gider toplamı" value={formatMoney(expenseTotal, account.currency)} />
+            <InfoItem label="Gider toplamÄ±" value={formatMoney(expenseTotal, account.currency)} />
           </div>
         </div>
 
@@ -184,10 +184,10 @@ export default async function AccountDetailPage({
       </section>
 
       <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">Bu hesaba bağlı hareketler</h2>
+        <h2 className="text-lg font-semibold text-[#16201b]">Bu hesaba baÄŸlÄ± hareketler</h2>
         {account.payments.length === 0 ? (
           <p className="mt-5 rounded-md border border-dashed border-[#cfd8cf] p-4 text-sm text-[#647067]">
-            Bu hesaba bağlı tahsilat veya ödeme hareketi yok.
+            Bu hesaba baÄŸlÄ± tahsilat veya Ã¶deme hareketi yok.
           </p>
         ) : (
           <div className="mt-5 overflow-x-auto">
@@ -195,11 +195,11 @@ export default async function AccountDetailPage({
               <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
-                  <th className="px-4 py-3">İşlem tipi</th>
+                  <th className="px-4 py-3">Ä°ÅŸlem tipi</th>
                   <th className="px-4 py-3">Cari</th>
                   <th className="px-4 py-3">Fatura</th>
                   <th className="px-4 py-3">Tutar</th>
-                  <th className="px-4 py-3">Açıklama</th>
+                  <th className="px-4 py-3">AÃ§Ä±klama</th>
                 </tr>
               </thead>
               <tbody>
@@ -240,10 +240,10 @@ export default async function AccountDetailPage({
       </section>
 
       <section className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
-        <h2 className="text-lg font-semibold text-[#16201b]">Bu hesaba bağlı giderler</h2>
+        <h2 className="text-lg font-semibold text-[#16201b]">Bu hesaba baÄŸlÄ± giderler</h2>
         {account.expenses.length === 0 ? (
           <p className="mt-5 rounded-md border border-dashed border-[#cfd8cf] p-4 text-sm text-[#647067]">
-            Bu hesaba bağlı gider kaydı yok.
+            Bu hesaba baÄŸlÄ± gider kaydÄ± yok.
           </p>
         ) : (
           <div className="mt-5 overflow-x-auto">

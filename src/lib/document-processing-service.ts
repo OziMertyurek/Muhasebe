@@ -1,4 +1,4 @@
-import { AiExtractionStatus, type PrismaClient, type Prisma } from "@prisma/client";
+import { AiExtractionStatus, type PrismaClient, type Prisma } from "#prisma/client";
 import {
   getInvoiceStructuredExtractionProvider,
   getTextExtractionProvider,
@@ -44,15 +44,15 @@ export async function runTextExtractionJob(db: PrismaLike, jobId: string) {
   });
 
   if (!job) {
-    return { ok: false as const, code: "not-found", message: "AI analiz kaydı bulunamadı." };
+    return { ok: false as const, code: "not-found", message: "AI analiz kaydÄ± bulunamadÄ±." };
   }
 
   if (!canRetryAiExtractionJob(job)) {
-    return { ok: false as const, code: "posted", message: "Kaydedilmiş AI taslağı tekrar işlenemez." };
+    return { ok: false as const, code: "posted", message: "KaydedilmiÅŸ AI taslaÄŸÄ± tekrar iÅŸlenemez." };
   }
 
   if (job.status === "PROCESSING" && !isAiExtractionProcessingStale(job)) {
-    return { ok: false as const, code: "processing", message: "Belge işleme halen devam ediyor." };
+    return { ok: false as const, code: "processing", message: "Belge iÅŸleme halen devam ediyor." };
   }
 
   await db.aiExtractionJob.update({
@@ -121,15 +121,15 @@ export async function runInvoiceStructuredExtractionJob(db: PrismaLike, jobId: s
   });
 
   if (!job) {
-    return { ok: false as const, code: "not-found", message: "AI analiz kaydı bulunamadı." };
+    return { ok: false as const, code: "not-found", message: "AI analiz kaydÄ± bulunamadÄ±." };
   }
 
   if (!canRetryAiExtractionJob(job)) {
-    return { ok: false as const, code: "posted", message: "Kaydedilmiş AI taslağı tekrar işlenemez." };
+    return { ok: false as const, code: "posted", message: "KaydedilmiÅŸ AI taslaÄŸÄ± tekrar iÅŸlenemez." };
   }
 
   if (!job.rawExtractedText?.trim()) {
-    return { ok: false as const, code: "parse-empty", message: "Çıkarılmış metin bulunamadı." };
+    return { ok: false as const, code: "parse-empty", message: "Ã‡Ä±karÄ±lmÄ±ÅŸ metin bulunamadÄ±." };
   }
 
   const provider = getInvoiceStructuredExtractionProvider();

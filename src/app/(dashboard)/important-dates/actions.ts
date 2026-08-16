@@ -5,7 +5,7 @@ import {
   Priority,
   ReminderStatus,
   RepeatType,
-} from "@prisma/client";
+} from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/audit-log-utils";
@@ -109,19 +109,19 @@ async function validateRelations(
   ]);
 
   if (data.companyId && !company) {
-    errors.companyId = "Geçerli bir cari firma seçin.";
+    errors.companyId = "GeÃ§erli bir cari firma seÃ§in.";
   }
 
   if (data.invoiceId && !invoice) {
-    errors.invoiceId = "Geçerli bir fatura seçin.";
+    errors.invoiceId = "GeÃ§erli bir fatura seÃ§in.";
   }
 
   if (data.expenseId && !expense) {
-    errors.expenseId = "Geçerli bir gider seçin.";
+    errors.expenseId = "GeÃ§erli bir gider seÃ§in.";
   }
 
   if (data.financialAccountId && !financialAccount) {
-    errors.financialAccountId = "Geçerli bir finansal hesap seçin.";
+    errors.financialAccountId = "GeÃ§erli bir finansal hesap seÃ§in.";
   }
 }
 
@@ -145,21 +145,21 @@ async function parseImportantDateForm(formData: FormData): Promise<{
   const financialAccountId = optionalText(readText(formData, "financialAccountId"));
 
   if (!title) {
-    errors.title = "Başlık boş olamaz.";
+    errors.title = "BaÅŸlÄ±k boÅŸ olamaz.";
   }
 
   if (!category) {
-    errors.category = "Kategori seçilmeli.";
+    errors.category = "Kategori seÃ§ilmeli.";
   }
 
   const date = parseDate(dateValue);
 
   if (!date) {
-    errors.date = "Tarih boş olamaz.";
+    errors.date = "Tarih boÅŸ olamaz.";
   }
 
   if (time && !/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) {
-    errors.time = "Saat HH:mm formatında olmalı.";
+    errors.time = "Saat HH:mm formatÄ±nda olmalÄ±.";
   }
 
   let reminderDaysBefore: number | null = null;
@@ -168,9 +168,9 @@ async function parseImportantDateForm(formData: FormData): Promise<{
     const parsedReminderDays = Number(reminderDaysValue);
 
     if (!Number.isInteger(parsedReminderDays)) {
-      errors.reminderDaysBefore = "Hatırlatma günü tam sayı olmalı.";
+      errors.reminderDaysBefore = "HatÄ±rlatma gÃ¼nÃ¼ tam sayÄ± olmalÄ±.";
     } else if (parsedReminderDays < 0) {
-      errors.reminderDaysBefore = "Hatırlatma günü negatif olamaz.";
+      errors.reminderDaysBefore = "HatÄ±rlatma gÃ¼nÃ¼ negatif olamaz.";
     } else {
       reminderDaysBefore = parsedReminderDays;
     }
@@ -207,7 +207,7 @@ export async function createImportantDateAction(
   const parsed = await parseImportantDateForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   let importantDateId: string;
@@ -222,12 +222,12 @@ export async function createImportantDateAction(
       entityType: "IMPORTANT_DATE",
       entityId: importantDateId,
       action: "CREATE",
-      title: `Önemli tarih oluşturuldu: ${parsed.data.title}`,
-      description: "Hatırlatma kaydı oluşturuldu.",
+      title: `Ã–nemli tarih oluÅŸturuldu: ${parsed.data.title}`,
+      description: "HatÄ±rlatma kaydÄ± oluÅŸturuldu.",
       after: parsed.data,
     });
   } catch {
-    return { message: "Önemli tarih kaydı oluşturulurken bir hata oluştu." };
+    return { message: "Ã–nemli tarih kaydÄ± oluÅŸturulurken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/important-dates");
@@ -242,7 +242,7 @@ export async function updateImportantDateAction(
   const parsed = await parseImportantDateForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "LÃ¼tfen formdaki hatalarÄ± dÃ¼zeltin." };
   }
 
   try {
@@ -259,13 +259,13 @@ export async function updateImportantDateAction(
       entityType: "IMPORTANT_DATE",
       entityId: importantDateId,
       action: "UPDATE",
-      title: `Önemli tarih güncellendi: ${parsed.data.title}`,
-      description: "Hatırlatma bilgilerinde değişiklik yapıldı.",
+      title: `Ã–nemli tarih gÃ¼ncellendi: ${parsed.data.title}`,
+      description: "HatÄ±rlatma bilgilerinde deÄŸiÅŸiklik yapÄ±ldÄ±.",
       before,
       after: parsed.data,
     });
   } catch {
-    return { message: "Önemli tarih kaydı güncellenirken bir hata oluştu." };
+    return { message: "Ã–nemli tarih kaydÄ± gÃ¼ncellenirken bir hata oluÅŸtu." };
   }
 
   revalidatePath("/important-dates");
@@ -284,8 +284,8 @@ export async function deleteImportantDateAction(importantDateId: string) {
       entityType: "IMPORTANT_DATE",
       entityId: importantDate.id,
       action: "SOFT_DELETE",
-      title: `Önemli tarih silindi: ${importantDate.title}`,
-      description: "Kayıt çöp kutusuna taşındı.",
+      title: `Ã–nemli tarih silindi: ${importantDate.title}`,
+      description: "KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±ndÄ±.",
       before: importantDate,
     });
   } catch {
@@ -307,8 +307,8 @@ export async function markImportantDateDoneAction(importantDateId: string) {
       entityType: "IMPORTANT_DATE",
       entityId: importantDate.id,
       action: "STATUS_CHANGE",
-      title: `Önemli tarih tamamlandı: ${importantDate.title}`,
-      description: "Hatırlatma durumu Tamamlandı olarak değiştirildi.",
+      title: `Ã–nemli tarih tamamlandÄ±: ${importantDate.title}`,
+      description: "HatÄ±rlatma durumu TamamlandÄ± olarak deÄŸiÅŸtirildi.",
       after: importantDate,
     });
   } catch {
@@ -330,8 +330,8 @@ export async function markImportantDatePendingAction(importantDateId: string) {
       entityType: "IMPORTANT_DATE",
       entityId: importantDate.id,
       action: "STATUS_CHANGE",
-      title: `Önemli tarih bekliyor yapıldı: ${importantDate.title}`,
-      description: "Hatırlatma durumu Bekliyor olarak değiştirildi.",
+      title: `Ã–nemli tarih bekliyor yapÄ±ldÄ±: ${importantDate.title}`,
+      description: "HatÄ±rlatma durumu Bekliyor olarak deÄŸiÅŸtirildi.",
       after: importantDate,
     });
   } catch {

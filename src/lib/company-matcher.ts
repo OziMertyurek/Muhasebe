@@ -1,4 +1,4 @@
-import type { Company, CompanyType } from "@prisma/client";
+import type { Company, CompanyType } from "#prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type CompanyMatchType = "TAX_NUMBER" | "NAME" | "NONE";
@@ -54,11 +54,11 @@ export async function matchCompany(
   const warnings: string[] = [];
 
   if (!taxNumber) {
-    warnings.push("Vergi no bulunamadı");
+    warnings.push("Vergi no bulunamadÄ±");
   }
 
   if (!companyName) {
-    warnings.push("Firma adı bulunamadı");
+    warnings.push("Firma adÄ± bulunamadÄ±");
   }
 
   if (taxNumber) {
@@ -84,7 +84,7 @@ export async function matchCompany(
       };
     }
 
-    warnings.push("Vergi no ile eşleşen cari bulunamadı");
+    warnings.push("Vergi no ile eÅŸleÅŸen cari bulunamadÄ±");
   }
 
   if (companyName) {
@@ -111,7 +111,7 @@ export async function matchCompany(
       };
     }
 
-    warnings.push("Firma adına benzer cari bulunamadı");
+    warnings.push("Firma adÄ±na benzer cari bulunamadÄ±");
   }
 
   return {
@@ -206,19 +206,19 @@ function calculateNameScore(inputName: string, companyName: string) {
 function normalizeCompanyName(value: string) {
   return value
     .toLocaleLowerCase("tr-TR")
-    .replace(/ş/g, "s")
-    .replace(/ı/g, "i")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
-    .replace(/ş/g, "s")
-    .replace(/ı/g, "i")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
-    .replace(/\b(ltd|sti|şti|limited|anonim|aş|as|ticaret|sanayi|ve)\b/g, " ")
+    .replace(/ÅŸ/g, "s")
+    .replace(/Ä±/g, "i")
+    .replace(/ÄŸ/g, "g")
+    .replace(/Ã¼/g, "u")
+    .replace(/Ã¶/g, "o")
+    .replace(/Ã§/g, "c")
+    .replace(/ÅŸ/g, "s")
+    .replace(/Ä±/g, "i")
+    .replace(/ÄŸ/g, "g")
+    .replace(/Ã¼/g, "u")
+    .replace(/Ã¶/g, "o")
+    .replace(/Ã§/g, "c")
+    .replace(/\b(ltd|sti|ÅŸti|limited|anonim|aÅŸ|as|ticaret|sanayi|ve)\b/g, " ")
     .replace(/\b(sirketi|sirket|a\s*s)\b/g, " ")
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")

@@ -1,9 +1,9 @@
-import type { CompanyType } from "@prisma/client";
+import type { CompanyType } from "#prisma/client";
 
 export const companyTypeLabels: Record<CompanyType, string> = {
-  CUSTOMER: "Müşteri",
-  SUPPLIER: "Tedarikçi",
-  BOTH: "Müşteri & Tedarikçi",
+  CUSTOMER: "MÃ¼ÅŸteri",
+  SUPPLIER: "TedarikÃ§i",
+  BOTH: "MÃ¼ÅŸteri & TedarikÃ§i",
 };
 
 export const companyTypeOptions: Array<{ value: CompanyType; label: string }> = [

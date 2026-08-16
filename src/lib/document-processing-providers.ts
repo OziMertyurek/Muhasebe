@@ -1,4 +1,4 @@
-import type { FileAttachment } from "@prisma/client";
+import type { FileAttachment } from "#prisma/client";
 import {
   normalizeExtractedInvoiceDraft,
   parseCanonicalDraftJson,
@@ -39,7 +39,7 @@ export type InvoiceStructuredExtractionProvider = {
 };
 
 const processorUnavailableMessage =
-  "Belge işleme servisi şu anda kullanılamıyor. Belge kaydedildi; daha sonra tekrar deneyebilir veya faturayı manuel oluşturabilirsiniz.";
+  "Belge iÅŸleme servisi ÅŸu anda kullanÄ±lamÄ±yor. Belge kaydedildi; daha sonra tekrar deneyebilir veya faturayÄ± manuel oluÅŸturabilirsiniz.";
 
 export function getDocumentProcessorMode(env: NodeJS.ProcessEnv = process.env): DocumentProcessorMode {
   const configured = env.DOCUMENT_PROCESSOR_MODE?.trim().toUpperCase();
@@ -100,7 +100,7 @@ export async function withProviderTimeout<T>(
           resolve({
             ok: false,
             code: "TIMEOUT",
-            message: "Belge işleme zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.",
+            message: "Belge iÅŸleme zaman aÅŸÄ±mÄ±na uÄŸradÄ±. LÃ¼tfen daha sonra tekrar deneyin.",
           });
         }, timeoutMs);
       }),
@@ -138,7 +138,7 @@ const localInvoiceStructuredExtractionProvider: InvoiceStructuredExtractionProvi
       return {
         ok: false,
         code: "MALFORMED_RESULT",
-        message: "Fatura alanları çıkarılamadı. Taslağı manuel kontrol edin.",
+        message: "Fatura alanlarÄ± Ã§Ä±karÄ±lamadÄ±. TaslaÄŸÄ± manuel kontrol edin.",
       };
     }
   },
@@ -168,7 +168,7 @@ const externalInvoiceStructuredExtractionProvider: InvoiceStructuredExtractionPr
       return {
         ok: false,
         code: "MALFORMED_RESULT",
-        message: "Harici sağlayıcı geçerli fatura taslağı döndürmedi.",
+        message: "Harici saÄŸlayÄ±cÄ± geÃ§erli fatura taslaÄŸÄ± dÃ¶ndÃ¼rmedi.",
       };
     }
   },
@@ -206,7 +206,7 @@ function notConfigured<T>(): ProviderResult<T> {
   return {
     ok: false,
     code: "NOT_CONFIGURED",
-    message: "Belge işleme sağlayıcısı yapılandırılmadı. Taslak manuel kontrol gerektiriyor.",
+    message: "Belge iÅŸleme saÄŸlayÄ±cÄ±sÄ± yapÄ±landÄ±rÄ±lmadÄ±. Taslak manuel kontrol gerektiriyor.",
   };
 }
 

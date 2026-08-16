@@ -1,6 +1,6 @@
 "use client";
 
-import type { CompanyType } from "@prisma/client";
+import type { CompanyType } from "#prisma/client";
 import { useActionState } from "react";
 import { Save } from "lucide-react";
 import type { CompanyFormState } from "@/app/(dashboard)/companies/actions";
@@ -67,7 +67,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
         <h2 className="text-base font-semibold text-[#16201b]">Cari bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-semibold text-[#46534b]">
-            Firma adı
+            Firma adÄ±
             <input
               name="name"
               defaultValue={initialValues?.name ?? ""}
@@ -85,7 +85,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
               className={fieldClass(Boolean(state.errors?.type))}
               required
             >
-              <option value="">Seçin</option>
+              <option value="">SeÃ§in</option>
               {companyTypeOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
@@ -134,7 +134,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            Ülke
+            Ãœlke
             <input
               name="country"
               defaultValue={initialValues?.country ?? ""}
@@ -143,7 +143,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            Şehir
+            Åehir
             <input
               name="city"
               defaultValue={initialValues?.city ?? ""}
@@ -152,7 +152,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            Varsayılan para birimi
+            VarsayÄ±lan para birimi
             <input
               name="defaultCurrency"
               defaultValue={initialValues?.defaultCurrency ?? "TRY"}
@@ -175,7 +175,7 @@ export function CompanyForm({ action, submitLabel, initialValues }: CompanyFormP
           </label>
 
           <label className="block text-sm font-semibold text-[#46534b]">
-            Vade günü
+            Vade gÃ¼nÃ¼
             <input
               name="paymentTermDays"
               type="number"

@@ -1,4 +1,4 @@
-import { InvoiceType, Prisma, type ProductUnit } from "@prisma/client";
+import { InvoiceType, Prisma, type ProductUnit } from "#prisma/client";
 import {
   type CanonicalExtractedInvoiceDraft,
   type CanonicalExtractedInvoiceLine,

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AiExtractionStatus, FileRelatedType } from "@prisma/client";
+import { AiExtractionStatus, FileRelatedType } from "#prisma/client";
 import { CheckCircle2, Eye, FileSearch, FileUp, Pencil, Plus, ScanText, Search } from "lucide-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HelpHint } from "@/components/ui/help-hint";
@@ -41,9 +41,9 @@ function getRelatedType(value?: string) {
 }
 
 const aiFlowSteps = [
-  { title: "Dosya yükle", description: "PDF veya görsel faturayı arşive ekleyin.", icon: FileUp },
-  { title: "Metin çıkar", description: "MarkItDown ile okunabilir metin oluşturun.", icon: ScanText },
-  { title: "Kontrol et", description: "Alanları, cari eşleşmesini ve tutarı onaylayın.", icon: CheckCircle2 },
+  { title: "Dosya yÃ¼kle", description: "PDF veya gÃ¶rsel faturayÄ± arÅŸive ekleyin.", icon: FileUp },
+  { title: "Metin Ã§Ä±kar", description: "MarkItDown ile okunabilir metin oluÅŸturun.", icon: ScanText },
+  { title: "Kontrol et", description: "AlanlarÄ±, cari eÅŸleÅŸmesini ve tutarÄ± onaylayÄ±n.", icon: CheckCircle2 },
 ];
 
 function getAiStatusTone(status: AiExtractionStatus) {
@@ -96,11 +96,11 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
         <div>
           <p className="text-sm font-medium text-[#607167]">AI Fatura Okuma</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
-            AI analiz kayıtları
+            AI analiz kayÄ±tlarÄ±
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve cari
-            eşleşmesini güvenle onaylayın.
+PDF ve gÃ¶rsel faturalarÄ±n metnini Ã§Ä±karÄ±n, parser sonucunu kontrol edin ve cari
+            eÅŸleÅŸmesini gÃ¼venle onaylayÄ±n.
           </p>
           {processorMode !== "LOCAL" ? (
             <p className="mt-2 max-w-2xl rounded-md border border-[#ead7a4] bg-[#fffaf0] px-3 py-2 text-sm leading-6 text-[#6f5220]">
@@ -113,7 +113,7 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
           className="inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]"
         >
           <Plus className="h-4 w-4" />
-          Yeni Analiz Kaydı
+          Yeni Analiz KaydÄ±
         </Link>
       </section>
 
@@ -153,7 +153,7 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
             <input
               name="q"
               defaultValue={query}
-              placeholder="Dosya adına göre ara"
+              placeholder="Dosya adÄ±na gÃ¶re ara"
               className="h-10 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54]"
             />
           </label>
@@ -162,7 +162,7 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
             defaultValue={status ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           >
-            <option value="">Tüm durumlar</option>
+            <option value="">TÃ¼m durumlar</option>
             {aiExtractionStatusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -174,7 +174,7 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
             defaultValue={relatedType ?? ""}
             className="h-10 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54]"
           >
-            <option value="">Tüm ilişki tipleri</option>
+            <option value="">TÃ¼m iliÅŸki tipleri</option>
             {aiExtractionRelatedTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -190,10 +190,10 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm">
         {jobs.length === 0 ? (
           <EmptyState
-            title="Henüz AI analiz kaydı yok"
-            description="Dosya arşivindeki ilk faturayı seçerek metin çıkarma ve alan kontrolü akışını başlatabilirsiniz."
+            title="HenÃ¼z AI analiz kaydÄ± yok"
+            description="Dosya arÅŸivindeki ilk faturayÄ± seÃ§erek metin Ã§Ä±karma ve alan kontrolÃ¼ akÄ±ÅŸÄ±nÄ± baÅŸlatabilirsiniz."
             actionHref="/ai-extraction/new"
-            actionLabel="Yeni Analiz Kaydı"
+            actionLabel="Yeni Analiz KaydÄ±"
             icon={FileSearch}
           />
         ) : (
@@ -201,13 +201,13 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
             <table className="min-w-[980px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f1f4f1] text-xs font-semibold uppercase text-[#607167]">
                 <tr>
-                  <th className="px-4 py-3">Oluşturulma</th>
-                  <th className="px-4 py-3">Dosya adı</th>
-                  <th className="px-4 py-3">İlişki tipi</th>
+                  <th className="px-4 py-3">OluÅŸturulma</th>
+                  <th className="px-4 py-3">Dosya adÄ±</th>
+                  <th className="px-4 py-3">Ä°liÅŸki tipi</th>
                   <th className="px-4 py-3">Durum</th>
-                  <th className="px-4 py-3">Güven skoru</th>
-                  <th className="px-4 py-3">Hata var mı?</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3">GÃ¼ven skoru</th>
+                  <th className="px-4 py-3">Hata var mÄ±?</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -243,7 +243,7 @@ PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve 
                         <Link
                           href={`/ai-extraction/${job.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] text-[#223028] transition hover:border-[#aebdae]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PaymentMethod, PaymentType } from "@prisma/client";
+import { PaymentMethod, PaymentType } from "#prisma/client";
 import { Download, Eye, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { deletePaymentAction } from "@/app/(dashboard)/payments/actions";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -109,12 +109,12 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     <div className="space-y-6">
       <section className="flex flex-col gap-3 border-b border-[#dce2dc] pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-[#607167]">Tahsilat / Ödeme</p>
+          <p className="text-sm font-medium text-[#607167]">Tahsilat / Ã–deme</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
             Para hareketleri
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Faturaya bağlı ya da genel cari para hareketlerini takip edin.
+            Faturaya baÄŸlÄ± ya da genel cari para hareketlerini takip edin.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -123,7 +123,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             className="inline-flex h-10 w-fit items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae]"
           >
             <Download className="h-4 w-4" />
-            CSV Dışa Aktar
+            CSV DÄ±ÅŸa Aktar
           </a>
           <Link
             href="/payments/new"
@@ -152,7 +152,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             <input
               name="q"
               defaultValue={query}
-              placeholder="Firma, fatura no veya açıklama ara"
+              placeholder="Firma, fatura no veya aÃ§Ä±klama ara"
               className="h-11 w-full rounded-md border border-[#cfd8cf] bg-white pl-10 pr-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
             />
           </label>
@@ -161,7 +161,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             defaultValue={type ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm işlem tipleri</option>
+            <option value="">TÃ¼m iÅŸlem tipleri</option>
             {paymentTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -173,7 +173,7 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             defaultValue={method ?? ""}
             className="h-11 rounded-md border border-[#cfd8cf] bg-white px-3 text-sm outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d7e5dc]"
           >
-            <option value="">Tüm yöntemler</option>
+            <option value="">TÃ¼m yÃ¶ntemler</option>
             {paymentMethodOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -201,8 +201,8 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
       <div className="overflow-hidden rounded-lg border border-[#dce2dc] bg-white shadow-sm ring-1 ring-black/0">
         {payments.length === 0 ? (
           <EmptyState
-            title="Henüz ödeme/tahsilat hareketi yok"
-            description="İlk para hareketinizi Yeni Hareket butonuyla ekleyebilirsiniz."
+            title="HenÃ¼z Ã¶deme/tahsilat hareketi yok"
+            description="Ä°lk para hareketinizi Yeni Hareket butonuyla ekleyebilirsiniz."
             actionHref="/payments/new"
             actionLabel="Yeni Hareket"
           />
@@ -212,15 +212,15 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
               <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
-                  <th className="px-4 py-3">İşlem tipi</th>
+                  <th className="px-4 py-3">Ä°ÅŸlem tipi</th>
                   <th className="px-4 py-3">Cari firma</th>
-                  <th className="px-4 py-3">İlgili fatura</th>
+                  <th className="px-4 py-3">Ä°lgili fatura</th>
                   <th className="px-4 py-3">Tutar</th>
                   <th className="px-4 py-3">Para birimi</th>
-                  <th className="px-4 py-3">Ödeme yöntemi</th>
+                  <th className="px-4 py-3">Ã–deme yÃ¶ntemi</th>
                   <th className="px-4 py-3">Hesap</th>
-                  <th className="px-4 py-3">Açıklama</th>
-                  <th className="px-4 py-3 text-right">İşlemler</th>
+                  <th className="px-4 py-3">AÃ§Ä±klama</th>
+                  <th className="px-4 py-3 text-right">Ä°ÅŸlemler</th>
                 </tr>
               </thead>
               <tbody>
@@ -261,14 +261,14 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
                         <Link
                           href={`/payments/${payment.id}/edit`}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#cfd8cf] bg-white text-[#223028] transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
-                          title="Düzenle"
+                          title="DÃ¼zenle"
                         >
                           <Pencil className="h-4 w-4" />
                         </Link>
                         <form action={deletePaymentAction.bind(null, payment.id)}>
                           <ConfirmSubmitButton
                             className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-[#e0c4bf] bg-white text-[#8b2f28] transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
-                            message="Bu tahsilat / ödeme hareketini silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak ve bağlı fatura durumu etkilenebilir."
+                            message="Bu tahsilat / Ã¶deme hareketini silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak ve baÄŸlÄ± fatura durumu etkilenebilir."
                             title="Sil"
                           >
                             <Trash2 className="h-4 w-4" />

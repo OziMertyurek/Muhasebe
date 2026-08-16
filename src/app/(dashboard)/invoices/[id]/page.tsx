@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import { ArrowLeft, Building2, Pencil, Trash2 } from "lucide-react";
 import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { RelatedFilesCard } from "@/components/files/related-files-card";
@@ -77,7 +77,7 @@ export default async function InvoiceDetailPage({
             className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#1f6f54] hover:text-[#195d47]"
           >
             <ArrowLeft className="h-4 w-4" />
-            Faturalara dön
+            Faturalara dÃ¶n
           </Link>
           <p className="mt-4 text-sm font-medium text-[#607167]">Fatura detay</p>
           <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
@@ -90,12 +90,12 @@ export default async function InvoiceDetailPage({
             className="inline-flex h-10 items-center gap-2 rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#223028] shadow-sm transition hover:border-[#aebdae] hover:bg-[#f7f9f6] focus:outline-none focus:ring-2 focus:ring-[#d7e5dc]"
           >
             <Pencil className="h-4 w-4" />
-            Düzenle
+            DÃ¼zenle
           </Link>
           <form action={deleteInvoiceAction.bind(null, invoice.id)}>
             <ConfirmSubmitButton
               className="inline-flex h-10 items-center gap-2 rounded-md border border-[#e0c4bf] bg-white px-4 text-sm font-semibold text-[#8b2f28] shadow-sm transition hover:border-[#c79a92] hover:bg-[#fff7f5] focus:outline-none focus:ring-2 focus:ring-[#efd3cf]"
-              message="Bu faturayı silmek istediğine emin misin? Kayıt çöp kutusuna taşınacak. Bağlı ödeme durumu etkilenebilir."
+              message="Bu faturayÄ± silmek istediÄŸine emin misin? KayÄ±t Ã§Ã¶p kutusuna taÅŸÄ±nacak. BaÄŸlÄ± Ã¶deme durumu etkilenebilir."
             >
               <Trash2 className="h-4 w-4" />
               Sil
@@ -116,7 +116,7 @@ export default async function InvoiceDetailPage({
 
       {query?.error === "delete" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
-          Fatura silinirken bir hata oluştu.
+          Fatura silinirken bir hata oluÅŸtu.
         </div>
       ) : null}
 
@@ -137,7 +137,7 @@ export default async function InvoiceDetailPage({
               label="Vade tarihi"
               value={invoice.dueDate ? formatDate(invoice.dueDate) : "-"}
             />
-            <InfoItem label="Ödeme durumu" value={invoiceStatusLabels[invoice.status]} />
+            <InfoItem label="Ã–deme durumu" value={invoiceStatusLabels[invoice.status]} />
             <InfoItem label="Para birimi" value={invoice.currency} />
           </div>
         </div>
@@ -155,7 +155,7 @@ export default async function InvoiceDetailPage({
               <span className="block text-sm font-semibold text-[#223028]">
                 {invoice.company.name}
               </span>
-              <span className="mt-1 block text-sm text-[#647067]">Cari detayına git</span>
+              <span className="mt-1 block text-sm text-[#647067]">Cari detayÄ±na git</span>
             </span>
           </Link>
         </div>
@@ -164,9 +164,9 @@ export default async function InvoiceDetailPage({
           <h2 className="text-base font-semibold text-[#16201b]">Tutar bilgileri</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="Ara toplam" value={formatMoney(invoice.subtotal, invoice.currency)} />
-            <InfoItem label="KDV tutarı" value={formatMoney(invoice.vatAmount, invoice.currency)} />
+            <InfoItem label="KDV tutarÄ±" value={formatMoney(invoice.vatAmount, invoice.currency)} />
             <InfoItem
-              label="İskonto tutarı"
+              label="Ä°skonto tutarÄ±"
               value={formatMoney(invoice.discountAmount, invoice.currency)}
             />
             <InfoItem
@@ -174,7 +174,7 @@ export default async function InvoiceDetailPage({
               value={formatMoney(invoice.totalAmount, invoice.currency)}
             />
             <InfoItem
-              label="Ödenen / tahsil edilen"
+              label="Ã–denen / tahsil edilen"
               value={formatMoney(paidTotal, invoice.currency)}
             />
             <InfoItem label="Kalan tutar" value={formatMoney(remainingDisplay, invoice.currency)} />
@@ -193,20 +193,20 @@ export default async function InvoiceDetailPage({
         <h2 className="text-base font-semibold text-[#16201b]">Fatura kalemleri</h2>
         {invoice.items.length === 0 ? (
           <p className="mt-5 rounded-md border border-dashed border-[#cfd8cf] p-4 text-sm text-[#647067]">
-            Bu faturada kalem kaydı bulunmuyor.
+            Bu faturada kalem kaydÄ± bulunmuyor.
           </p>
         ) : (
           <div className="mt-5 overflow-x-auto">
             <table className="min-w-[1040px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
-                  <th className="px-4 py-3">Açıklama</th>
+                  <th className="px-4 py-3">AÃ§Ä±klama</th>
                   <th className="px-4 py-3">Urun</th>
                   <th className="px-4 py-3">Miktar</th>
                   <th className="px-4 py-3">Birim fiyat</th>
-                  <th className="px-4 py-3">İndirim</th>
+                  <th className="px-4 py-3">Ä°ndirim</th>
                   <th className="px-4 py-3">KDV %</th>
-                  <th className="px-4 py-3">Satır toplamı</th>
+                  <th className="px-4 py-3">SatÄ±r toplamÄ±</th>
                 </tr>
               </thead>
               <tbody>
@@ -250,10 +250,10 @@ export default async function InvoiceDetailPage({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-base font-semibold text-[#16201b]">
-              Tahsilat / ödeme hareketleri
+              Tahsilat / Ã¶deme hareketleri
             </h2>
             <p className="mt-1 text-sm text-[#647067]">
-              Bu faturaya bağlanan aktif para hareketleri.
+              Bu faturaya baÄŸlanan aktif para hareketleri.
             </p>
           </div>
           <Link
@@ -266,7 +266,7 @@ export default async function InvoiceDetailPage({
 
         {invoice.payments.length === 0 ? (
           <p className="mt-5 rounded-md border border-dashed border-[#cfd8cf] p-4 text-sm text-[#647067]">
-            Bu faturaya bağlı tahsilat veya ödeme hareketi yok.
+            Bu faturaya baÄŸlÄ± tahsilat veya Ã¶deme hareketi yok.
           </p>
         ) : (
           <div className="mt-5 overflow-x-auto">
@@ -274,10 +274,10 @@ export default async function InvoiceDetailPage({
               <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Tarih</th>
-                  <th className="px-4 py-3">İşlem tipi</th>
+                  <th className="px-4 py-3">Ä°ÅŸlem tipi</th>
                   <th className="px-4 py-3">Tutar</th>
-                  <th className="px-4 py-3">Yöntem</th>
-                  <th className="px-4 py-3">Açıklama</th>
+                  <th className="px-4 py-3">YÃ¶ntem</th>
+                  <th className="px-4 py-3">AÃ§Ä±klama</th>
                 </tr>
               </thead>
               <tbody>

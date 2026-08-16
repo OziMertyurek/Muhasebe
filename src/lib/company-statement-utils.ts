@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import { expenseStatusLabels } from "@/lib/expense-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -38,7 +38,7 @@ function getInvoiceLabel(type: "SALES" | "PURCHASE") {
 }
 
 function getPaymentLabel(type: "COLLECTION" | "PAYMENT") {
-  return type === "COLLECTION" ? "Para aldım" : "Para ödedim";
+  return type === "COLLECTION" ? "Para aldÄ±m" : "Para Ã¶dedim";
 }
 
 function addMoney(map: MoneyMap, currency: string, amount: Prisma.Decimal) {
@@ -216,7 +216,7 @@ export async function getCompanyStatement(companyId: string, filters: StatementF
       type: "invoices",
       label: getInvoiceLabel(invoice.type),
       reference: invoice.invoiceNumber,
-      description: invoice.notes || "Fatura kaydı",
+      description: invoice.notes || "Fatura kaydÄ±",
       debit,
       credit,
       currency: invoice.currency,
@@ -245,7 +245,7 @@ export async function getCompanyStatement(companyId: string, filters: StatementF
       type: "payments",
       label: getPaymentLabel(payment.type),
       reference: payment.invoice?.invoiceNumber ?? "-",
-      description: payment.description || "Tahsilat / ödeme hareketi",
+      description: payment.description || "Tahsilat / Ã¶deme hareketi",
       debit,
       credit,
       currency: payment.currency,
@@ -272,7 +272,7 @@ export async function getCompanyStatement(companyId: string, filters: StatementF
       reference: expense.title,
       description:
         expense.description ||
-        `${expense.category?.name ?? "Kategori yok"} · ${expenseStatusLabels[expense.status]}`,
+        `${expense.category?.name ?? "Kategori yok"} Â· ${expenseStatusLabels[expense.status]}`,
       debit: expense.amount,
       credit: zero(),
       currency: expense.currency,

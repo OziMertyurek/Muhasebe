@@ -1,4 +1,4 @@
-import { FinancialAccountType, Prisma } from "@prisma/client";
+import { FinancialAccountType, Prisma } from "#prisma/client";
 import { getExpectedPaymentType } from "@/lib/accounting-core";
 import { getAuditEntityHref } from "@/lib/audit-log-utils";
 import { addDays, getLocalDateRange } from "@/lib/important-date-utils";
@@ -83,21 +83,21 @@ function getTimelineTitle(log: {
 
   if (log.entityType === "INVOICE") {
     if (log.action === "CREATE") return "Yeni Fatura";
-    if (log.action === "UPDATE") return "Fatura Güncellendi";
-    if (log.action === "SOFT_DELETE") return "Fatura Arşivlendi";
-    if (log.action === "RESTORE") return "Fatura Geri Yüklendi";
-    if (log.action === "STATUS_CHANGE") return "Fatura Durumu Değişti";
+    if (log.action === "UPDATE") return "Fatura GÃ¼ncellendi";
+    if (log.action === "SOFT_DELETE") return "Fatura ArÅŸivlendi";
+    if (log.action === "RESTORE") return "Fatura Geri YÃ¼klendi";
+    if (log.action === "STATUS_CHANGE") return "Fatura Durumu DeÄŸiÅŸti";
   }
 
   if (log.entityType === "PAYMENT") {
     if (log.action === "CREATE") {
-      if (paymentType === "COLLECTION") return "Tahsilat Alındı";
-      if (paymentType === "PAYMENT") return "Ödeme Yapıldı";
+      if (paymentType === "COLLECTION") return "Tahsilat AlÄ±ndÄ±";
+      if (paymentType === "PAYMENT") return "Ã–deme YapÄ±ldÄ±";
       return "Para Hareketi Eklendi";
     }
-    if (log.action === "UPDATE") return "Para Hareketi Güncellendi";
-    if (log.action === "SOFT_DELETE") return "Para Hareketi Arşivlendi";
-    if (log.action === "RESTORE") return "Para Hareketi Geri Yüklendi";
+    if (log.action === "UPDATE") return "Para Hareketi GÃ¼ncellendi";
+    if (log.action === "SOFT_DELETE") return "Para Hareketi ArÅŸivlendi";
+    if (log.action === "RESTORE") return "Para Hareketi Geri YÃ¼klendi";
   }
 
   if (log.entityType === "PRODUCT") {
@@ -114,70 +114,70 @@ function getTimelineTitle(log: {
 
   if (log.entityType === "EXPENSE") {
     if (log.action === "CREATE") return "Gider Kaydedildi";
-    if (log.action === "UPDATE") return "Gider Güncellendi";
-    if (log.action === "SOFT_DELETE") return "Gider Arşivlendi";
-    if (log.action === "RESTORE") return "Gider Geri Yüklendi";
+    if (log.action === "UPDATE") return "Gider GÃ¼ncellendi";
+    if (log.action === "SOFT_DELETE") return "Gider ArÅŸivlendi";
+    if (log.action === "RESTORE") return "Gider Geri YÃ¼klendi";
   }
 
   if (log.entityType === "COMPANY") {
     if (log.action === "CREATE") return "Yeni Firma";
-    if (log.action === "UPDATE") return "Firma Güncellendi";
-    if (log.action === "SOFT_DELETE") return "Firma Arşivlendi";
-    if (log.action === "RESTORE") return "Firma Geri Yüklendi";
+    if (log.action === "UPDATE") return "Firma GÃ¼ncellendi";
+    if (log.action === "SOFT_DELETE") return "Firma ArÅŸivlendi";
+    if (log.action === "RESTORE") return "Firma Geri YÃ¼klendi";
   }
 
   if (log.entityType === "IMPORTANT_DATE") {
-    if (log.action === "CREATE") return "Hatırlatma Oluşturuldu";
-    if (log.action === "UPDATE") return "Hatırlatma Güncellendi";
-    if (log.action === "SOFT_DELETE") return "Hatırlatma Arşivlendi";
-    if (log.action === "RESTORE") return "Hatırlatma Geri Yüklendi";
-    if (log.action === "STATUS_CHANGE") return "Hatırlatma Durumu Değişti";
+    if (log.action === "CREATE") return "HatÄ±rlatma OluÅŸturuldu";
+    if (log.action === "UPDATE") return "HatÄ±rlatma GÃ¼ncellendi";
+    if (log.action === "SOFT_DELETE") return "HatÄ±rlatma ArÅŸivlendi";
+    if (log.action === "RESTORE") return "HatÄ±rlatma Geri YÃ¼klendi";
+    if (log.action === "STATUS_CHANGE") return "HatÄ±rlatma Durumu DeÄŸiÅŸti";
   }
 
   if (log.entityType === "FILE_ATTACHMENT") {
-    if (log.action === "CREATE") return "Dosya Yüklendi";
-    if (log.action === "SOFT_DELETE") return "Dosya Arşivlendi";
-    if (log.action === "RESTORE") return "Dosya Geri Yüklendi";
-    if (log.action === "UPDATE") return "Dosya Güncellendi";
+    if (log.action === "CREATE") return "Dosya YÃ¼klendi";
+    if (log.action === "SOFT_DELETE") return "Dosya ArÅŸivlendi";
+    if (log.action === "RESTORE") return "Dosya Geri YÃ¼klendi";
+    if (log.action === "UPDATE") return "Dosya GÃ¼ncellendi";
   }
 
   if (log.entityType === "AI_EXTRACTION") {
-    if (log.action === "CREATE") return "AI Analizi Başlatıldı";
+    if (log.action === "CREATE") return "AI Analizi BaÅŸlatÄ±ldÄ±";
     if (status === "FAILED" || log.title.toLocaleLowerCase("tr-TR").includes("hata")) {
-      return "AI Analizi Başarısız";
+      return "AI Analizi BaÅŸarÄ±sÄ±z";
     }
-    if (status === "COMPLETED" || status === "REVIEWED") return "AI Analizi Tamamlandı";
-    if (log.action === "SOFT_DELETE") return "AI Analizi Arşivlendi";
-    if (log.action === "RESTORE") return "AI Analizi Geri Yüklendi";
-    if (log.action === "STATUS_CHANGE") return "AI Analizi Güncellendi";
-    if (log.action === "UPDATE") return "AI Analizi Güncellendi";
+    if (status === "COMPLETED" || status === "REVIEWED") return "AI Analizi TamamlandÄ±";
+    if (log.action === "SOFT_DELETE") return "AI Analizi ArÅŸivlendi";
+    if (log.action === "RESTORE") return "AI Analizi Geri YÃ¼klendi";
+    if (log.action === "STATUS_CHANGE") return "AI Analizi GÃ¼ncellendi";
+    if (log.action === "UPDATE") return "AI Analizi GÃ¼ncellendi";
   }
 
   if (log.entityType === "BACKUP") {
-    return "Backup Oluşturuldu";
+    return "Backup OluÅŸturuldu";
   }
 
   if (log.entityType === "RESTORE") {
     if (log.action === "BACKUP_VALIDATE") return "Backup Kontrol Edildi";
-    return "Backup Geri Yüklendi";
+    return "Backup Geri YÃ¼klendi";
   }
 
   if (log.entityType === "SETTINGS") {
-    return "Ayarlar Güncellendi";
+    return "Ayarlar GÃ¼ncellendi";
   }
 
   if (log.entityType === "FINANCIAL_ACCOUNT") {
-    if (log.action === "CREATE") return "Finansal Hesap Oluşturuldu";
-    if (log.action === "UPDATE") return "Finansal Hesap Güncellendi";
-    if (log.action === "SOFT_DELETE") return "Finansal Hesap Arşivlendi";
-    if (log.action === "RESTORE") return "Finansal Hesap Geri Yüklendi";
+    if (log.action === "CREATE") return "Finansal Hesap OluÅŸturuldu";
+    if (log.action === "UPDATE") return "Finansal Hesap GÃ¼ncellendi";
+    if (log.action === "SOFT_DELETE") return "Finansal Hesap ArÅŸivlendi";
+    if (log.action === "RESTORE") return "Finansal Hesap Geri YÃ¼klendi";
   }
 
   if (log.entityType === "RECURRING_EXPENSE") {
-    if (log.action === "CREATE") return "Sabit Gider Oluşturuldu";
-    if (log.action === "UPDATE") return "Sabit Gider Güncellendi";
-    if (log.action === "SOFT_DELETE") return "Sabit Gider Arşivlendi";
-    if (log.action === "RESTORE") return "Sabit Gider Geri Yüklendi";
+    if (log.action === "CREATE") return "Sabit Gider OluÅŸturuldu";
+    if (log.action === "UPDATE") return "Sabit Gider GÃ¼ncellendi";
+    if (log.action === "SOFT_DELETE") return "Sabit Gider ArÅŸivlendi";
+    if (log.action === "RESTORE") return "Sabit Gider Geri YÃ¼klendi";
   }
 
   return log.title;
@@ -185,21 +185,21 @@ function getTimelineTitle(log: {
 
 function getTimelineIcon(entityType: string) {
   const icons: Record<string, string> = {
-    INVOICE: "📄",
-    PAYMENT: "💰",
-    EXPENSE: "💸",
-    COMPANY: "🏢",
-    FINANCIAL_ACCOUNT: "💰",
-    RECURRING_EXPENSE: "💸",
-    IMPORTANT_DATE: "📅",
-    FILE_ATTACHMENT: "📎",
-    AI_EXTRACTION: "🤖",
-    BACKUP: "💾",
-    RESTORE: "♻️",
-    SETTINGS: "⚙️",
+    INVOICE: "ğŸ“„",
+    PAYMENT: "ğŸ’°",
+    EXPENSE: "ğŸ’¸",
+    COMPANY: "ğŸ¢",
+    FINANCIAL_ACCOUNT: "ğŸ’°",
+    RECURRING_EXPENSE: "ğŸ’¸",
+    IMPORTANT_DATE: "ğŸ“…",
+    FILE_ATTACHMENT: "ğŸ“",
+    AI_EXTRACTION: "ğŸ¤–",
+    BACKUP: "ğŸ’¾",
+    RESTORE: "â™»ï¸",
+    SETTINGS: "âš™ï¸",
   };
 
-  return icons[entityType] ?? "📄";
+  return icons[entityType] ?? "ğŸ“„";
 }
 
 export function formatDashboardMoney(value: { toNumber: () => number }, currency: string) {

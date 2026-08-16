@@ -1,6 +1,6 @@
 "use client";
 
-import type { FileRelatedType } from "@prisma/client";
+import type { FileRelatedType } from "#prisma/client";
 import { useActionState, useState } from "react";
 import { Upload } from "lucide-react";
 import type { FileUploadFormState } from "@/app/(dashboard)/files/actions";
@@ -62,8 +62,8 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
       <div className="rounded-lg border border-[#dce2dc] bg-white p-5 shadow-sm">
         <h2 className="text-lg font-semibold text-[#16201b]">Dosya bilgileri</h2>
         <p className="mt-2 text-sm leading-6 text-[#647067]">
-          Fatura ve AI analiz dosyaları için PDF, PNG, JPG, WebP veya HTML desteklenir.
-          HTML dosyaları tarayıcıda gösterilmez, sadece metin çıkarma için işlenir.
+          Fatura ve AI analiz dosyalarÄ± iÃ§in PDF, PNG, JPG, WebP veya HTML desteklenir.
+          HTML dosyalarÄ± tarayÄ±cÄ±da gÃ¶sterilmez, sadece metin Ã§Ä±karma iÃ§in iÅŸlenir.
         </p>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-medium text-[#46534b]">
@@ -79,7 +79,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
           </label>
 
           <label className="block text-sm font-medium text-[#46534b]">
-            İlişki tipi
+            Ä°liÅŸki tipi
             <select
               name="relatedType"
               value={relatedType}
@@ -101,7 +101,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
           {relatedType === "INVOICE" ? (
             <RelationSelect
               name="invoiceId"
-              label="İlgili fatura"
+              label="Ä°lgili fatura"
               options={options.invoices}
               defaultValue={initialValues?.invoiceId}
             />
@@ -109,7 +109,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
           {relatedType === "EXPENSE" ? (
             <RelationSelect
               name="expenseId"
-              label="İlgili gider"
+              label="Ä°lgili gider"
               options={options.expenses}
               defaultValue={initialValues?.expenseId}
             />
@@ -117,7 +117,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
           {relatedType === "COMPANY" ? (
             <RelationSelect
               name="companyId"
-              label="İlgili cari"
+              label="Ä°lgili cari"
               options={options.companies}
               defaultValue={initialValues?.companyId}
             />
@@ -125,14 +125,14 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
           {relatedType === "PAYMENT" ? (
             <RelationSelect
               name="paymentId"
-              label="İlgili tahsilat / ödeme"
+              label="Ä°lgili tahsilat / Ã¶deme"
               options={options.payments}
               defaultValue={initialValues?.paymentId}
             />
           ) : null}
           {relatedType === "OTHER" ? (
             <div className="rounded-md border border-[#dce2dc] bg-[#fbfcfa] px-4 py-3 text-sm text-[#647067]">
-              Diğer dosyalar ilişki seçmeden arşivlenebilir.
+              DiÄŸer dosyalar iliÅŸki seÃ§meden arÅŸivlenebilir.
             </div>
           ) : null}
           <FieldError message={state.errors?.relatedId} />
@@ -142,7 +142,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
       <div className="rounded-lg border border-dashed border-[#cfd8cf] bg-white p-5">
         <h2 className="text-sm font-semibold text-[#223028]">AI Analizi</h2>
         <p className="mt-2 text-sm text-[#647067]">
-          Bu alan ileride AI/OCR fatura okuma sistemi için kullanılacak.
+          Bu alan ileride AI/OCR fatura okuma sistemi iÃ§in kullanÄ±lacak.
         </p>
       </div>
 
@@ -153,7 +153,7 @@ export function FileUploadForm({ action, options, initialValues }: FileUploadFor
           className="inline-flex h-10 items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:opacity-65"
         >
           <Upload className="h-4 w-4" />
-          {isPending ? "Yükleniyor" : "Dosyayı yükle"}
+          {isPending ? "YÃ¼kleniyor" : "DosyayÄ± yÃ¼kle"}
         </button>
       </div>
     </form>
@@ -175,7 +175,7 @@ function RelationSelect({
     <label className="block text-sm font-medium text-[#46534b]">
       {label}
       <select name={name} defaultValue={defaultValue ?? ""} className={fieldClass()}>
-        <option value="">İlişkili kayıt seçilmedi</option>
+        <option value="">Ä°liÅŸkili kayÄ±t seÃ§ilmedi</option>
         {options.map((option) => (
           <option key={option.id} value={option.id}>
             {option.label}

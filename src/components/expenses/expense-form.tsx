@@ -1,6 +1,6 @@
 "use client";
 
-import type { ExpenseStatus } from "@prisma/client";
+import type { ExpenseStatus } from "#prisma/client";
 import { useActionState, useState } from "react";
 import { Save } from "lucide-react";
 import type { ExpenseFormState } from "@/app/(dashboard)/expenses/actions";
@@ -83,7 +83,7 @@ export function ExpenseForm({
         <h2 className="text-base font-semibold text-[#16201b]">Gider bilgileri</h2>
         <div className="mt-5 grid gap-4 md:grid-cols-2">
           <label className="block text-sm font-semibold text-[#46534b]">
-            Gider başlığı
+            Gider baÅŸlÄ±ÄŸÄ±
             <input
               name="title"
               defaultValue={initialValues?.title ?? ""}
@@ -100,7 +100,7 @@ export function ExpenseForm({
               defaultValue={initialValues?.categoryId ?? ""}
               className={fieldClass(Boolean(state.errors?.categoryId))}
             >
-              <option value="">Kategori seçilmedi</option>
+              <option value="">Kategori seÃ§ilmedi</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.name}
@@ -117,7 +117,7 @@ export function ExpenseForm({
               defaultValue={initialValues?.companyId ?? ""}
               className={fieldClass(Boolean(state.errors?.companyId))}
             >
-              <option value="">Cari seçilmedi</option>
+              <option value="">Cari seÃ§ilmedi</option>
               {companies.map((company) => (
                 <option key={company.id} value={company.id}>
                   {company.name}
@@ -134,7 +134,7 @@ export function ExpenseForm({
               defaultValue={initialValues?.financialAccountId ?? ""}
               className={fieldClass(Boolean(state.errors?.financialAccountId))}
             >
-              <option value="">Hesap seçilmedi</option>
+              <option value="">Hesap seÃ§ilmedi</option>
               {financialAccounts.map((account) => (
                 <option key={account.id} value={account.id}>
                   {account.name}
@@ -144,7 +144,7 @@ export function ExpenseForm({
             <FieldError message={state.errors?.financialAccountId} />
             {isPaid ? (
               <p className="mt-1 text-xs text-[#647067]">
-                Ödenmiş giderlerde hangi hesaptan ödendiğini seçmeniz önerilir.
+                Ã–denmiÅŸ giderlerde hangi hesaptan Ã¶dendiÄŸini seÃ§meniz Ã¶nerilir.
               </p>
             ) : null}
           </label>
@@ -204,7 +204,7 @@ export function ExpenseForm({
 
           {isPaid ? (
             <label className="block text-sm font-semibold text-[#46534b]">
-              Ödeme tarihi
+              Ã–deme tarihi
               <input
                 name="paymentDate"
                 type="date"
@@ -219,7 +219,7 @@ export function ExpenseForm({
         </div>
 
         <label className="mt-5 block text-sm font-semibold text-[#46534b]">
-          Açıklama
+          AÃ§Ä±klama
           <textarea
             name="description"
             defaultValue={initialValues?.description ?? ""}

@@ -1,16 +1,16 @@
-import type { PaymentMethod, PaymentType } from "@prisma/client";
+import type { PaymentMethod, PaymentType } from "#prisma/client";
 
 export const paymentTypeLabels: Record<PaymentType, string> = {
-  COLLECTION: "Para aldım",
-  PAYMENT: "Para ödedim",
+  COLLECTION: "Para aldÄ±m",
+  PAYMENT: "Para Ã¶dedim",
 };
 
 export const paymentMethodLabels: Record<PaymentMethod, string> = {
   BANK_TRANSFER: "Havale / EFT",
   CASH: "Nakit",
-  CREDIT_CARD: "Kredi Kartı",
+  CREDIT_CARD: "Kredi KartÄ±",
   POS: "POS",
-  OTHER: "Diğer",
+  OTHER: "DiÄŸer",
 };
 
 export const paymentTypeOptions: Array<{ value: PaymentType; label: string }> = [

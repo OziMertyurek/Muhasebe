@@ -1,4 +1,4 @@
-import { InvoiceStatus, InvoiceType } from "@prisma/client";
+import { InvoiceStatus, InvoiceType } from "#prisma/client";
 import { formatCsvDate, formatCsvNumber, formatTodayForFileName, createCsv, createCsvResponse } from "@/lib/export-utils";
 import { invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { prisma } from "@/lib/prisma";
@@ -58,7 +58,7 @@ export async function GET(request: Request) {
       "Vade tarihi",
       "Ara toplam",
       "KDV",
-      "İskonto",
+      "Ä°skonto",
       "Genel toplam",
       "Para birimi",
       "Durum",

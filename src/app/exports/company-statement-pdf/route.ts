@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import {
   getCompanyStatement,
   getStatementDateToExclusive,
@@ -71,29 +71,29 @@ export async function GET(request: Request) {
   });
 
   if (!statement.company) {
-    return new Response("Cari bulunamadı", { status: 404 });
+    return new Response("Cari bulunamadÄ±", { status: 404 });
   }
 
   const company = statement.company;
   const summary = buildSummary(statement.movements);
   const buffer = await createPdfDocument(
     `Cari Ekstre - ${company.name}`,
-    "Cari hareketleri para birimi bazında ayrı bakiye ile hazırlanmıştır.",
+    "Cari hareketleri para birimi bazÄ±nda ayrÄ± bakiye ile hazÄ±rlanmÄ±ÅŸtÄ±r.",
     (doc) => {
       drawSectionTitle(doc, "Firma bilgileri");
       drawKeyValueList(doc, [
-        { label: "Cari adı", value: company.name },
+        { label: "Cari adÄ±", value: company.name },
         { label: "Ekstre tarihi", value: formatPdfDate(new Date()) },
-        { label: "Varsayılan para birimi", value: company.defaultCurrency },
+        { label: "VarsayÄ±lan para birimi", value: company.defaultCurrency },
       ]);
 
-      drawSectionTitle(doc, "Para birimi özeti");
+      drawSectionTitle(doc, "Para birimi Ã¶zeti");
       drawTable(
         doc,
         [
           { header: "Para birimi", width: 90, value: (row) => row.currency },
           {
-            header: "Toplam borç",
+            header: "Toplam borÃ§",
             width: 130,
             value: (row) => formatPdfMoney(row.debit, row.currency),
             align: "right",
@@ -119,11 +119,11 @@ export async function GET(request: Request) {
         doc,
         [
           { header: "Tarih", width: 48, value: (row) => formatPdfDate(row.date) },
-          { header: "İşlem tipi", width: 72, value: (row) => row.label },
+          { header: "Ä°ÅŸlem tipi", width: 72, value: (row) => row.label },
           { header: "Referans", width: 70, value: (row) => row.reference },
-          { header: "Açıklama", width: 105, value: (row) => row.description },
+          { header: "AÃ§Ä±klama", width: 105, value: (row) => row.description },
           {
-            header: "Borç",
+            header: "BorÃ§",
             width: 58,
             value: (row) => (row.debit.equals(0) ? "-" : formatPdfMoney(row.debit, row.currency)),
             align: "right",

@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { Prisma } from "#prisma/client";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {

@@ -1,4 +1,4 @@
-import { Prisma, type ProductUnit } from "@prisma/client";
+import { Prisma, type ProductUnit } from "#prisma/client";
 
 export type AiMatchStatus = "EXACT" | "HIGH_CONFIDENCE" | "AMBIGUOUS" | "NOT_FOUND";
 export type AiTotalValidationStatus = "OK" | "WARNING" | "UNKNOWN";
@@ -93,7 +93,7 @@ export function normalizeDecimalText(value: unknown) {
   if (!text) return null;
 
   const cleaned = text
-    .replace(/[₺€$]/g, "")
+    .replace(/[â‚ºâ‚¬$]/g, "")
     .replace(/\b(TL|TRY|USD|EUR)\b/giu, "")
     .replace(/[^\d.,+\-\s]/g, "")
     .replace(/\s/g, "")
@@ -153,9 +153,9 @@ export function normalizeDateText(value: unknown) {
 export function normalizeCurrencyCode(value: unknown) {
   const text = emptyToNull(value)?.toUpperCase();
   if (!text) return null;
-  if (text.includes("₺") || text === "TL") return "TRY";
+  if (text.includes("â‚º") || text === "TL") return "TRY";
   if (text.includes("$")) return "USD";
-  if (text.includes("€")) return "EUR";
+  if (text.includes("â‚¬")) return "EUR";
   return /^[A-Z]{3}$/u.test(text) ? text : null;
 }
 
