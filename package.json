@@ -11,6 +11,7 @@
     "web:prepare": "node scripts/prepare-hosted-web.js",
     "web:package": "npm run web:build && npm run web:prepare",
     "web:start": "node dist/hosted-web/app.js",
+    "test": "node --test --experimental-strip-types tests/*.test.ts",
     "electron:dev": "set ELECTRON_RUN_AS_NODE=& electron electron/main.js",
     "electron:prod": "set ELECTRON_RUN_AS_NODE=& set ELECTRON_SERVER_MODE=production& electron electron/main.js",
     "prepare:standalone": "node scripts/prepare-standalone.js",

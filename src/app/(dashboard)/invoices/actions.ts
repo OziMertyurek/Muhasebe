@@ -1,12 +1,15 @@
 "use server";
 
-import { InvoiceStatus, InvoiceType, Prisma } from "@prisma/client";
+import { InvoiceStatus, InvoiceType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  AccountingValidationError,
+  deriveInvoiceStatus,
+  getInvoicePaidTotal,
+} from "@/lib/accounting-core";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { syncInvoiceDueReminder } from "@/lib/auto-reminder-utils";
-import { prisma } from "@/lib/prisma";
-import { getManualInvoiceStatus } from "@/lib/invoice-utils";
 import {
   calculateInvoiceLine,
   calculateInvoiceTotals,
@@ -14,6 +17,7 @@ import {
   type InvoiceLineCalculationInput,
   type InvoiceLineCalculationResult,
 } from "@/lib/invoice-line-item-utils";
+import { prisma } from "@/lib/prisma";
 
 export type InvoiceFormState = {
   message?: string;
@@ -46,18 +50,11 @@ type InvoiceHeaderPayload = {
   notes: string | null;
 };
 
-type InvoicePayload = InvoiceHeaderPayload & {
-  subtotal: Prisma.Decimal;
-  vatAmount: Prisma.Decimal;
-  discountAmount: Prisma.Decimal;
-  totalAmount: Prisma.Decimal;
-};
-
 type InvoiceFormErrors = NonNullable<InvoiceFormState["errors"]>;
 
 class InvoiceCreateValidationError extends Error {
   constructor(public readonly state: InvoiceFormState) {
-    super("Fatura doğrulama hatası.");
+    super("Fatura dogrulama hatasi.");
     this.name = "InvoiceCreateValidationError";
   }
 }
@@ -80,132 +77,6 @@ function parseDate(value: string) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function parseAmount(
-  formData: FormData,
-  field: InvoiceFormField,
-  label: string,
-  errors: InvoiceFormErrors,
-  options: { emptyAsZero?: boolean; mustBePositive?: boolean } = {},
-) {
-  const rawValue = readText(formData, field).replace(",", ".");
-  const normalizedValue = rawValue || (options.emptyAsZero ? "0" : "");
-
-  if (!normalizedValue) {
-    errors[field] = `${label} girilmeli.`;
-    return null;
-  }
-
-  const numericValue = Number(normalizedValue);
-
-  if (Number.isNaN(numericValue)) {
-    errors[field] = `${label} sayı olmalı.`;
-    return null;
-  }
-
-  if (numericValue < 0) {
-    errors[field] = `${label} negatif olamaz.`;
-    return null;
-  }
-
-  if (options.mustBePositive && numericValue <= 0) {
-    errors[field] = `${label} 0'dan büyük olmalı.`;
-    return null;
-  }
-
-  return new Prisma.Decimal(normalizedValue);
-}
-
-async function parseInvoiceForm(formData: FormData): Promise<{
-  data?: InvoicePayload;
-  errors: InvoiceFormErrors;
-}> {
-  const errors: InvoiceFormErrors = {};
-  const companyId = readText(formData, "companyId");
-  const type = readText(formData, "type");
-  const invoiceNumber = readText(formData, "invoiceNumber");
-  const invoiceDateValue = readText(formData, "invoiceDate");
-  const dueDateValue = readText(formData, "dueDate");
-  const currency = readText(formData, "currency").toUpperCase() || "TRY";
-  const statusValue = readText(formData, "status") || "UNPAID";
-
-  if (!companyId) {
-    errors.companyId = "Cari firma seçilmeden fatura kaydedilemez.";
-  } else {
-    const company = await prisma.company.findFirst({
-      where: { id: companyId, deletedAt: null },
-      select: { id: true },
-    });
-
-    if (!company) {
-      errors.companyId = "Geçerli bir cari firma seçin.";
-    }
-  }
-
-  if (!type || !Object.values(InvoiceType).includes(type as InvoiceType)) {
-    errors.type = "Fatura tipi seçilmeli.";
-  }
-
-  if (!invoiceNumber) {
-    errors.invoiceNumber = "Fatura no boş olamaz.";
-  }
-
-  const invoiceDate = parseDate(invoiceDateValue);
-
-  if (!invoiceDate) {
-    errors.invoiceDate = "Fatura tarihi boş olamaz.";
-  }
-
-  const dueDate = parseDate(dueDateValue);
-
-  if (dueDateValue && !dueDate) {
-    errors.dueDate = "Geçerli bir vade tarihi girin.";
-  }
-
-  if (!Object.values(InvoiceStatus).includes(statusValue as InvoiceStatus)) {
-    errors.status = "Geçerli bir fatura durumu seçin.";
-  }
-
-  const subtotal = parseAmount(formData, "subtotal", "Ara toplam", errors);
-  const vatAmount = parseAmount(formData, "vatAmount", "KDV tutarı", errors, {
-    emptyAsZero: true,
-  });
-  const discountAmount = parseAmount(formData, "discountAmount", "İskonto tutarı", errors, {
-    emptyAsZero: true,
-  });
-  const totalAmount = parseAmount(formData, "totalAmount", "Genel toplam", errors, {
-    mustBePositive: true,
-  });
-
-  if (
-    Object.keys(errors).length > 0 ||
-    !invoiceDate ||
-    !subtotal ||
-    !vatAmount ||
-    !discountAmount ||
-    !totalAmount
-  ) {
-    return { errors };
-  }
-
-  return {
-    data: {
-      companyId,
-      type: type as InvoiceType,
-      invoiceNumber,
-      invoiceDate,
-      dueDate,
-      currency,
-      subtotal,
-      vatAmount,
-      discountAmount,
-      totalAmount,
-      status: getManualInvoiceStatus(statusValue as InvoiceStatus),
-      notes: optionalText(readText(formData, "notes")),
-    },
-    errors,
-  };
-}
-
 async function parseInvoiceHeaderForm(formData: FormData): Promise<{
   data?: InvoiceHeaderPayload;
   errors: InvoiceFormErrors;
@@ -220,31 +91,31 @@ async function parseInvoiceHeaderForm(formData: FormData): Promise<{
   const statusValue = readText(formData, "status") || "UNPAID";
 
   if (!companyId) {
-    errors.companyId = "Cari firma seçilmeden fatura kaydedilemez.";
+    errors.companyId = "Cari firma secilmeden fatura kaydedilemez.";
   }
 
   if (!type || !Object.values(InvoiceType).includes(type as InvoiceType)) {
-    errors.type = "Fatura tipi seçilmeli.";
+    errors.type = "Fatura tipi secilmeli.";
   }
 
   if (!invoiceNumber) {
-    errors.invoiceNumber = "Fatura no boş olamaz.";
+    errors.invoiceNumber = "Fatura no bos olamaz.";
   }
 
   const invoiceDate = parseDate(invoiceDateValue);
 
   if (!invoiceDate) {
-    errors.invoiceDate = "Fatura tarihi boş olamaz.";
+    errors.invoiceDate = "Fatura tarihi bos olamaz.";
   }
 
   const dueDate = parseDate(dueDateValue);
 
   if (dueDateValue && !dueDate) {
-    errors.dueDate = "Geçerli bir vade tarihi girin.";
+    errors.dueDate = "Gecerli bir vade tarihi girin.";
   }
 
   if (!Object.values(InvoiceStatus).includes(statusValue as InvoiceStatus)) {
-    errors.status = "Geçerli bir fatura durumu seçin.";
+    errors.status = "Gecerli bir fatura durumu secin.";
   }
 
   if (Object.keys(errors).length > 0 || !invoiceDate) {
@@ -259,7 +130,7 @@ async function parseInvoiceHeaderForm(formData: FormData): Promise<{
       invoiceDate,
       dueDate,
       currency,
-      status: getManualInvoiceStatus(statusValue as InvoiceStatus),
+      status: statusValue as InvoiceStatus,
       notes: optionalText(readText(formData, "notes")),
     },
     errors,
@@ -284,12 +155,12 @@ function parseInvoiceLineItems(formData: FormData): {
   try {
     parsed = JSON.parse(rawValue);
   } catch {
-    errors.lineItems = "Fatura kalemleri okunamadı. Lütfen satırları kontrol edin.";
+    errors.lineItems = "Fatura kalemleri okunamadi. Lutfen satirlari kontrol edin.";
     return { errors };
   }
 
   if (!Array.isArray(parsed)) {
-    errors.lineItems = "Fatura kalemleri beklenen liste formatında değil.";
+    errors.lineItems = "Fatura kalemleri beklenen liste formatinda degil.";
     return { errors };
   }
 
@@ -310,7 +181,7 @@ function parseInvoiceLineItems(formData: FormData): {
 
   if (validationErrors.length > 0) {
     errors.lineItems = validationErrors
-      .map((error) => `${error.message}`)
+      .map((error) => error.message)
       .filter((message, index, messages) => messages.indexOf(message) === index)
       .join(" ");
     return { lines, errors };
@@ -323,6 +194,24 @@ function parseInvoiceLineItems(formData: FormData): {
 
 function toDecimalInput(value: unknown) {
   return typeof value === "string" || typeof value === "number" ? value : "";
+}
+
+function validationFailure(error: AccountingValidationError): InvoiceFormState {
+  return {
+    errors: { [error.field]: error.message },
+    message: "Lutfen formdaki hatalari duzeltin.",
+  };
+}
+
+function revalidateInvoicePaths(invoiceId?: string | null) {
+  revalidatePath("/invoices");
+  revalidatePath("/reports");
+  revalidatePath("/reports/due-invoices");
+  revalidatePath("/reports/receivables-payables");
+  revalidatePath("/important-dates");
+  if (invoiceId) {
+    revalidatePath(`/invoices/${invoiceId}`);
+  }
 }
 
 export async function createInvoiceAction(
@@ -340,26 +229,17 @@ export async function createInvoiceAction(
         ...parsedHeader.errors,
         ...parsedLineItems.errors,
       },
-      message: "Lütfen formdaki hataları düzeltin.",
+      message: "Lutfen formdaki hatalari duzeltin.",
     };
   }
 
   const header = parsedHeader.data;
   const calculatedLines = parsedLineItems.calculatedLines;
-  let invoiceId: string;
-  let createdInvoice: {
-    id: string;
-    invoiceNumber: string;
-    type: InvoiceType;
-    dueDate: Date | null;
-    status: InvoiceStatus;
-    companyId: string;
-    deletedAt: Date | null;
-  };
   const totals = calculateInvoiceTotals(calculatedLines);
+  let invoiceId: string;
 
   try {
-    createdInvoice = await prisma.$transaction(async (tx) => {
+    const createdInvoice = await prisma.$transaction(async (tx) => {
       const company = await tx.company.findFirst({
         where: { id: header.companyId, deletedAt: null },
         select: { id: true },
@@ -367,14 +247,15 @@ export async function createInvoiceAction(
 
       if (!company) {
         throw new InvoiceCreateValidationError({
-          errors: { companyId: "Geçerli bir cari firma seçin." },
-          message: "Lütfen formdaki hataları düzeltin.",
+          errors: { companyId: "Gecerli bir cari firma secin." },
+          message: "Lutfen formdaki hatalari duzeltin.",
         });
       }
 
       return tx.invoice.create({
         data: {
           ...header,
+          status: "UNPAID",
           subtotal: totals.subtotal,
           vatAmount: totals.vatAmount,
           discountAmount: totals.discountAmount,
@@ -407,10 +288,11 @@ export async function createInvoiceAction(
       entityType: "INVOICE",
       entityId: invoiceId,
       action: "CREATE",
-      title: `Fatura oluşturuldu: ${header.invoiceNumber}`,
-      description: `${header.currency} ${totals.totalAmount.toString()} tutarlı fatura oluşturuldu.`,
+      title: `Fatura olusturuldu: ${header.invoiceNumber}`,
+      description: `${header.currency} ${totals.totalAmount.toString()} tutarli fatura olusturuldu.`,
       after: {
         ...header,
+        status: "UNPAID",
         subtotal: totals.subtotal,
         vatAmount: totals.vatAmount,
         discountAmount: totals.discountAmount,
@@ -424,11 +306,10 @@ export async function createInvoiceAction(
       return error.state;
     }
 
-    return { message: "Fatura kaydı oluşturulurken bir hata oluştu." };
+    return { message: "Fatura kaydi olusturulurken bir hata olustu." };
   }
 
-  revalidatePath("/invoices");
-  revalidatePath("/important-dates");
+  revalidateInvoicePaths(invoiceId);
   redirect(`/invoices/${invoiceId}`);
 }
 
@@ -437,47 +318,130 @@ export async function updateInvoiceAction(
   _previousState: InvoiceFormState,
   formData: FormData,
 ): Promise<InvoiceFormState> {
-  const parsed = await parseInvoiceForm(formData);
+  const [parsedHeader, parsedLineItems] = await Promise.all([
+    parseInvoiceHeaderForm(formData),
+    Promise.resolve(parseInvoiceLineItems(formData)),
+  ]);
 
-  if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+  if (!parsedHeader.data || !parsedLineItems.calculatedLines) {
+    return {
+      errors: {
+        ...parsedHeader.errors,
+        ...parsedLineItems.errors,
+      },
+      message: "Lutfen formdaki hatalari duzeltin.",
+    };
   }
 
-  try {
-    const before = await prisma.invoice.findFirst({
-      where: { id: invoiceId, deletedAt: null },
-    });
+  const header = parsedHeader.data;
+  const calculatedLines = parsedLineItems.calculatedLines;
+  const totals = calculateInvoiceTotals(calculatedLines);
 
-    const invoice = await prisma.invoice.update({
-      where: { id: invoiceId, deletedAt: null },
-      data: parsed.data,
-      select: {
-        id: true,
-        invoiceNumber: true,
-        type: true,
-        dueDate: true,
-        status: true,
-        companyId: true,
-        deletedAt: true,
-      },
+  try {
+    const { before, invoice, after } = await prisma.$transaction(async (tx) => {
+      const existingInvoice = await tx.invoice.findFirst({
+        where: { id: invoiceId, deletedAt: null },
+        include: {
+          items: { orderBy: { sortOrder: "asc" } },
+          payments: {
+            where: { deletedAt: null },
+            select: { type: true, amount: true, currency: true },
+          },
+        },
+      });
+
+      if (!existingInvoice) {
+        throw new AccountingValidationError("invoiceNumber", "Duzenlenecek fatura bulunamadi.");
+      }
+
+      const paidTotal = getInvoicePaidTotal(
+        { type: header.type, currency: header.currency },
+        existingInvoice.payments,
+      );
+
+      if (paidTotal.greaterThan(totals.totalAmount)) {
+        throw new AccountingValidationError(
+          "lineItems",
+          "Fatura toplami bagli tahsilat / odeme tutarinin altina dusemez.",
+        );
+      }
+
+      const nextStatus = deriveInvoiceStatus(
+        {
+          type: header.type,
+          currency: header.currency,
+          totalAmount: totals.totalAmount,
+          status: header.status === "CANCELLED" ? "CANCELLED" : undefined,
+        },
+        existingInvoice.payments,
+      );
+
+      await tx.invoiceItem.deleteMany({ where: { invoiceId } });
+      const updatedInvoice = await tx.invoice.update({
+        where: { id: invoiceId, deletedAt: null },
+        data: {
+          ...header,
+          status: nextStatus,
+          subtotal: totals.subtotal,
+          vatAmount: totals.vatAmount,
+          discountAmount: totals.discountAmount,
+          totalAmount: totals.totalAmount,
+          items: {
+            create: calculatedLines.map((line, index) => ({
+              description: line.description,
+              quantity: line.quantity,
+              unitPrice: line.unitPrice,
+              vatRate: line.vatRate,
+              discountAmount: line.discountAmount,
+              lineTotal: line.lineTotal,
+              sortOrder: index,
+            })),
+          },
+        },
+        select: {
+          id: true,
+          invoiceNumber: true,
+          type: true,
+          dueDate: true,
+          status: true,
+          companyId: true,
+          deletedAt: true,
+        },
+      });
+
+      return {
+        before: existingInvoice,
+        invoice: updatedInvoice,
+        after: {
+          ...header,
+          status: nextStatus,
+          subtotal: totals.subtotal,
+          vatAmount: totals.vatAmount,
+          discountAmount: totals.discountAmount,
+          totalAmount: totals.totalAmount,
+          itemCount: calculatedLines.length,
+        },
+      };
     });
     await syncInvoiceDueReminder(invoice);
     await createAuditLog({
       entityType: "INVOICE",
       entityId: invoiceId,
       action: "UPDATE",
-      title: `Fatura güncellendi: ${parsed.data.invoiceNumber}`,
-      description: "Fatura bilgilerinde değişiklik yapıldı.",
+      title: `Fatura guncellendi: ${header.invoiceNumber}`,
+      description: "Fatura bilgileri ve kalemleri guncellendi.",
       before,
-      after: parsed.data,
+      after,
     });
-  } catch {
-    return { message: "Fatura kaydı güncellenirken bir hata oluştu." };
+  } catch (error) {
+    if (error instanceof AccountingValidationError) {
+      return validationFailure(error);
+    }
+
+    return { message: "Fatura kaydi guncellenirken bir hata olustu." };
   }
 
-  revalidatePath("/invoices");
-  revalidatePath(`/invoices/${invoiceId}`);
-  revalidatePath("/important-dates");
+  revalidateInvoicePaths(invoiceId);
   redirect(`/invoices/${invoiceId}`);
 }
 
@@ -504,14 +468,13 @@ export async function deleteInvoiceAction(invoiceId: string) {
       entityId: invoice.id,
       action: "SOFT_DELETE",
       title: `Fatura silindi: ${invoice.invoiceNumber}`,
-      description: "Kayıt çöp kutusuna taşındı.",
+      description: "Kayit cop kutusuna tasindi.",
       before: invoice,
     });
   } catch {
     redirect(`/invoices/${invoiceId}?error=delete`);
   }
 
-  revalidatePath("/invoices");
-  revalidatePath("/important-dates");
+  revalidateInvoicePaths(invoiceId);
   redirect("/invoices");
 }

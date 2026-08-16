@@ -6,6 +6,7 @@ import { deleteInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { RelatedFilesCard } from "@/components/files/related-files-card";
 import { ConfirmSubmitButton } from "@/components/ui/confirm-submit-button";
 import { HelpHint } from "@/components/ui/help-hint";
+import { getInvoicePaidTotal } from "@/lib/accounting-core";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
@@ -38,6 +39,9 @@ export default async function InvoiceDetailPage({
         where: { deletedAt: null },
         orderBy: { paymentDate: "desc" },
       },
+      items: {
+        orderBy: { sortOrder: "asc" },
+      },
       files: {
         orderBy: { uploadedAt: "desc" },
         take: 5,
@@ -56,13 +60,10 @@ export default async function InvoiceDetailPage({
     notFound();
   }
 
-  const paidTotal = invoice.payments.reduce(
-    (total, payment) => total.plus(payment.amount),
-    new Prisma.Decimal(0),
-  );
+  const paidTotal = getInvoicePaidTotal(invoice, invoice.payments);
   const remainingTotal = invoice.totalAmount.minus(paidTotal);
   const remainingDisplay = remainingTotal.lessThan(0) ? new Prisma.Decimal(0) : remainingTotal;
-  const placeholders = ["Fatura kalemleri", "AI fatura okuma sonucu"];
+  const placeholders = ["AI fatura okuma sonucu"];
 
   return (
     <div className="space-y-6">
@@ -177,6 +178,48 @@ export default async function InvoiceDetailPage({
             {formatPlainValue(invoice.notes)}
           </p>
         </div>
+      </section>
+
+      <section className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
+        <h2 className="text-base font-semibold text-[#16201b]">Fatura kalemleri</h2>
+        {invoice.items.length === 0 ? (
+          <p className="mt-5 rounded-md border border-dashed border-[#cfd8cf] p-4 text-sm text-[#647067]">
+            Bu faturada kalem kaydı bulunmuyor.
+          </p>
+        ) : (
+          <div className="mt-5 overflow-x-auto">
+            <table className="min-w-[920px] w-full border-collapse text-left text-sm">
+              <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
+                <tr>
+                  <th className="px-4 py-3">Açıklama</th>
+                  <th className="px-4 py-3">Miktar</th>
+                  <th className="px-4 py-3">Birim fiyat</th>
+                  <th className="px-4 py-3">İndirim</th>
+                  <th className="px-4 py-3">KDV %</th>
+                  <th className="px-4 py-3">Satır toplamı</th>
+                </tr>
+              </thead>
+              <tbody>
+                {invoice.items.map((item) => (
+                  <tr key={item.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
+                    <td className="px-4 py-3 font-semibold text-[#16201b]">{item.description}</td>
+                    <td className="px-4 py-3 text-[#46534b]">{item.quantity.toString()}</td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {formatMoney(item.unitPrice, invoice.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {formatMoney(item.discountAmount, invoice.currency)}
+                    </td>
+                    <td className="px-4 py-3 text-[#46534b]">{item.vatRate.toString()}</td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {formatMoney(item.lineTotal, invoice.currency)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <section className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">

@@ -1,14 +1,20 @@
 import { InvoiceStatus, Prisma } from "@prisma/client";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { syncInvoiceDueReminder } from "@/lib/auto-reminder-utils";
+import { deriveInvoiceStatus, getInvoicePaidTotal } from "@/lib/accounting-core";
 import { prisma } from "@/lib/prisma";
 
-export async function updateInvoicePaymentStatus(invoiceId: string | null | undefined) {
+type PrismaClientLike = typeof prisma | Prisma.TransactionClient;
+
+export async function updateInvoicePaymentStatus(
+  invoiceId: string | null | undefined,
+  client: PrismaClientLike = prisma,
+) {
   if (!invoiceId) {
     return;
   }
 
-  const invoice = await prisma.invoice.findFirst({
+  const invoice = await client.invoice.findFirst({
     where: { id: invoiceId, deletedAt: null },
     select: {
       id: true,
@@ -16,6 +22,7 @@ export async function updateInvoicePaymentStatus(invoiceId: string | null | unde
       status: true,
       totalAmount: true,
       type: true,
+      currency: true,
       dueDate: true,
       companyId: true,
       deletedAt: true,
@@ -26,41 +33,40 @@ export async function updateInvoicePaymentStatus(invoiceId: string | null | unde
     return;
   }
 
-  const result = await prisma.payment.aggregate({
+  const payments = await client.payment.findMany({
     where: {
       invoiceId,
       deletedAt: null,
     },
-    _sum: {
+    select: {
+      type: true,
       amount: true,
+      currency: true,
     },
   });
 
-  const paidTotal = result._sum.amount ?? new Prisma.Decimal(0);
-  let nextStatus: InvoiceStatus = "UNPAID";
-
-  if (paidTotal.greaterThanOrEqualTo(invoice.totalAmount)) {
-    nextStatus = "PAID";
-  } else if (paidTotal.greaterThan(0)) {
-    nextStatus = "PARTIAL";
-  }
+  const paidTotal = getInvoicePaidTotal(invoice, payments);
+  const nextStatus: InvoiceStatus = deriveInvoiceStatus(invoice, payments);
 
   if (nextStatus !== invoice.status) {
-    await prisma.invoice.update({
+    await client.invoice.update({
       where: { id: invoice.id },
       data: { status: nextStatus },
       select: { id: true },
     });
-    await createAuditLog({
-      entityType: "INVOICE",
-      entityId: invoice.id,
-      action: "STATUS_CHANGE",
-      title: `Fatura durumu değişti: ${invoice.invoiceNumber}`,
-      description: `${invoice.status} -> ${nextStatus}`,
-      before: { status: invoice.status },
-      after: { status: nextStatus },
-      metadata: { paidTotal, totalAmount: invoice.totalAmount },
-    });
+    await createAuditLog(
+      {
+        entityType: "INVOICE",
+        entityId: invoice.id,
+        action: "STATUS_CHANGE",
+        title: `Fatura durumu degisti: ${invoice.invoiceNumber}`,
+        description: `${invoice.status} -> ${nextStatus}`,
+        before: { status: invoice.status },
+        after: { status: nextStatus },
+        metadata: { paidTotal, totalAmount: invoice.totalAmount },
+      },
+      client,
+    );
     await syncInvoiceDueReminder({ ...invoice, status: nextStatus });
   }
 }

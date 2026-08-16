@@ -1,4 +1,5 @@
 import { FinancialAccountType, Prisma } from "@prisma/client";
+import { getExpectedPaymentType } from "@/lib/accounting-core";
 import { getAuditEntityHref } from "@/lib/audit-log-utils";
 import { addDays, getLocalDateRange } from "@/lib/important-date-utils";
 import { prisma } from "@/lib/prisma";
@@ -34,10 +35,6 @@ function getMonthRange(date = new Date()) {
   const start = new Date(date.getFullYear(), date.getMonth(), 1);
   const end = new Date(date.getFullYear(), date.getMonth() + 1, 1);
   return { start, end };
-}
-
-function getInvoiceExpectedPaymentType(invoiceType: "SALES" | "PURCHASE") {
-  return invoiceType === "SALES" ? "COLLECTION" : "PAYMENT";
 }
 
 const liquidFinancialAccountTypes: FinancialAccountType[] = ["CASH", "BANK", "FOREIGN_CURRENCY"];
@@ -385,7 +382,7 @@ export async function getDashboardData() {
   const unpaidInvoiceRemaining = new Map<string, Prisma.Decimal>();
 
   for (const invoice of activeInvoices) {
-    const expectedPaymentType = getInvoiceExpectedPaymentType(invoice.type);
+    const expectedPaymentType = getExpectedPaymentType(invoice.type);
     const paidTotal = invoice.payments
       .filter((payment) => payment.type === expectedPaymentType)
       .reduce((total, payment) => total.plus(payment.amount), zero());
@@ -457,7 +454,7 @@ export async function getDashboardData() {
   }
 
   const dueInvoiceRows = dueInvoicesThisWeek.map((invoice) => {
-    const expectedPaymentType = getInvoiceExpectedPaymentType(invoice.type);
+    const expectedPaymentType = getExpectedPaymentType(invoice.type);
     const paidTotal = invoice.payments
       .filter((payment) => payment.type === expectedPaymentType)
       .reduce((total, payment) => total.plus(payment.amount), zero());

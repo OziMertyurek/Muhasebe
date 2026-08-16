@@ -15,7 +15,10 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
   const [invoice, companies] = await Promise.all([
     prisma.invoice.findFirst({
       where: { id, deletedAt: null, company: { deletedAt: null } },
-      include: { company: { select: { id: true, name: true } } },
+      include: {
+        company: { select: { id: true, name: true } },
+        items: { orderBy: { sortOrder: "asc" } },
+      },
     }),
     prisma.company.findMany({
       where: { deletedAt: null },
@@ -64,6 +67,28 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
           status: invoice.status,
           notes: invoice.notes,
         }}
+        initialLineItems={
+          invoice.items.length > 0
+            ? invoice.items.map((item) => ({
+                id: item.id,
+                description: item.description,
+                quantity: item.quantity.toString(),
+                unitPrice: item.unitPrice.toString(),
+                vatRate: item.vatRate.toString(),
+                discountAmount: item.discountAmount.toString(),
+              }))
+            : [
+                {
+                  id: "legacy-total-line",
+                  description: invoice.notes || invoice.invoiceNumber,
+                  quantity: "1",
+                  unitPrice: invoice.totalAmount.toString(),
+                  vatRate: "0",
+                  discountAmount: "0",
+                },
+              ]
+        }
+        lineItemsEnabled
       />
     </div>
   );

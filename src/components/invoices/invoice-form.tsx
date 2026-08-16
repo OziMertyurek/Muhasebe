@@ -37,6 +37,7 @@ type InvoiceFormProps = {
   companies: InvoiceCompanyOption[];
   submitLabel: string;
   initialValues?: InvoiceFormValues;
+  initialLineItems?: InvoiceLineFormValue[];
   lineItemsEnabled?: boolean;
 };
 
@@ -123,10 +124,13 @@ export function InvoiceForm({
   companies,
   submitLabel,
   initialValues,
+  initialLineItems,
   lineItemsEnabled = false,
 }: InvoiceFormProps) {
   const [state, formAction, isPending] = useActionState(action, initialState);
-  const [lines, setLines] = useState<InvoiceLineFormValue[]>([createEmptyLine()]);
+  const [lines, setLines] = useState<InvoiceLineFormValue[]>(
+    initialLineItems && initialLineItems.length > 0 ? initialLineItems : [createEmptyLine()],
+  );
   const [currency, setCurrency] = useState(initialValues?.currency ?? "TRY");
   const lineItemsPayload = useMemo(
     () =>

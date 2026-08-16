@@ -4,6 +4,7 @@ import {
   InvoiceType,
   Prisma,
 } from "@prisma/client";
+import { getExpectedPaymentType } from "@/lib/accounting-core";
 import { prisma } from "@/lib/prisma";
 
 type MoneyMap = Map<string, Prisma.Decimal>;
@@ -88,10 +89,6 @@ export function getReportMonths() {
 export function getReportYears() {
   const currentYear = new Date().getFullYear();
   return Array.from({ length: 7 }, (_, index) => currentYear - 3 + index);
-}
-
-function getExpectedPaymentType(invoiceType: "SALES" | "PURCHASE") {
-  return invoiceType === "SALES" ? "COLLECTION" : "PAYMENT";
 }
 
 function sumByCurrency<T extends { currency: string; amount: Prisma.Decimal }>(items: T[]) {

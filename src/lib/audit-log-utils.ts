@@ -1,4 +1,4 @@
-import type { AuditLog } from "@prisma/client";
+import type { AuditLog, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 
 export type AuditEntityType =
@@ -83,9 +83,11 @@ export const auditActionOptions = Object.entries(auditActionLabels).map(([value,
   label,
 }));
 
-export async function createAuditLog(input: AuditLogInput) {
+type PrismaClientLike = typeof prisma | Prisma.TransactionClient;
+
+export async function createAuditLog(input: AuditLogInput, client: PrismaClientLike = prisma) {
   try {
-    await prisma.auditLog.create({
+    await client.auditLog.create({
       data: {
         entityType: input.entityType,
         entityId: input.entityId || null,

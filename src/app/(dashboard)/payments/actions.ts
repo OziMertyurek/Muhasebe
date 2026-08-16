@@ -3,6 +3,10 @@
 import { PaymentMethod, PaymentType, Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import {
+  AccountingValidationError,
+  assertPaymentMatchesInvoice,
+} from "@/lib/accounting-core";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { updateInvoicePaymentStatus } from "@/lib/payment-status";
 import { prisma } from "@/lib/prisma";
@@ -70,11 +74,11 @@ async function parsePaymentForm(formData: FormData): Promise<{
   const methodValue = readText(formData, "method");
 
   if (!typeValue || !Object.values(PaymentType).includes(typeValue as PaymentType)) {
-    errors.type = "İşlem tipi seçilmeli.";
+    errors.type = "Islem tipi secilmeli.";
   }
 
   if (!methodValue || !Object.values(PaymentMethod).includes(methodValue as PaymentMethod)) {
-    errors.method = "Ödeme yöntemi seçilmeli.";
+    errors.method = "Odeme yontemi secilmeli.";
   }
 
   let amount: Prisma.Decimal | null = null;
@@ -85,9 +89,9 @@ async function parsePaymentForm(formData: FormData): Promise<{
     const numericAmount = Number(amountValue);
 
     if (Number.isNaN(numericAmount)) {
-      errors.amount = "Tutar sayı olmalı.";
+      errors.amount = "Tutar sayi olmali.";
     } else if (numericAmount <= 0) {
-      errors.amount = "Tutar 0'dan büyük olmalı.";
+      errors.amount = "Tutar 0'dan buyuk olmali.";
     } else {
       amount = new Prisma.Decimal(amountValue);
     }
@@ -96,7 +100,7 @@ async function parsePaymentForm(formData: FormData): Promise<{
   const paymentDate = parseDate(paymentDateValue);
 
   if (!paymentDate) {
-    errors.paymentDate = "Tarih boş olamaz.";
+    errors.paymentDate = "Tarih bos olamaz.";
   }
 
   let companyId = optionalText(companyIdValue);
@@ -108,7 +112,7 @@ async function parsePaymentForm(formData: FormData): Promise<{
     });
 
     if (!company) {
-      errors.companyId = "Silinmiş veya geçersiz cari seçilemez.";
+      errors.companyId = "Silinmis veya gecersiz cari secilemez.";
     }
   }
 
@@ -121,9 +125,9 @@ async function parsePaymentForm(formData: FormData): Promise<{
     });
 
     if (!invoice) {
-      errors.invoiceId = "Silinmiş veya geçersiz fatura seçilemez.";
+      errors.invoiceId = "Silinmis veya gecersiz fatura secilemez.";
     } else if (companyId && companyId !== invoice.companyId) {
-      errors.invoiceId = "Seçilen fatura ile cari firma uyumlu olmalı.";
+      errors.invoiceId = "Secilen fatura ile cari firma uyumlu olmali.";
     } else if (!companyId) {
       companyId = invoice.companyId;
     }
@@ -138,7 +142,7 @@ async function parsePaymentForm(formData: FormData): Promise<{
     });
 
     if (!financialAccount) {
-      errors.financialAccountId = "Geçerli bir finansal hesap seçin.";
+      errors.financialAccountId = "Gecerli bir finansal hesap secin.";
     }
   }
 
@@ -162,6 +166,53 @@ async function parsePaymentForm(formData: FormData): Promise<{
   };
 }
 
+async function assertPaymentIsSafeForInvoice(
+  tx: Prisma.TransactionClient,
+  data: PaymentPayload,
+  ignoredPaymentId?: string,
+) {
+  if (!data.invoiceId) {
+    return;
+  }
+
+  const invoice = await tx.invoice.findFirst({
+    where: { id: data.invoiceId, deletedAt: null, company: { deletedAt: null } },
+    select: {
+      id: true,
+      companyId: true,
+      type: true,
+      currency: true,
+      totalAmount: true,
+    },
+  });
+
+  if (!invoice) {
+    throw new AccountingValidationError("invoiceId", "Silinmis veya gecersiz fatura secilemez.");
+  }
+
+  const existingPayments = await tx.payment.findMany({
+    where: {
+      invoiceId: invoice.id,
+      deletedAt: null,
+      ...(ignoredPaymentId ? { id: { not: ignoredPaymentId } } : {}),
+    },
+    select: {
+      type: true,
+      amount: true,
+      currency: true,
+    },
+  });
+
+  assertPaymentMatchesInvoice(data, invoice, existingPayments);
+}
+
+function validationFailure(error: AccountingValidationError): PaymentFormState {
+  return {
+    errors: { [error.field]: error.message },
+    message: "Lutfen formdaki hatalari duzeltin.",
+  };
+}
+
 export async function createPaymentAction(
   _previousState: PaymentFormState,
   formData: FormData,
@@ -169,34 +220,43 @@ export async function createPaymentAction(
   const parsed = await parsePaymentForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "Lutfen formdaki hatalari duzeltin." };
   }
 
+  const data = parsed.data;
   let paymentId: string;
 
   try {
-    const payment = await prisma.payment.create({
-      data: parsed.data,
-      select: { id: true },
+    const payment = await prisma.$transaction(async (tx) => {
+      await assertPaymentIsSafeForInvoice(tx, data);
+      const createdPayment = await tx.payment.create({
+        data,
+        select: { id: true },
+      });
+      await updateInvoicePaymentStatus(data.invoiceId, tx);
+      return createdPayment;
     });
     paymentId = payment.id;
     await createAuditLog({
       entityType: "PAYMENT",
       entityId: paymentId,
       action: "CREATE",
-      title: `Para hareketi eklendi: ${parsed.data.amount.toString()} ${parsed.data.currency}`,
-      description: parsed.data.description ?? "Tahsilat / ödeme hareketi oluşturuldu.",
-      after: parsed.data,
+      title: `Para hareketi eklendi: ${data.amount.toString()} ${data.currency}`,
+      description: data.description ?? "Tahsilat / odeme hareketi olusturuldu.",
+      after: data,
     });
-    await updateInvoicePaymentStatus(parsed.data.invoiceId);
-  } catch {
-    return { message: "Para hareketi kaydedilirken bir hata oluştu." };
+  } catch (error) {
+    if (error instanceof AccountingValidationError) {
+      return validationFailure(error);
+    }
+
+    return { message: "Para hareketi kaydedilirken bir hata olustu." };
   }
 
   revalidatePath("/payments");
   revalidatePath("/invoices");
-  if (parsed.data.invoiceId) {
-    revalidatePath(`/invoices/${parsed.data.invoiceId}`);
+  if (data.invoiceId) {
+    revalidatePath(`/invoices/${data.invoiceId}`);
   }
   redirect(`/payments/${paymentId}`);
 }
@@ -209,43 +269,54 @@ export async function updatePaymentAction(
   const parsed = await parsePaymentForm(formData);
 
   if (!parsed.data) {
-    return { errors: parsed.errors, message: "Lütfen formdaki hataları düzeltin." };
+    return { errors: parsed.errors, message: "Lutfen formdaki hatalari duzeltin." };
   }
 
+  const data = parsed.data;
   let previousInvoiceId: string | null = null;
 
   try {
-    const existingPayment = await prisma.payment.findFirst({
-      where: { id: paymentId, deletedAt: null },
-    });
+    const existingPayment = await prisma.$transaction(async (tx) => {
+      const currentPayment = await tx.payment.findFirst({
+        where: { id: paymentId, deletedAt: null },
+      });
 
-    if (!existingPayment) {
-      return { message: "Düzenlenecek para hareketi bulunamadı." };
-    }
+      if (!currentPayment) {
+        throw new AccountingValidationError(
+          "invoiceId",
+          "Duzenlenecek para hareketi bulunamadi.",
+        );
+      }
 
-    previousInvoiceId = existingPayment.invoiceId;
+      previousInvoiceId = currentPayment.invoiceId;
+      await assertPaymentIsSafeForInvoice(tx, data, paymentId);
+      await tx.payment.update({
+        where: { id: paymentId, deletedAt: null },
+        data,
+        select: { id: true },
+      });
+      await updateInvoicePaymentStatus(previousInvoiceId, tx);
+      if (previousInvoiceId !== data.invoiceId) {
+        await updateInvoicePaymentStatus(data.invoiceId, tx);
+      }
 
-    await prisma.payment.update({
-      where: { id: paymentId, deletedAt: null },
-      data: parsed.data,
-      select: { id: true },
+      return currentPayment;
     });
     await createAuditLog({
       entityType: "PAYMENT",
       entityId: paymentId,
       action: "UPDATE",
-      title: `Para hareketi güncellendi: ${parsed.data.amount.toString()} ${parsed.data.currency}`,
-      description: parsed.data.description ?? "Tahsilat / ödeme hareketi güncellendi.",
+      title: `Para hareketi guncellendi: ${data.amount.toString()} ${data.currency}`,
+      description: data.description ?? "Tahsilat / odeme hareketi guncellendi.",
       before: existingPayment,
-      after: parsed.data,
+      after: data,
     });
-
-    await updateInvoicePaymentStatus(previousInvoiceId);
-    if (previousInvoiceId !== parsed.data.invoiceId) {
-      await updateInvoicePaymentStatus(parsed.data.invoiceId);
+  } catch (error) {
+    if (error instanceof AccountingValidationError) {
+      return validationFailure(error);
     }
-  } catch {
-    return { message: "Para hareketi güncellenirken bir hata oluştu." };
+
+    return { message: "Para hareketi guncellenirken bir hata olustu." };
   }
 
   revalidatePath("/payments");
@@ -254,8 +325,8 @@ export async function updatePaymentAction(
   if (previousInvoiceId) {
     revalidatePath(`/invoices/${previousInvoiceId}`);
   }
-  if (parsed.data.invoiceId) {
-    revalidatePath(`/invoices/${parsed.data.invoiceId}`);
+  if (data.invoiceId) {
+    revalidatePath(`/invoices/${data.invoiceId}`);
   }
   redirect(`/payments/${paymentId}`);
 }
@@ -264,17 +335,21 @@ export async function deletePaymentAction(paymentId: string) {
   let invoiceId: string | null = null;
 
   try {
-    const payment = await prisma.payment.update({
-      where: { id: paymentId, deletedAt: null },
-      data: { deletedAt: new Date() },
-      select: {
-        id: true,
-        invoiceId: true,
-        type: true,
-        amount: true,
-        currency: true,
-        description: true,
-      },
+    const payment = await prisma.$transaction(async (tx) => {
+      const deletedPayment = await tx.payment.update({
+        where: { id: paymentId, deletedAt: null },
+        data: { deletedAt: new Date() },
+        select: {
+          id: true,
+          invoiceId: true,
+          type: true,
+          amount: true,
+          currency: true,
+          description: true,
+        },
+      });
+      await updateInvoicePaymentStatus(deletedPayment.invoiceId, tx);
+      return deletedPayment;
     });
     invoiceId = payment.invoiceId;
     await createAuditLog({
@@ -282,10 +357,9 @@ export async function deletePaymentAction(paymentId: string) {
       entityId: payment.id,
       action: "SOFT_DELETE",
       title: `Para hareketi silindi: ${payment.amount.toString()} ${payment.currency}`,
-      description: "Kayıt çöp kutusuna taşındı.",
+      description: "Kayit cop kutusuna tasindi.",
       before: payment,
     });
-    await updateInvoicePaymentStatus(invoiceId);
   } catch {
     redirect(`/payments/${paymentId}?error=delete`);
   }
