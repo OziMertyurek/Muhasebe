@@ -27,6 +27,7 @@ const forbiddenArtifactEntries = [
   "scripts",
   "src",
   "storage",
+  "tests",
   path.join("prisma", "dev.db"),
   path.join("prisma", "dev.db-journal"),
   path.join("prisma", "dev.db.pin-reset-backup-20260724-104458.db"),
@@ -200,6 +201,27 @@ function copyPrismaSchema() {
   fs.copyFileSync(sourceSchemaPath, targetSchemaPath);
 }
 
+function copyPrismaMigrations() {
+  const sourceMigrationsPath = path.join(projectRoot, "prisma", "migrations");
+  const targetMigrationsPath = path.join(artifactDir, "prisma", "migrations");
+
+  if (!fs.existsSync(sourceMigrationsPath)) {
+    return;
+  }
+
+  copyDirectory(sourceMigrationsPath, targetMigrationsPath);
+}
+
+function copyPackageMetadata() {
+  for (const fileName of ["package.json", "package-lock.json"]) {
+    const sourcePath = path.join(projectRoot, fileName);
+
+    if (fs.existsSync(sourcePath)) {
+      fs.copyFileSync(sourcePath, path.join(artifactDir, fileName));
+    }
+  }
+}
+
 function failIfForbiddenFilesRemain() {
   const forbiddenPatterns = [
     /(^|[\\/])\.env($|[\\/])/,
@@ -216,6 +238,7 @@ function failIfForbiddenFilesRemain() {
     /^electron([\\/]|$)/,
     /^scripts([\\/]|$)/,
     /^src([\\/]|$)/,
+    /^tests([\\/]|$)/,
     /^python([\\/]|$)/,
     /^python-worker([\\/]|$)/,
     /(^|[\\/]).+\.bat$/,
@@ -279,7 +302,9 @@ rewriteStandaloneExternalAliases(standalonePackageAliases);
 copyDirectory(staticSourceDir, path.join(artifactDir, ".next", "static"));
 copyDirectory(publicSourceDir, path.join(artifactDir, "public"));
 fs.copyFileSync(startupSourcePath, path.join(artifactDir, "app.js"));
+copyPackageMetadata();
 copyPrismaSchema();
+copyPrismaMigrations();
 removeForbiddenEntries();
 writeArtifactMetadata();
 failIfForbiddenFilesRemain();

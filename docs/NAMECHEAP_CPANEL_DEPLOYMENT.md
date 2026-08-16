@@ -304,6 +304,38 @@ Current variables used by the repository:
 | `MARKITDOWN_PYTHON` | Optional AI runtime | Avoid for Phase 1 hosted smoke test. Future worker decision. |
 | `PYTHON_BUNDLE_SOURCE` | Electron packaging | Not hosted web. |
 
+## Phase 6 Document / AI Processing
+
+Hosted web startup must not depend on Python, MarkItDown, or a live external AI
+provider. On Namecheap shared hosting, use:
+
+```text
+DOCUMENT_PROCESSOR_MODE=HOSTED_SAFE
+DOCUMENT_PROCESSING_TIMEOUT_MS=30000
+```
+
+Optional names reserved for later provider work:
+
+```text
+DOCUMENT_UPLOAD_DIR=/home/ACCOUNT/avorayazilim-uploads
+DOCUMENT_AI_PROVIDER=disabled
+DOCUMENT_AI_API_BASE_URL=
+DOCUMENT_AI_MODEL=
+DOCUMENT_AI_API_KEY=
+```
+
+Do not commit real provider secrets. `HOSTED_SAFE` keeps normal accounting,
+inventory, file upload, and manual review screens available. AI extraction jobs
+show a Turkish unavailable/manual-review message and can be retried later. A
+failed AI job does not delete the uploaded source document and does not create
+accounting, stock, payment, or invoice data. `POSTED` AI jobs are terminal and
+remain linked to their created invoice.
+
+Local development can keep `DOCUMENT_PROCESSOR_MODE=LOCAL` to use the existing
+MarkItDown/Python path. `EXTERNAL_AI` is only an integration point for a future
+environment-configured provider; malformed provider output must be rejected and
+only review drafts may be created.
+
 Future variables not implemented yet:
 
 - Web auth secrets/session keys.

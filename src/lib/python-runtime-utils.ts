@@ -1,9 +1,7 @@
-import "server-only";
-
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import { isAbsolute, join } from "node:path";
-import { getProjectRoot } from "@/lib/app-paths";
+import { getProjectRoot } from "./app-paths.ts";
 
 export type PythonRuntimeSource =
   | "configured"

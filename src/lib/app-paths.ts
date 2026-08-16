@@ -1,5 +1,3 @@
-import "server-only";
-
 import { mkdir } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
@@ -30,7 +28,7 @@ export function getUploadsDir() {
     return getDesktopUploadsDir();
   }
 
-  return join(getProjectRoot(), "storage", "uploads");
+  return process.env.DOCUMENT_UPLOAD_DIR || join(getProjectRoot(), "storage", "uploads");
 }
 
 export function getRestoreBackupsDir() {

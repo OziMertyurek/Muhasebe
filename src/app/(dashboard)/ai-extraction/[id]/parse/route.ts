@@ -1,8 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { normalizeExtractedInvoiceDraft } from "@/lib/ai-invoice-extraction-core";
 import { createAuditLog } from "@/lib/audit-log-utils";
-import { parseInvoiceText } from "@/lib/invoice-parser";
+import { runInvoiceStructuredExtractionJob } from "@/lib/document-processing-service";
 import { prisma } from "@/lib/prisma";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
 
@@ -22,112 +21,57 @@ export async function POST(request: Request, { params }: ParseRouteContext) {
 
   const { id } = await params;
   const detailUrl = new URL(`/ai-extraction/${id}`, request.url);
-  const job = await prisma.aiExtractionJob.findFirst({
-    where: {
-      id,
-      deletedAt: null,
-      fileAttachment: { deletedAt: null },
-    },
-    select: {
-      id: true,
-      status: true,
-      rawExtractedText: true,
-      extractedJson: true,
-      errorMessage: true,
-      fileAttachmentId: true,
-      fileAttachment: {
-        select: {
-          originalFileName: true,
-        },
-      },
-    },
-  });
+  const result = await runInvoiceStructuredExtractionJob(prisma, id);
 
-  if (!job) {
+  if (result.ok) {
+    await createAuditLog({
+      entityType: "AI_EXTRACTION",
+      entityId: result.job.id,
+      action: "UPDATE",
+      title: "Fatura bilgileri metinden çıkarıldı",
+      description: `${result.job.fileAttachment.originalFileName} için fatura bilgileri çıkarıldı.`,
+      before: {
+        status: result.job.status,
+        extractedJson: result.job.extractedJson,
+        errorMessage: result.job.errorMessage,
+      },
+      after: {
+        status: result.updatedJob.status,
+        extractedJson: result.updatedJob.extractedJson,
+        fileAttachmentId: result.updatedJob.fileAttachmentId,
+        providerId: result.providerId,
+      },
+    });
+
+    revalidatePath("/ai-extraction");
+    revalidatePath(`/ai-extraction/${result.job.id}`);
+    detailUrl.searchParams.set("parsed", "1");
+    return NextResponse.redirect(detailUrl);
+  }
+
+  if (result.code === "not-found") {
     return NextResponse.redirect(new URL("/ai-extraction?error=not-found", request.url));
   }
 
-  if (!job.rawExtractedText?.trim()) {
-    detailUrl.searchParams.set("error", "parse-empty");
-    return NextResponse.redirect(detailUrl);
-  }
+  const failedSourceJob = "job" in result ? result.job : null;
 
-  try {
-    const parsedInvoice = parseInvoiceText(job.rawExtractedText);
-    const draft = normalizeExtractedInvoiceDraft(parsedInvoice as unknown as Record<string, unknown>);
-    const extractedJson = JSON.stringify(draft, null, 2);
-    const updatedJob = await prisma.aiExtractionJob.update({
-      where: { id: job.id },
-      data: {
-        extractedJson,
-        status: "COMPLETED",
-        errorMessage: null,
-      },
-      select: {
-        id: true,
-        status: true,
-        extractedJson: true,
-        fileAttachmentId: true,
-      },
-    });
-
+  if (failedSourceJob) {
     await createAuditLog({
       entityType: "AI_EXTRACTION",
-      entityId: job.id,
-      action: "UPDATE",
-      title: "Fatura bilgileri metinden çıkarıldı",
-      description: `${job.fileAttachment.originalFileName} için local parser ile fatura bilgileri çıkarıldı.`,
-      before: {
-        status: job.status,
-        extractedJson: job.extractedJson,
-        errorMessage: job.errorMessage,
-      },
-      after: {
-        status: updatedJob.status,
-        extractedJson: updatedJob.extractedJson,
-        fileAttachmentId: updatedJob.fileAttachmentId,
-      },
-    });
-
-    revalidatePath("/ai-extraction");
-    revalidatePath(`/ai-extraction/${job.id}`);
-    detailUrl.searchParams.set("parsed", "1");
-    return NextResponse.redirect(detailUrl);
-  } catch (error) {
-    const message =
-      error instanceof Error
-        ? `Fatura bilgileri çıkarılırken hata oluştu: ${error.message}`
-        : "Fatura bilgileri çıkarılırken beklenmeyen bir hata oluştu.";
-
-    const failedJob = await prisma.aiExtractionJob.update({
-      where: { id: job.id },
-      data: {
-        errorMessage: message,
-      },
-      select: {
-        id: true,
-        status: true,
-        errorMessage: true,
-        fileAttachmentId: true,
-      },
-    });
-
-    await createAuditLog({
-      entityType: "AI_EXTRACTION",
-      entityId: job.id,
+      entityId: failedSourceJob.id,
       action: "UPDATE",
       title: "Fatura bilgileri çıkarma hatası",
-      description: message,
+      description: result.message,
       before: {
-        status: job.status,
-        errorMessage: job.errorMessage,
+        status: failedSourceJob.status,
+        errorMessage: failedSourceJob.errorMessage,
       },
-      after: failedJob,
+      after: "failedJob" in result ? result.failedJob : { errorMessage: result.message },
     });
-
-    revalidatePath("/ai-extraction");
-    revalidatePath(`/ai-extraction/${job.id}`);
-    detailUrl.searchParams.set("error", "parse");
-    return NextResponse.redirect(detailUrl);
   }
+
+  revalidatePath("/ai-extraction");
+  revalidatePath(`/ai-extraction/${id}`);
+  detailUrl.searchParams.set("error", result.code);
+  return NextResponse.redirect(detailUrl);
 }

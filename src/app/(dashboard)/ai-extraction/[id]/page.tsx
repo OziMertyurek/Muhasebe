@@ -11,6 +11,7 @@ import {
   formatConfidence,
 } from "@/lib/ai-extraction-utils";
 import { formatDate } from "@/lib/company-utils";
+import { getDocumentProcessorMode, getProcessingUnavailableMessage } from "@/lib/document-processing-providers";
 import { fileRelatedTypeLabels, formatFileSize, getFileKind } from "@/lib/file-utils";
 import { calculateCurrentStock } from "@/lib/inventory-core";
 import { productUnitOptions } from "@/lib/product-utils";
@@ -214,6 +215,7 @@ export default async function AiExtractionDetailPage({
     ? draft.review.invoiceType
     : "";
   const postingReadiness = getPostingReadiness(job, draft, selectedCompanyId, invoiceType);
+  const processorMode = getDocumentProcessorMode();
 
   return (
     <div className="space-y-6">
@@ -259,6 +261,12 @@ export default async function AiExtractionDetailPage({
             : "border-[#e8c4bf] bg-[#fff7f5] text-[#8b2f28]"
         }`}>
           {notice.text}
+        </div>
+      ) : null}
+
+      {processorMode !== "LOCAL" && !job.postedInvoiceId ? (
+        <div className="rounded-md border border-[#ead7a4] bg-[#fffaf0] px-4 py-3 text-sm font-medium text-[#6f5220]">
+          {getProcessingUnavailableMessage()}
         </div>
       ) : null}
 

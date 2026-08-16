@@ -1,18 +1,14 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import { mkdir, writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { FileRelatedType } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
-  getSafeFileExtension,
   isAllowedUploadType,
   maxUploadSize,
 } from "@/lib/file-utils";
-import { getUploadsDir } from "@/lib/app-paths";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { saveUploadedDocument } from "@/lib/document-storage";
 import { prisma } from "@/lib/prisma";
 import { requireLocalAuth } from "@/lib/security-utils";
 
@@ -164,26 +160,21 @@ export async function uploadFileAction(
     };
   }
 
-  const extension = getSafeFileExtension(fileValue.name, fileValue.type, relatedType);
-  const storedFileName = `${randomUUID()}${extension}`;
-  const uploadDirectory = getUploadsDir();
-  const absolutePath = join(uploadDirectory, storedFileName);
-  const relativePath = `storage/uploads/${storedFileName}`;
-
   let fileId: string;
 
   try {
-    await mkdir(uploadDirectory, { recursive: true });
-    const buffer = Buffer.from(await fileValue.arrayBuffer());
-    await writeFile(absolutePath, buffer);
+    const storedDocument = await saveUploadedDocument({
+      file: fileValue,
+      relatedType,
+    });
 
     const file = await prisma.fileAttachment.create({
       data: {
-        originalFileName: fileValue.name,
-        storedFileName,
-        filePath: relativePath,
-        mimeType: fileValue.type || null,
-        fileSize: fileValue.size,
+        originalFileName: storedDocument.originalFileName,
+        storedFileName: storedDocument.storedFileName,
+        filePath: storedDocument.filePath,
+        mimeType: storedDocument.mimeType,
+        fileSize: storedDocument.fileSize,
         relatedType,
         ...relation,
       },
@@ -197,9 +188,11 @@ export async function uploadFileAction(
       title: `Dosya yüklendi: ${fileValue.name}`,
       description: "Dosya arşivine yeni ek yüklendi.",
       after: {
-        originalFileName: fileValue.name,
-        mimeType: fileValue.type || null,
-        fileSize: fileValue.size,
+        originalFileName: storedDocument.originalFileName,
+        storedFileName: storedDocument.storedFileName,
+        filePath: storedDocument.filePath,
+        mimeType: storedDocument.mimeType,
+        fileSize: storedDocument.fileSize,
         relatedType,
         ...relation,
       },

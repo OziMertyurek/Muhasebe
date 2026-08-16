@@ -1,7 +1,7 @@
 import type { FileAttachment } from "@prisma/client";
-import { join } from "node:path";
-import { getPythonWorkerScriptPath, getUploadsDir } from "@/lib/app-paths";
-import { resolvePythonRuntime } from "@/lib/python-runtime-utils";
+import { getPythonWorkerScriptPath } from "./app-paths.ts";
+import { resolveStoredDocumentPath } from "./document-storage.ts";
+import { resolvePythonRuntime } from "./python-runtime-utils.ts";
 
 type MarkItDownFile = Pick<
   FileAttachment,
@@ -61,9 +61,11 @@ export async function extractMarkdownFromFileAttachment(
     };
   }
 
-  const resolvedFilePath = resolveUploadPath(file.filePath);
+  let resolvedFilePath: string;
 
-  if (!resolvedFilePath) {
+  try {
+    resolvedFilePath = resolveStoredDocumentPath(file.filePath);
+  } catch {
     return {
       ok: false,
       error: "Dosya yolu guvenli degil veya upload klasoru disinda gorunuyor.",
@@ -93,27 +95,6 @@ export async function extractMarkdownFromFileAttachment(
   }
 
   return runMarkItDownWorker(pythonRuntime.command, scriptPath, resolvedFilePath);
-}
-
-function resolveUploadPath(filePath: string) {
-  const normalizedFilePath = filePath.replace(/\\/g, "/");
-  const uploadPrefix = "storage/uploads/";
-
-  if (!normalizedFilePath.startsWith(uploadPrefix)) {
-    return null;
-  }
-
-  const uploadRelativePath = normalizedFilePath.slice(uploadPrefix.length);
-  const pathParts = uploadRelativePath.split("/").filter(Boolean);
-
-  if (
-    pathParts.length === 0 ||
-    pathParts.some((part) => part === "." || part === ".." || part.includes(":"))
-  ) {
-    return null;
-  }
-
-  return join(getUploadsDir(), ...pathParts);
 }
 
 function getFileExtension(fileName: string) {

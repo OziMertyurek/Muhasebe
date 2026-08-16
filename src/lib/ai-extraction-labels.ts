@@ -3,9 +3,9 @@ import type { AiExtractionStatus, FileRelatedType } from "@prisma/client";
 export const aiExtractionStatusLabels: Record<AiExtractionStatus, string> = {
   PENDING: "Bekliyor",
   PROCESSING: "İşleniyor",
-  COMPLETED: "Tamamlandı",
+  COMPLETED: "İnceleme Hazır",
   FAILED: "Hata",
-  REVIEWED: "İncelendi",
+  REVIEWED: "İnceleme Tamamlandı",
   POSTED: "Faturaya Kaydedildi",
 };
 

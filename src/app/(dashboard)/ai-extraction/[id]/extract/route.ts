@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { createAuditLog } from "@/lib/audit-log-utils";
-import { extractMarkdownFromFileAttachment } from "@/lib/markitdown-utils";
+import { runTextExtractionJob } from "@/lib/document-processing-service";
 import { prisma } from "@/lib/prisma";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
 
@@ -21,109 +21,57 @@ export async function POST(request: Request, { params }: ExtractRouteContext) {
 
   const { id } = await params;
   const detailUrl = new URL(`/ai-extraction/${id}`, request.url);
-  const job = await prisma.aiExtractionJob.findFirst({
-    where: {
-      id,
-      deletedAt: null,
-      fileAttachment: { deletedAt: null },
-    },
-    include: {
-      fileAttachment: {
-        select: {
-          id: true,
-          filePath: true,
-          mimeType: true,
-          originalFileName: true,
-          relatedType: true,
-        },
-      },
-    },
-  });
-
-  if (!job) {
-    return NextResponse.redirect(new URL("/ai-extraction?error=not-found", request.url));
-  }
-
-  await prisma.aiExtractionJob.update({
-    where: { id: job.id },
-    data: {
-      status: "PROCESSING",
-      errorMessage: null,
-    },
-    select: { id: true },
-  });
-
-  const result = await extractMarkdownFromFileAttachment(job.fileAttachment);
+  const result = await runTextExtractionJob(prisma, id);
 
   if (result.ok) {
-    const updatedJob = await prisma.aiExtractionJob.update({
-      where: { id: job.id },
-      data: {
-        rawExtractedText: result.text,
-        status: "COMPLETED",
-        errorMessage: null,
-      },
-      select: {
-        id: true,
-        status: true,
-        rawExtractedText: true,
-        fileAttachmentId: true,
-      },
-    });
-
     await createAuditLog({
       entityType: "AI_EXTRACTION",
-      entityId: job.id,
+      entityId: result.job.id,
       action: "UPDATE",
-      title: "MarkItDown ile metin çıkarıldı",
-      description: `${job.fileAttachment.originalFileName} dosyasından metin çıkarıldı.`,
+      title: "Belgeden metin çıkarıldı",
+      description: `${result.job.fileAttachment.originalFileName} dosyasından metin çıkarıldı.`,
       before: {
-        status: job.status,
-        rawExtractedText: job.rawExtractedText,
-        errorMessage: job.errorMessage,
+        status: result.job.status,
+        rawExtractedText: result.job.rawExtractedText,
+        errorMessage: result.job.errorMessage,
       },
       after: {
-        status: updatedJob.status,
-        textLength: updatedJob.rawExtractedText?.length ?? 0,
-        fileAttachmentId: updatedJob.fileAttachmentId,
+        status: result.updatedJob.status,
+        textLength: result.updatedJob.rawExtractedText?.length ?? 0,
+        fileAttachmentId: result.updatedJob.fileAttachmentId,
+        providerId: result.providerId,
       },
     });
 
     revalidatePath("/ai-extraction");
-    revalidatePath(`/ai-extraction/${job.id}`);
+    revalidatePath(`/ai-extraction/${result.job.id}`);
     detailUrl.searchParams.set("extracted", "1");
     return NextResponse.redirect(detailUrl);
   }
 
-  const failedJob = await prisma.aiExtractionJob.update({
-    where: { id: job.id },
-    data: {
-      status: "FAILED",
-      errorMessage: result.error,
-    },
-    select: {
-      id: true,
-      status: true,
-      errorMessage: true,
-      fileAttachmentId: true,
-    },
-  });
+  if (result.code === "not-found") {
+    return NextResponse.redirect(new URL("/ai-extraction?error=not-found", request.url));
+  }
 
-  await createAuditLog({
-    entityType: "AI_EXTRACTION",
-    entityId: job.id,
-    action: "STATUS_CHANGE",
-    title: "MarkItDown metin çıkarma hatası",
-    description: result.error,
-    before: {
-      status: job.status,
-      errorMessage: job.errorMessage,
-    },
-    after: failedJob,
-  });
+  const failedSourceJob = "job" in result ? result.job : null;
+
+  if (failedSourceJob) {
+    await createAuditLog({
+      entityType: "AI_EXTRACTION",
+      entityId: failedSourceJob.id,
+      action: "STATUS_CHANGE",
+      title: "Belge metni çıkarma hatası",
+      description: result.message,
+      before: {
+        status: failedSourceJob.status,
+        errorMessage: failedSourceJob.errorMessage,
+      },
+      after: "failedJob" in result ? result.failedJob : { errorMessage: result.message },
+    });
+  }
 
   revalidatePath("/ai-extraction");
-  revalidatePath(`/ai-extraction/${job.id}`);
-  detailUrl.searchParams.set("error", "markitdown");
+  revalidatePath(`/ai-extraction/${id}`);
+  detailUrl.searchParams.set("error", result.code);
   return NextResponse.redirect(detailUrl);
 }

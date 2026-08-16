@@ -13,6 +13,7 @@ import {
   hasExtractionError,
 } from "@/lib/ai-extraction-utils";
 import { formatDate } from "@/lib/company-utils";
+import { getDocumentProcessorMode, getProcessingUnavailableMessage } from "@/lib/document-processing-providers";
 import { prisma } from "@/lib/prisma";
 
 type AiExtractionPageProps = {
@@ -66,6 +67,7 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
   const query = params?.q?.trim() ?? "";
   const status = getStatus(params?.status);
   const relatedType = getRelatedType(params?.relatedType);
+  const processorMode = getDocumentProcessorMode();
   const jobs = await prisma.aiExtractionJob.findMany({
     where: {
       deletedAt: null,
@@ -100,6 +102,11 @@ export default async function AiExtractionPage({ searchParams }: AiExtractionPag
 PDF ve görsel faturaların metnini çıkarın, parser sonucunu kontrol edin ve cari
             eşleşmesini güvenle onaylayın.
           </p>
+          {processorMode !== "LOCAL" ? (
+            <p className="mt-2 max-w-2xl rounded-md border border-[#ead7a4] bg-[#fffaf0] px-3 py-2 text-sm leading-6 text-[#6f5220]">
+              {getProcessingUnavailableMessage()}
+            </p>
+          ) : null}
         </div>
         <Link
           href="/ai-extraction/new"
