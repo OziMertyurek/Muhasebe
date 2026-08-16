@@ -68,6 +68,23 @@ export default async function ProductDetailPage({
     notFound();
   }
 
+  const invoiceReferenceIds = Array.from(
+    new Set(
+      product.stockMovements
+        .filter((movement) => movement.referenceType === "INVOICE" && movement.referenceId)
+        .map((movement) => movement.referenceId as string),
+    ),
+  );
+  const invoiceReferences = invoiceReferenceIds.length > 0
+    ? await prisma.invoice.findMany({
+        where: { id: { in: invoiceReferenceIds } },
+        select: { id: true, invoiceNumber: true },
+      })
+    : [];
+  const invoiceReferencesById = new Map(
+    invoiceReferences.map((invoice) => [invoice.id, invoice.invoiceNumber]),
+  );
+
   const currentStock = calculateCurrentStock(product.stockMovements);
   const stockState = getMinimumStockState(currentStock, product.minimumStockLevel);
 
@@ -192,7 +209,12 @@ export default async function ProductDetailPage({
                 </tr>
               </thead>
               <tbody>
-                {product.stockMovements.map((movement) => (
+                {product.stockMovements.map((movement) => {
+                  const invoiceNumber = movement.referenceId
+                    ? invoiceReferencesById.get(movement.referenceId)
+                    : null;
+
+                  return (
                   <tr key={movement.id} className="border-t border-[#e5e9e5]">
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatProductDate(movement.movementDate)}
@@ -204,13 +226,23 @@ export default async function ProductDetailPage({
                       {formatQuantity(movement.quantity)} {productUnitLabels[product.unit]}
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">
-                      {movement.referenceId ?? movement.referenceType}
+                      {invoiceNumber && movement.referenceId ? (
+                        <Link
+                          href={`/invoices/${movement.referenceId}`}
+                          className="font-semibold text-[#1f6f54] hover:text-[#195d47]"
+                        >
+                          {invoiceNumber}
+                        </Link>
+                      ) : (
+                        movement.referenceId ?? movement.referenceType
+                      )}
                     </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatPlainValue(movement.note)}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

@@ -2,14 +2,18 @@ import Link from "next/link";
 import { ArrowLeft, Plus } from "lucide-react";
 import { createInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { InvoiceForm } from "@/components/invoices/invoice-form";
+import { getInvoiceProductOptions } from "@/lib/invoice-product-options";
 import { prisma } from "@/lib/prisma";
 
 export default async function NewInvoicePage() {
-  const companies = await prisma.company.findMany({
-    where: { deletedAt: null },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const [companies, products] = await Promise.all([
+    prisma.company.findMany({
+      where: { deletedAt: null },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    getInvoiceProductOptions(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -47,6 +51,7 @@ export default async function NewInvoicePage() {
         <InvoiceForm
           action={createInvoiceAction}
           companies={companies}
+          products={products}
           lineItemsEnabled
           submitLabel="Faturayı kaydet"
         />

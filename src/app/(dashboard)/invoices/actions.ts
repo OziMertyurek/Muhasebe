@@ -17,6 +17,11 @@ import {
   type InvoiceLineCalculationInput,
   type InvoiceLineCalculationResult,
 } from "@/lib/invoice-line-item-utils";
+import {
+  InvoiceStockValidationError,
+  reconcileInvoiceStockMovements,
+  type InvoiceStockLineInput,
+} from "@/lib/invoice-stock-utils";
 import { prisma } from "@/lib/prisma";
 
 export type InvoiceFormState = {
@@ -141,6 +146,7 @@ function parseInvoiceLineItems(formData: FormData): {
   lines?: InvoiceLineCalculationInput[];
   calculatedLines?: InvoiceLineCalculationResult[];
   units?: ProductUnit[];
+  productIds?: Array<string | null>;
   errors: InvoiceFormErrors;
 } {
   const errors: InvoiceFormErrors = {};
@@ -186,6 +192,14 @@ function parseInvoiceLineItems(formData: FormData): {
 
     return Object.values(ProductUnit).includes(unit as ProductUnit) ? unit as ProductUnit : "ADET";
   });
+  const productIds = parsed.map((item): string | null => {
+    const record = item && typeof item === "object" && !Array.isArray(item)
+      ? item as Record<string, unknown>
+      : {};
+    const productId = typeof record.productId === "string" ? record.productId.trim() : "";
+
+    return productId || null;
+  });
   const validationErrors = validateInvoiceLines(lines);
 
   if (validationErrors.length > 0) {
@@ -193,12 +207,12 @@ function parseInvoiceLineItems(formData: FormData): {
       .map((error) => error.message)
       .filter((message, index, messages) => messages.indexOf(message) === index)
       .join(" ");
-    return { lines, units, errors };
+    return { lines, units, productIds, errors };
   }
 
   const calculatedLines = lines.map(calculateInvoiceLine);
 
-  return { lines, calculatedLines, units, errors };
+  return { lines, calculatedLines, units, productIds, errors };
 }
 
 function toDecimalInput(value: unknown) {
@@ -206,6 +220,13 @@ function toDecimalInput(value: unknown) {
 }
 
 function validationFailure(error: AccountingValidationError): InvoiceFormState {
+  return {
+    errors: { [error.field]: error.message },
+    message: "Lutfen formdaki hatalari duzeltin.",
+  };
+}
+
+function stockValidationFailure(error: InvoiceStockValidationError): InvoiceFormState {
   return {
     errors: { [error.field]: error.message },
     message: "Lutfen formdaki hatalari duzeltin.",
@@ -261,7 +282,7 @@ export async function createInvoiceAction(
         });
       }
 
-      return tx.invoice.create({
+      const invoice = await tx.invoice.create({
         data: {
           ...header,
           status: "UNPAID",
@@ -269,18 +290,6 @@ export async function createInvoiceAction(
           vatAmount: totals.vatAmount,
           discountAmount: totals.discountAmount,
           totalAmount: totals.totalAmount,
-          items: {
-            create: calculatedLines.map((line, index) => ({
-              description: line.description,
-              quantity: line.quantity,
-              unit: parsedLineItems.units?.[index] ?? "ADET",
-              unitPrice: line.unitPrice,
-              vatRate: line.vatRate,
-              discountAmount: line.discountAmount,
-              lineTotal: line.lineTotal,
-              sortOrder: index,
-            })),
-          },
         },
         select: {
           id: true,
@@ -292,6 +301,50 @@ export async function createInvoiceAction(
           deletedAt: true,
         },
       });
+
+      const stockLines: InvoiceStockLineInput[] = [];
+
+      for (const [index, line] of calculatedLines.entries()) {
+        const item = await tx.invoiceItem.create({
+          data: {
+            invoiceId: invoice.id,
+            productId: parsedLineItems.productIds?.[index] ?? null,
+            description: line.description,
+            quantity: line.quantity,
+            unit: parsedLineItems.units?.[index] ?? "ADET",
+            unitPrice: line.unitPrice,
+            vatRate: line.vatRate,
+            discountAmount: line.discountAmount,
+            lineTotal: line.lineTotal,
+            sortOrder: index,
+          },
+          select: {
+            id: true,
+            productId: true,
+            quantity: true,
+            unit: true,
+            description: true,
+          },
+        });
+
+        stockLines.push({
+          invoiceItemId: item.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          unit: item.unit,
+          description: item.description,
+        });
+      }
+
+      await reconcileInvoiceStockMovements(tx, {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceType: invoice.type,
+        invoiceDate: header.invoiceDate,
+        lines: stockLines,
+      });
+
+      return invoice;
     });
     invoiceId = createdInvoice.id;
     await createAuditLog({
@@ -314,6 +367,9 @@ export async function createInvoiceAction(
   } catch (error) {
     if (error instanceof InvoiceCreateValidationError) {
       return error.state;
+    }
+    if (error instanceof InvoiceStockValidationError) {
+      return stockValidationFailure(error);
     }
 
     return { message: "Fatura kaydi olusturulurken bir hata olustu." };
@@ -386,7 +442,6 @@ export async function updateInvoiceAction(
         existingInvoice.payments,
       );
 
-      await tx.invoiceItem.deleteMany({ where: { invoiceId } });
       const updatedInvoice = await tx.invoice.update({
         where: { id: invoiceId, deletedAt: null },
         data: {
@@ -396,18 +451,6 @@ export async function updateInvoiceAction(
           vatAmount: totals.vatAmount,
           discountAmount: totals.discountAmount,
           totalAmount: totals.totalAmount,
-          items: {
-            create: calculatedLines.map((line, index) => ({
-              description: line.description,
-              quantity: line.quantity,
-              unit: parsedLineItems.units?.[index] ?? "ADET",
-              unitPrice: line.unitPrice,
-              vatRate: line.vatRate,
-              discountAmount: line.discountAmount,
-              lineTotal: line.lineTotal,
-              sortOrder: index,
-            })),
-          },
         },
         select: {
           id: true,
@@ -419,6 +462,56 @@ export async function updateInvoiceAction(
           deletedAt: true,
         },
       });
+
+      const oldInvoiceItemIds = existingInvoice.items.map((item) => item.id);
+      const stockLines: InvoiceStockLineInput[] = [];
+
+      for (const [index, line] of calculatedLines.entries()) {
+        const item = await tx.invoiceItem.create({
+          data: {
+            invoiceId,
+            productId: parsedLineItems.productIds?.[index] ?? null,
+            description: line.description,
+            quantity: line.quantity,
+            unit: parsedLineItems.units?.[index] ?? "ADET",
+            unitPrice: line.unitPrice,
+            vatRate: line.vatRate,
+            discountAmount: line.discountAmount,
+            lineTotal: line.lineTotal,
+            sortOrder: index,
+          },
+          select: {
+            id: true,
+            productId: true,
+            quantity: true,
+            unit: true,
+            description: true,
+          },
+        });
+
+        stockLines.push({
+          invoiceItemId: item.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          unit: item.unit,
+          description: item.description,
+        });
+      }
+
+      await reconcileInvoiceStockMovements(tx, {
+        invoiceId: updatedInvoice.id,
+        invoiceNumber: updatedInvoice.invoiceNumber,
+        invoiceType: updatedInvoice.type,
+        invoiceDate: header.invoiceDate,
+        lines: nextStatus === "CANCELLED" ? [] : stockLines,
+        oldInvoiceItemIds,
+      });
+
+      if (oldInvoiceItemIds.length > 0) {
+        await tx.invoiceItem.deleteMany({
+          where: { id: { in: oldInvoiceItemIds } },
+        });
+      }
 
       return {
         before: existingInvoice,
@@ -448,6 +541,9 @@ export async function updateInvoiceAction(
     if (error instanceof AccountingValidationError) {
       return validationFailure(error);
     }
+    if (error instanceof InvoiceStockValidationError) {
+      return stockValidationFailure(error);
+    }
 
     return { message: "Fatura kaydi guncellenirken bir hata olustu." };
   }
@@ -458,21 +554,46 @@ export async function updateInvoiceAction(
 
 export async function deleteInvoiceAction(invoiceId: string) {
   try {
-    const invoice = await prisma.invoice.update({
-      where: { id: invoiceId, deletedAt: null },
-      data: { deletedAt: new Date() },
-      select: {
-        id: true,
-        invoiceNumber: true,
-        type: true,
-        dueDate: true,
-        status: true,
-        companyId: true,
-        deletedAt: true,
-        totalAmount: true,
-        currency: true,
-      },
+    const invoice = await prisma.$transaction(async (tx) => {
+      const existingInvoice = await tx.invoice.findFirst({
+        where: { id: invoiceId, deletedAt: null },
+        include: {
+          items: { select: { id: true } },
+        },
+      });
+
+      if (!existingInvoice) {
+        throw new Error("Invoice not found.");
+      }
+
+      const itemIds = existingInvoice.items.map((item) => item.id);
+
+      await reconcileInvoiceStockMovements(tx, {
+        invoiceId: existingInvoice.id,
+        invoiceNumber: existingInvoice.invoiceNumber,
+        invoiceType: existingInvoice.type,
+        invoiceDate: existingInvoice.invoiceDate,
+        lines: [],
+        oldInvoiceItemIds: itemIds,
+      });
+
+      return tx.invoice.update({
+        where: { id: invoiceId, deletedAt: null },
+        data: { deletedAt: new Date() },
+        select: {
+          id: true,
+          invoiceNumber: true,
+          type: true,
+          dueDate: true,
+          status: true,
+          companyId: true,
+          deletedAt: true,
+          totalAmount: true,
+          currency: true,
+        },
+      });
     });
+
     await syncInvoiceDueReminder(invoice);
     await createAuditLog({
       entityType: "INVOICE",

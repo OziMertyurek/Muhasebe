@@ -42,6 +42,9 @@ export default async function InvoiceDetailPage({
       },
       items: {
         orderBy: { sortOrder: "asc" },
+        include: {
+          product: { select: { id: true, name: true, sku: true } },
+        },
       },
       files: {
         orderBy: { uploadedAt: "desc" },
@@ -189,10 +192,11 @@ export default async function InvoiceDetailPage({
           </p>
         ) : (
           <div className="mt-5 overflow-x-auto">
-            <table className="min-w-[920px] w-full border-collapse text-left text-sm">
+            <table className="min-w-[1040px] w-full border-collapse text-left text-sm">
               <thead className="bg-[#f5f7f3] text-xs font-semibold uppercase tracking-[0.08em] text-[#607167]">
                 <tr>
                   <th className="px-4 py-3">Açıklama</th>
+                  <th className="px-4 py-3">Urun</th>
                   <th className="px-4 py-3">Miktar</th>
                   <th className="px-4 py-3">Birim fiyat</th>
                   <th className="px-4 py-3">İndirim</th>
@@ -204,6 +208,18 @@ export default async function InvoiceDetailPage({
                 {invoice.items.map((item) => (
                   <tr key={item.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 font-semibold text-[#16201b]">{item.description}</td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {item.product ? (
+                        <Link
+                          href={`/products/${item.product.id}`}
+                          className="font-semibold text-[#1f6f54] hover:text-[#195d47]"
+                        >
+                          {item.product.sku} - {item.product.name}
+                        </Link>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {item.quantity.toString()} {productUnitLabels[item.unit]}
                     </td>

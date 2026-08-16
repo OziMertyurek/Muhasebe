@@ -4,8 +4,9 @@ import type { Company, InvoiceStatus, InvoiceType, ProductUnit } from "@prisma/c
 import { useActionState, useMemo, useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import type { InvoiceFormState } from "@/app/(dashboard)/invoices/actions";
+import type { InvoiceProductOption } from "@/lib/invoice-product-options";
 import { invoiceStatusOptions, invoiceTypeOptions } from "@/lib/invoice-utils";
-import { productUnitOptions } from "@/lib/product-utils";
+import { productUnitLabels, productUnitOptions } from "@/lib/product-utils";
 
 type InvoiceCompanyOption = Pick<Company, "id" | "name">;
 
@@ -26,6 +27,7 @@ type InvoiceFormValues = {
 
 type InvoiceLineFormValue = {
   id: string;
+  productId: string;
   description: string;
   quantity: string;
   unit: ProductUnit;
@@ -37,6 +39,7 @@ type InvoiceLineFormValue = {
 type InvoiceFormProps = {
   action: (state: InvoiceFormState, formData: FormData) => Promise<InvoiceFormState>;
   companies: InvoiceCompanyOption[];
+  products?: InvoiceProductOption[];
   submitLabel: string;
   initialValues?: InvoiceFormValues;
   initialLineItems?: InvoiceLineFormValue[];
@@ -48,6 +51,7 @@ const initialState: InvoiceFormState = {};
 function createEmptyLine(id = "line-1"): InvoiceLineFormValue {
   return {
     id,
+    productId: "",
     description: "",
     quantity: "",
     unit: "ADET",
@@ -104,6 +108,14 @@ function formatPreviewMoney(value: number, currency: string) {
   }
 }
 
+function formatQuantityText(value: string) {
+  const parsed = Number(value);
+
+  return new Intl.NumberFormat("tr-TR", {
+    maximumFractionDigits: 4,
+  }).format(Number.isFinite(parsed) ? parsed : 0);
+}
+
 function calculatePreviewLine(line: InvoiceLineFormValue) {
   const quantity = parsePreviewNumber(line.quantity);
   const unitPrice = parsePreviewNumber(line.unitPrice);
@@ -125,6 +137,7 @@ function calculatePreviewLine(line: InvoiceLineFormValue) {
 export function InvoiceForm({
   action,
   companies,
+  products = [],
   submitLabel,
   initialValues,
   initialLineItems,
@@ -135,10 +148,16 @@ export function InvoiceForm({
     initialLineItems && initialLineItems.length > 0 ? initialLineItems : [createEmptyLine()],
   );
   const [currency, setCurrency] = useState(initialValues?.currency ?? "TRY");
+  const [selectedType, setSelectedType] = useState<InvoiceType | "">(initialValues?.type ?? "");
+  const productsById = useMemo(
+    () => new Map(products.map((product) => [product.id, product])),
+    [products],
+  );
   const lineItemsPayload = useMemo(
     () =>
       JSON.stringify(
         lines.map((line, index) => ({
+          productId: line.productId,
           description: line.description,
           quantity: line.quantity,
           unit: line.unit,
@@ -179,6 +198,37 @@ export function InvoiceForm({
             }
           : line,
       ),
+    );
+  }
+
+  function selectProduct(lineId: string, productId: string) {
+    const product = productsById.get(productId);
+
+    setLines((currentLines) =>
+      currentLines.map((line) => {
+        if (line.id !== lineId) {
+          return line;
+        }
+
+        if (!product) {
+          return {
+            ...line,
+            productId: "",
+          };
+        }
+
+        return {
+          ...line,
+          productId,
+          description: product.name,
+          unit: product.unit,
+          unitPrice:
+            selectedType === "PURCHASE"
+              ? product.defaultPurchasePrice
+              : product.defaultSalesPrice,
+          vatRate: product.defaultVatRate,
+        };
+      }),
     );
   }
 
@@ -231,7 +281,8 @@ export function InvoiceForm({
             Fatura tipi
             <select
               name="type"
-              defaultValue={initialValues?.type ?? ""}
+              value={selectedType}
+              onChange={(event) => setSelectedType(event.target.value as InvoiceType | "")}
               className={fieldClass(Boolean(state.errors?.type))}
               required
             >
@@ -395,13 +446,36 @@ export function InvoiceForm({
           <div className="mt-5 space-y-3">
             {lines.map((line, index) => {
               const previewLine = calculatePreviewLine(line);
+              const selectedProduct = productsById.get(line.productId);
 
               return (
                 <div
                   key={line.id}
                   className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-3"
                 >
-                  <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_96px_104px_120px_96px_120px_104px_auto]">
+                  <div className="grid gap-3 lg:grid-cols-[minmax(180px,0.9fr)_minmax(220px,1.1fr)_96px_104px_120px_96px_120px_104px_auto]">
+                    <label className="block min-w-0 text-sm font-semibold text-[#46534b]">
+                      Urun
+                      <select
+                        value={line.productId}
+                        onChange={(event) => selectProduct(line.id, event.target.value)}
+                        className={fieldClass()}
+                      >
+                        <option value="">Serbest satir</option>
+                        {products.map((product) => (
+                          <option key={product.id} value={product.id}>
+                            {product.sku} - {product.name}
+                          </option>
+                        ))}
+                      </select>
+                      {selectedProduct ? (
+                        <p className="mt-1.5 text-xs font-medium text-[#607167]">
+                          Stok: {formatQuantityText(selectedProduct.availableStock)}{" "}
+                          {productUnitLabels[selectedProduct.unit]}
+                        </p>
+                      ) : null}
+                    </label>
+
                     <label className="block min-w-0 text-sm font-semibold text-[#46534b]">
                       Açıklama
                       <input

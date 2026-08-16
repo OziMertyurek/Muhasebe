@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { updateInvoiceAction } from "@/app/(dashboard)/invoices/actions";
 import { InvoiceForm } from "@/components/invoices/invoice-form";
+import { getInvoiceProductOptions } from "@/lib/invoice-product-options";
 import { formatDateInput } from "@/lib/invoice-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -12,7 +13,7 @@ type EditInvoicePageProps = {
 
 export default async function EditInvoicePage({ params }: EditInvoicePageProps) {
   const { id } = await params;
-  const [invoice, companies] = await Promise.all([
+  const [invoice, companies, products] = await Promise.all([
     prisma.invoice.findFirst({
       where: { id, deletedAt: null, company: { deletedAt: null } },
       include: {
@@ -25,6 +26,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
+    getInvoiceProductOptions(),
   ]);
 
   if (!invoice) {
@@ -52,6 +54,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
       <InvoiceForm
         action={updateInvoiceAction.bind(null, invoice.id)}
         companies={companies}
+        products={products}
         submitLabel="Değişiklikleri kaydet"
         initialValues={{
           companyId: invoice.companyId,
@@ -71,6 +74,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
           invoice.items.length > 0
             ? invoice.items.map((item) => ({
                 id: item.id,
+                productId: item.productId ?? "",
                 description: item.description,
                 quantity: item.quantity.toString(),
                 unit: item.unit,
@@ -81,6 +85,7 @@ export default async function EditInvoicePage({ params }: EditInvoicePageProps) 
             : [
                 {
                   id: "legacy-total-line",
+                  productId: "",
                   description: invoice.notes || invoice.invoiceNumber,
                   quantity: "1",
                   unit: "ADET",

@@ -208,6 +208,7 @@ model InvoiceItem {
   sortOrder      Int      @default(0)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+  stockMovement  StockMovement?
 
   @@index([invoiceId])
   @@index([productId])
@@ -244,6 +245,8 @@ model StockMovement {
   id            String             @id @default(cuid())
   productId     String
   product       Product            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  invoiceItemId String?            @unique
+  invoiceItem   InvoiceItem?       @relation(fields: [invoiceItemId], references: [id], onDelete: Cascade)
   type          StockMovementType
   quantity      Decimal
   movementDate  DateTime
@@ -253,6 +256,7 @@ model StockMovement {
   createdAt     DateTime           @default(now())
 
   @@index([productId])
+  @@index([invoiceItemId])
   @@index([productId, movementDate])
   @@index([referenceType, referenceId])
   @@index([type])
