@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { parseCanonicalDraftJson } from "@/lib/ai-invoice-extraction-core";
-import { matchCompanyForDraft } from "@/lib/ai-matching-core";
+import { matchProductsForDraft } from "@/lib/ai-matching-core";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { prisma } from "@/lib/prisma";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
@@ -9,11 +9,11 @@ import { requireRequestLocalAuth } from "@/lib/security-utils";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type MatchCompanyRouteContext = {
+type MatchProductsRouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function POST(request: Request, { params }: MatchCompanyRouteContext) {
+export async function POST(request: Request, { params }: MatchProductsRouteContext) {
   const authResponse = await requireRequestLocalAuth(request);
 
   if (authResponse) {
@@ -31,11 +31,7 @@ export async function POST(request: Request, { params }: MatchCompanyRouteContex
     select: {
       id: true,
       extractedJson: true,
-      fileAttachment: {
-        select: {
-          originalFileName: true,
-        },
-      },
+      fileAttachment: { select: { originalFileName: true } },
     },
   });
 
@@ -44,7 +40,7 @@ export async function POST(request: Request, { params }: MatchCompanyRouteContex
   }
 
   if (!job.extractedJson?.trim()) {
-    detailUrl.searchParams.set("error", "company-match-empty");
+    detailUrl.searchParams.set("error", "product-match-empty");
     return NextResponse.redirect(detailUrl);
   }
 
@@ -53,17 +49,17 @@ export async function POST(request: Request, { params }: MatchCompanyRouteContex
   try {
     draft = parseCanonicalDraftJson(job.extractedJson);
   } catch {
-    detailUrl.searchParams.set("error", "company-match-json");
+    detailUrl.searchParams.set("error", "product-match-json");
     return NextResponse.redirect(detailUrl);
   }
 
-  const companyMatch = await matchCompanyForDraft(draft);
+  const productMatches = await matchProductsForDraft(draft);
   const nextJson = JSON.stringify(
     {
       ...draft,
       matches: {
         ...draft.matches,
-        company: companyMatch,
+        products: productMatches,
       },
     },
     null,
@@ -72,9 +68,7 @@ export async function POST(request: Request, { params }: MatchCompanyRouteContex
 
   await prisma.aiExtractionJob.update({
     where: { id: job.id },
-    data: {
-      extractedJson: nextJson,
-    },
+    data: { extractedJson: nextJson },
     select: { id: true },
   });
 
@@ -82,18 +76,14 @@ export async function POST(request: Request, { params }: MatchCompanyRouteContex
     entityType: "AI_EXTRACTION",
     entityId: job.id,
     action: "UPDATE",
-    title: "Cari eslestirme yapildi",
-    description: `${job.fileAttachment.originalFileName} icin parser sonucundan cari eslestirme yapildi.`,
-    before: {
-      extractedJson: job.extractedJson,
-    },
-    after: {
-      companyMatch,
-    },
+    title: "Urun eslestirme yapildi",
+    description: `${job.fileAttachment.originalFileName} icin fatura kalemleri urunlerle eslestirildi.`,
+    before: { extractedJson: job.extractedJson },
+    after: { productMatches },
   });
 
   revalidatePath("/ai-extraction");
   revalidatePath(`/ai-extraction/${job.id}`);
-  detailUrl.searchParams.set("companyMatched", "1");
+  detailUrl.searchParams.set("productsMatched", "1");
   return NextResponse.redirect(detailUrl);
 }

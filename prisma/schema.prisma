@@ -132,6 +132,11 @@ enum AiExtractionStatus {
   REVIEWED
 }
 
+enum AiConfirmedMappingType {
+  COMPANY
+  PRODUCT
+}
+
 model Company {
   id              String          @id @default(cuid())
   name            String
@@ -155,6 +160,8 @@ model Company {
   expenses        Expense[]
   importantDates  ImportantDate[]
   files           FileAttachment[]
+  aiCompanyMappings AiConfirmedMapping[] @relation("AiCompanyMapping")
+  aiSupplierProductMappings AiConfirmedMapping[] @relation("AiSupplierProductMapping")
 
   @@index([name])
   @@index([type])
@@ -233,6 +240,7 @@ model Product {
   deletedAt            DateTime?
   invoiceItems         InvoiceItem[]
   stockMovements       StockMovement[]
+  aiProductMappings     AiConfirmedMapping[] @relation("AiProductMapping")
 
   @@index([name])
   @@index([sku])
@@ -456,6 +464,30 @@ model AiExtractionJob {
 
   @@index([fileAttachmentId])
   @@index([status])
+  @@index([deletedAt])
+}
+
+model AiConfirmedMapping {
+  id                String                 @id @default(cuid())
+  type              AiConfirmedMappingType
+  sourceKey         String
+  sourceValue       String
+  companyId         String?
+  company           Company?               @relation("AiCompanyMapping", fields: [companyId], references: [id], onDelete: SetNull)
+  productId         String?
+  product           Product?               @relation("AiProductMapping", fields: [productId], references: [id], onDelete: SetNull)
+  supplierCompanyId String?
+  supplierCompany   Company?               @relation("AiSupplierProductMapping", fields: [supplierCompanyId], references: [id], onDelete: SetNull)
+  note              String?
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  deletedAt         DateTime?
+
+  @@unique([type, sourceKey, sourceValue, supplierCompanyId])
+  @@index([type])
+  @@index([companyId])
+  @@index([productId])
+  @@index([supplierCompanyId])
   @@index([deletedAt])
 }
 

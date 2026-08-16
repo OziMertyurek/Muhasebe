@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { normalizeExtractedInvoiceDraft } from "@/lib/ai-invoice-extraction-core";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { parseInvoiceText } from "@/lib/invoice-parser";
 import { prisma } from "@/lib/prisma";
@@ -53,7 +54,8 @@ export async function POST(request: Request, { params }: ParseRouteContext) {
 
   try {
     const parsedInvoice = parseInvoiceText(job.rawExtractedText);
-    const extractedJson = JSON.stringify(parsedInvoice, null, 2);
+    const draft = normalizeExtractedInvoiceDraft(parsedInvoice as unknown as Record<string, unknown>);
+    const extractedJson = JSON.stringify(draft, null, 2);
     const updatedJob = await prisma.aiExtractionJob.update({
       where: { id: job.id },
       data: {
