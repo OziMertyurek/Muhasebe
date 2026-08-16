@@ -23,6 +23,8 @@ const sessionVersion = "session-v1";
 const sessionMaxAgeSeconds = 60 * 60 * 12;
 const maxFailedPinAttempts = 5;
 const pinLockoutMs = 5 * 60 * 1000;
+const hostedRequestBlockedMessage = "Bu istek yalnizca ayni guvenli web oturumu uzerinden yapilabilir.";
+const hostedPinRequiredMessage = "Hosted uretim ortaminda PIN veya web kimlik dogrulamasi yapilandirilmadan erisim acilamaz.";
 const localRequestBlockedMessage = "Bu istek yalnızca yerel uygulama üzerinden yapılabilir.";
 const pinLockoutMessage = "Çok fazla hatalı PIN denemesi yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.";
 
@@ -57,6 +59,16 @@ export function getAuthCookieOptions() {
 
 export function getPinConfiguredCookieOptions() {
   return pinConfiguredCookieOptions;
+}
+
+export function isHostedProductionRuntime() {
+  const appMode = process.env.APP_MODE?.trim().toLowerCase();
+
+  return (
+    process.env.NODE_ENV === "production" &&
+    appMode !== "desktop" &&
+    process.env.DESKTOP_MODE !== "1"
+  );
 }
 
 export async function getLocalPinHash() {
@@ -188,7 +200,7 @@ export async function isLocalSessionValid() {
   const storedHash = await getLocalPinHash();
 
   if (!storedHash) {
-    return true;
+    return !isHostedProductionRuntime();
   }
 
   const cookieStore = await cookies();
@@ -199,6 +211,10 @@ export async function requireLocalAuth(nextPath = "/") {
   const storedHash = await getLocalPinHash();
 
   if (!storedHash) {
+    if (isHostedProductionRuntime()) {
+      redirect(`/login?error=pin-required&next=${encodeURIComponent(nextPath)}`);
+    }
+
     return;
   }
 
@@ -224,8 +240,9 @@ export async function clearLocalAuthCookie() {
 export function requireLocalRequestOrigin(request: Request) {
   const requestUrl = new URL(request.url);
   const hostHeader = request.headers.get("host") || requestUrl.host;
+  const hostedRuntime = isHostedProductionRuntime();
 
-  if (!isLocalHostValue(hostHeader)) {
+  if (!hostedRuntime && !isLocalHostValue(hostHeader)) {
     return new Response(localRequestBlockedMessage, {
       status: 403,
       headers: { "content-type": "text/plain; charset=utf-8" },
@@ -241,6 +258,13 @@ export function requireLocalRequestOrigin(request: Request) {
   const sourceHeader = originHeader || refererHeader;
 
   if (!sourceHeader) {
+    if (hostedRuntime) {
+      return new Response(hostedRequestBlockedMessage, {
+        status: 403,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      });
+    }
+
     return null;
   }
 
@@ -249,14 +273,17 @@ export function requireLocalRequestOrigin(request: Request) {
   try {
     sourceUrl = new URL(sourceHeader);
   } catch {
-    return new Response(localRequestBlockedMessage, {
+    return new Response(hostedRuntime ? hostedRequestBlockedMessage : localRequestBlockedMessage, {
       status: 403,
       headers: { "content-type": "text/plain; charset=utf-8" },
     });
   }
 
-  if (!isLocalHostValue(sourceUrl.host) || sourceUrl.host !== requestUrl.host) {
-    return new Response(localRequestBlockedMessage, {
+  const sourceMatchesRequest = sourceUrl.host === requestUrl.host;
+  const sourceAllowed = hostedRuntime ? sourceMatchesRequest : isLocalHostValue(sourceUrl.host);
+
+  if (!sourceAllowed || !sourceMatchesRequest) {
+    return new Response(hostedRuntime ? hostedRequestBlockedMessage : localRequestBlockedMessage, {
       status: 403,
       headers: { "content-type": "text/plain; charset=utf-8" },
     });
@@ -275,6 +302,13 @@ export async function requireRequestLocalAuth(request: Request) {
   const storedHash = await getLocalPinHash();
 
   if (!storedHash) {
+    if (isHostedProductionRuntime()) {
+      return new Response(hostedPinRequiredMessage, {
+        status: 503,
+        headers: { "content-type": "text/plain; charset=utf-8" },
+      });
+    }
+
     return null;
   }
 

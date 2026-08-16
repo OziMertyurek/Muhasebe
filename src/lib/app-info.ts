@@ -1,8 +1,9 @@
 import packageJson from "../../package.json";
+import { getDatabaseEngineLabel, getRuntimeModeLabel } from "@/lib/app-paths";
 
 export const appInfo = {
-  appName: "Local Muhasebe Takip Sistemi",
+  appName: "Muhasebe Takip Sistemi",
   version: packageJson.version,
-  mode: "Local",
-  database: "SQLite",
-} as const;
+  mode: getRuntimeModeLabel(),
+  database: getDatabaseEngineLabel(),
+};

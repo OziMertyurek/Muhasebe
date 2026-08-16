@@ -20,7 +20,28 @@ export function getDatabasePath() {
     return getDesktopDatabasePath();
   }
 
+  if (isPostgresRuntime()) {
+    return "";
+  }
+
   return join(getProjectRoot(), "prisma", "dev.db");
+}
+
+export function isPostgresRuntime() {
+  const databaseUrl = process.env.DATABASE_URL?.trim() ?? "";
+  return databaseUrl.startsWith("postgresql://") || databaseUrl.startsWith("postgres://");
+}
+
+export function getDatabaseEngineLabel() {
+  return isPostgresRuntime() ? "PostgreSQL" : "SQLite";
+}
+
+export function getRuntimeModeLabel() {
+  if (isDesktopMode()) {
+    return "Desktop";
+  }
+
+  return isPostgresRuntime() ? "Hosted Web" : "Local";
 }
 
 export function getUploadsDir() {

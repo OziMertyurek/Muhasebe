@@ -164,26 +164,29 @@ local dependencies. Do not upload `node_modules` from a Windows workstation.
 12. Verify that `node_modules/`, `.next/node_modules/`, `.env`, `prisma/dev.db`, `storage/uploads`, Electron files, BAT files, and native `.node` binaries are absent before dependency install.
 13. In cPanel Setup Node.js App, add environment variables from the approved inventory.
 14. Install dependencies on Namecheap Linux before starting the app.
-15. Verify no dependency install errors.
-16. Start or restart the application in cPanel.
-17. Verify `https://avorayazilim.com/api/health` only after the app URL is routed to the Node app.
-18. Test the PostgreSQL diagnostic endpoint only with the temporary diagnostic variables enabled.
-19. Immediately disable the diagnostic afterward by setting `POSTGRES_DIAGNOSTIC_ENABLED=false`, and remove the diagnostic token and URL when the test is complete.
-20. Keep Cloudflare DNS-only until the Namecheap origin is verified.
-21. Update Cloudflare origin DNS only after the Node app responds correctly.
-22. Enable Cloudflare proxying later, after HTTPS/cookie behavior is verified.
+15. Run `npx prisma migrate deploy` against the clean PostgreSQL database.
+16. Run `npm run prisma:generate` if Prisma Client generation did not run during install.
+17. Verify no dependency or migration errors.
+18. Start or restart the application in cPanel.
+19. Verify `https://avorayazilim.com/api/health` only after the app URL is routed to the Node app.
+20. Sign in through the configured PIN/auth path before testing DB-backed pages.
+21. Test the PostgreSQL diagnostic endpoint only with the temporary diagnostic variables enabled.
+22. Immediately disable the diagnostic afterward by setting `POSTGRES_DIAGNOSTIC_ENABLED=false`, and remove the diagnostic token and URL when the test is complete.
+23. Keep Cloudflare DNS-only until the Namecheap origin is verified.
+24. Update Cloudflare origin DNS only after the Node app responds correctly.
+25. Enable Cloudflare proxying later, after HTTPS/cookie behavior is verified.
 
 ## Namecheap Dependency Install
 
 The clean artifact does not contain local `node_modules`. Dependencies must be
-installed on Namecheap Linux so native packages such as `better-sqlite3` and
-`sharp` are built or downloaded for the server OS.
+installed on Namecheap Linux so server packages such as `@prisma/adapter-pg`,
+`pg`, and `sharp` are built or downloaded for the server OS.
 
 Preferred reproducible SSH command from the application root:
 
 ```bash
 cd /home/avornqik/avorayazilim-app
-npm ci
+npm ci --omit=dev
 ```
 
 Use `npm ci` because it installs exactly from `package-lock.json` and removes
@@ -201,15 +204,26 @@ same Namecheap application root after `npm ci`:
 npm run prisma:generate
 ```
 
+Initialize or update the clean PostgreSQL schema before opening DB-backed pages:
+
+```bash
+npx prisma migrate deploy
+```
+
+This applies the active PostgreSQL migrations in `prisma/migrations/`. The
+historical SQLite migrations are archived in the repository for reference only
+and must not be applied to PostgreSQL.
+
 Do not paste real database credentials or diagnostic tokens into shell history,
 support tickets, screenshots, or repository files.
 
 ## Environment Variables
 
-Phase 1 minimum:
+Hosted web minimum:
 
 ```text
 NODE_ENV=production
+DATABASE_URL=postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require
 ```
 
 cPanel/Passenger should provide:
@@ -220,23 +234,7 @@ PORT
 
 Do not hardcode `PORT`.
 
-Current transitional SQLite smoke-test variable:
-
-```text
-DATABASE_URL=file:./prisma/dev.db
-```
-
-This is only for a temporary non-production smoke test if the application must reach DB-backed pages before Phase 2. Do not treat hosted SQLite as production architecture.
-
-Future Phase 2 PostgreSQL variable:
-
-```text
-DATABASE_URL=postgresql://...
-```
-
-Do not set a real PostgreSQL value until Phase 2 is approved and implemented.
-
-Temporary Phase 2A PostgreSQL SELECT 1 diagnostic variables:
+Temporary PostgreSQL SELECT 1 diagnostic variables:
 
 ```text
 POSTGRES_DIAGNOSTIC_ENABLED=true
@@ -287,10 +285,10 @@ Current variables used by the repository:
 | `NODE_ENV` | Build/runtime | Use `production` for hosted web. |
 | `PORT` | Runtime, cPanel-provided | Used by generated Next standalone server. Do not hardcode. |
 | `HOSTNAME` / `HOST` | Optional runtime | Electron uses these for localhost packaged mode. Hosted web should not force them. |
-| `DATABASE_URL` | Runtime now, future PostgreSQL | Currently SQLite. PostgreSQL target in Phase 2. |
+| `DATABASE_URL` | Required runtime secret | PostgreSQL connection string. Do not commit or expose it. |
 | `POSTGRES_DIAGNOSTIC_ENABLED` | Temporary runtime diagnostic | Enables the guarded `/api/diagnostics/postgres-select-1` endpoint only when set to `true`. |
 | `POSTGRES_DIAGNOSTIC_TOKEN` | Temporary runtime secret | Bearer token for the diagnostic endpoint. Use at least 32 random characters. |
-| `POSTGRES_DIAGNOSTIC_DATABASE_URL` | Temporary runtime secret | PostgreSQL URL used only by the diagnostic endpoint before Prisma migration. |
+| `POSTGRES_DIAGNOSTIC_DATABASE_URL` | Temporary runtime secret | PostgreSQL URL used only by the guarded diagnostic endpoint. |
 | `APP_MODE` | Electron/local mode | `desktop` enables AppData paths. Do not set for hosted web. |
 | `DESKTOP_MODE` | Electron/local mode | Do not set for hosted web. |
 | `APP_PROJECT_ROOT` | Electron/local path override | Do not set for hosted web unless a path issue is explicitly diagnosed. |
@@ -343,25 +341,21 @@ Future variables not implemented yet:
 - Cloudflare R2 credentials/bucket settings.
 - AI worker queue/service settings.
 
-## SQLite / PostgreSQL Boundary
+## PostgreSQL Runtime Boundary
 
-Phase 1 does not migrate the database.
+Hosted web uses Prisma with PostgreSQL as the canonical runtime database.
 
-Current blockers for real hosted production:
+Production requirements:
 
-- `prisma/schema.prisma` uses SQLite.
-- `src/lib/prisma.ts` uses `@prisma/adapter-better-sqlite3`.
-- `prisma.config.ts` creates SQLite files for `file:` URLs.
-- Existing migrations are SQLite migrations.
-- Backup/restore code expects `database/dev.db`.
-- Hosted shared-server filesystem SQLite is not the approved production architecture.
+- `DATABASE_URL` must be a PostgreSQL connection string.
+- `npx prisma migrate deploy` must run successfully before DB-backed pages are used.
+- `prisma/migrations/000001_postgresql_baseline` is the active clean PostgreSQL baseline.
+- The archived `prisma/sqlite-migrations/` history is reference-only and must not be deployed to PostgreSQL.
+- SQLite file backup/restore routes are disabled under PostgreSQL runtime.
 
-Phase 1 success is limited to:
-
-- the Next.js server can boot, and
-- `/api/health` can respond without database access.
-
-DB-backed accounting pages are Phase 2/3 dependent and should not be considered production-ready on Namecheap in this phase.
+The user-facing backup screen may still show business export tools, but managed
+PostgreSQL backup, PITR, restore, and disaster recovery are infrastructure
+responsibilities.
 
 ## Local Filesystem Boundary
 
@@ -378,16 +372,15 @@ Do not silently remove these features. They are migration boundaries for later p
 
 ## Authentication Boundary
 
-Current local PIN auth is not suitable for public hosted access.
+Local PIN auth is still transitional. Hosted production now fails closed when no
+PIN/auth seed exists, and state-changing requests require same-origin hosted web
+headers instead of localhost-only headers.
 
-Known hosted blocker:
+Before exposing accounting pages publicly:
 
-- `requireLocalRequestOrigin()` rejects non-localhost hosts.
-- Dashboard layout uses onboarding and local PIN guards.
-- Export and AI POST routes call local auth helpers.
-- Cookies are named for local auth and signed from the local PIN hash.
-
-Do not weaken these checks in Phase 1. Public hosted accounting access waits for Phase 3 web authentication.
+- Configure a strong PIN or approved web authentication path.
+- Verify login, logout, protected dashboard access, and protected POST routes.
+- Do not treat local PIN as the final multi-user authentication model.
 
 ## Cloudflare DNS Boundary
 

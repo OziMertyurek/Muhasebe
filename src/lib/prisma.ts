@@ -1,19 +1,33 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
+import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
-const adapter = new PrismaBetterSqlite3({
-  url: process.env.DATABASE_URL ?? "file:./prisma/dev.db",
+function getDatabaseUrl() {
+  const databaseUrl = process.env.DATABASE_URL?.trim();
+
+  if (databaseUrl) {
+    return databaseUrl;
+  }
+
+  if (process.env.NEXT_PHASE === "phase-production-build") {
+    return "postgresql://build:build@localhost:5432/build";
+  }
+
+  throw new Error("DATABASE_URL is required for PostgreSQL runtime.");
+}
+
+const adapter = new PrismaPg({
+  connectionString: getDatabaseUrl(),
 });
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: ["error", "warn"],
   });
 
 if (process.env.NODE_ENV !== "production") {

@@ -31,6 +31,7 @@ const forbiddenArtifactEntries = [
   path.join("prisma", "dev.db"),
   path.join("prisma", "dev.db-journal"),
   path.join("prisma", "dev.db.pin-reset-backup-20260724-104458.db"),
+  path.join("prisma", "sqlite-migrations"),
   "node",
   "start-dev.bat",
   "start-prod.bat",
@@ -86,11 +87,6 @@ function getStandalonePackageAliases() {
       continue;
     }
 
-    if (entry.name === "better-sqlite3" || entry.name.startsWith("better-sqlite3-")) {
-      aliases.set(entry.name, "better-sqlite3");
-      continue;
-    }
-
     if (entry.name !== "@prisma") {
       continue;
     }
@@ -113,10 +109,6 @@ function addFallbackStandalonePackageAliases(aliases) {
     {
       pattern: /@prisma\/client-[0-9a-f]+/g,
       packageName: "@prisma/client",
-    },
-    {
-      pattern: /better-sqlite3-[0-9a-f]+/g,
-      packageName: "better-sqlite3",
     },
     {
       pattern: /pg-[0-9a-f]+/g,

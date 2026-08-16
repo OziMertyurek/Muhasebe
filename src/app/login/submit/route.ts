@@ -9,6 +9,7 @@ import {
   getPinLockoutMessage,
   getPinRateLimitStatus,
   getSafeRedirectPath,
+  isHostedProductionRuntime,
   pinConfiguredCookieName,
   recordFailedPinAttempt,
   requireLocalRequestOrigin,
@@ -38,6 +39,16 @@ export async function POST(request: Request) {
   const storedHash = await getLocalPinHash();
 
   if (!storedHash) {
+    if (isHostedProductionRuntime()) {
+      return new Response(
+        "Hosted uretim ortaminda PIN veya web kimlik dogrulamasi yapilandirilmadan giris yapilamaz.",
+        {
+          status: 503,
+          headers: { "content-type": "text/plain; charset=utf-8" },
+        },
+      );
+    }
+
     return NextResponse.redirect(new URL(nextPath, request.url), 303);
   }
 

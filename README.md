@@ -222,19 +222,24 @@ Gerçek `.env` dosyasını GitHub'a göndermeyin. Bu dosya local ayarlar içindi
 Örnek:
 
 ```bash
-DATABASE_URL="file:./prisma/dev.db"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/DATABASE?sslmode=require"
 ```
 
 ## Veritabanı
 
-Mevcut gecis durumunda proje SQLite kullanir. Varsayilan local veritabani dosyasi `prisma/dev.db` yolundadir.
+Hosted web runtime icin proje Prisma ile PostgreSQL kullanir. `DATABASE_URL`
+PostgreSQL connection string olmali ve gercek deger repository'ye
+gonderilmemelidir.
 
-Hedef hosted mimaride merkezi managed PostgreSQL kullanilacaktir. PostgreSQL gecisi henuz uygulanmamistir; provider secimi ve migration plani ayrica onaylanmadan `prisma/schema.prisma`, migrations veya database provider degistirilmemelidir.
+Aktif PostgreSQL migration gecmisi `prisma/migrations/` altindadir.
+Gecmis SQLite migrationlari denetim ve desktop gecis referansi olarak
+`prisma/sqlite-migrations/` altinda saklanir; PostgreSQL'e uygulanmaz.
 
 - `prisma/dev.db` GitHub'a gönderilmez.
 - `prisma/dev.db-journal` GitHub'a gönderilmez.
 - `prisma/migrations/` klasörü commitlenir; migration geçmişi projede tutulur.
-- Veritabanı dosyasını düzenli olarak ayrıca yedeklemek gerekir.
+- Hosted PostgreSQL yedekleme/restore hosting veya veritabani saglayicisi
+  uzerinden yonetilir.
 
 ## Dosya Yüklemeleri
 

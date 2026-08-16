@@ -1,38 +1,23 @@
 import { defineConfig } from "prisma/config";
-import { dirname, resolve } from "node:path";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 
-const databaseUrl = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
+function getDatabaseUrl() {
+  const databaseUrl = process.env.DATABASE_URL?.trim();
 
-function ensureSqliteFile(url: string) {
-  if (!url.startsWith("file:") || url === "file::memory:") {
-    return;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is required. Use a PostgreSQL connection string.");
   }
 
-  const sqlitePath = url.replace(/^file:/, "").split("?")[0];
-
-  if (!sqlitePath || sqlitePath === ":memory:") {
-    return;
+  if (!databaseUrl.startsWith("postgresql://") && !databaseUrl.startsWith("postgres://")) {
+    throw new Error("DATABASE_URL must be a PostgreSQL connection string.");
   }
 
-  const absolutePath = resolve(sqlitePath);
-  const directory = dirname(absolutePath);
-
-  if (!existsSync(directory)) {
-    mkdirSync(directory, { recursive: true });
-  }
-
-  if (!existsSync(absolutePath)) {
-    writeFileSync(absolutePath, "");
-  }
+  return databaseUrl;
 }
-
-ensureSqliteFile(databaseUrl);
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: databaseUrl,
+    url: getDatabaseUrl(),
   },
   migrations: {
     path: "prisma/migrations",

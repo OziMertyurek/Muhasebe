@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { Building2, LogOut } from "lucide-react";
 import { clsx } from "clsx";
 import { navigationItems } from "@/lib/navigation";
-import { appInfo } from "@/lib/app-info";
+import packageJson from "../../../package.json";
 
 const navigationGroups = [
   {
@@ -158,8 +158,8 @@ export function Sidebar() {
             <LogOut className="h-4 w-4" />
             Çıkış Yap
           </Link>
-          <p className="font-semibold text-[#16201b]">v{appInfo.version}</p>
-          <p>{appInfo.mode} kullanım</p>
+          <p className="font-semibold text-[#16201b]">v{packageJson.version}</p>
+          <p>Muhasebe kullanım</p>
         </div>
       </div>
     </aside>

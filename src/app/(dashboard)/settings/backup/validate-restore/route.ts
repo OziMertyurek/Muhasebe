@@ -1,4 +1,5 @@
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { isPostgresRuntime } from "@/lib/app-paths";
 import { maxBackupZipSize, validateBackupZip } from "@/lib/backup-utils";
 import { requireRequestOnboardingCompleted } from "@/lib/onboarding-utils";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
@@ -16,6 +17,16 @@ export async function POST(request: Request) {
 
   if (onboardingResponse) {
     return onboardingResponse;
+  }
+
+  if (isPostgresRuntime()) {
+    return Response.json(
+      {
+        message:
+          "PostgreSQL üretim ortamında SQLite ZIP restore doğrulaması desteklenmez.",
+      },
+      { status: 410 },
+    );
   }
 
   let formData: FormData;

@@ -2,6 +2,7 @@ import { LockKeyhole, ShieldCheck } from "lucide-react";
 import { redirect } from "next/navigation";
 import {
   getSafeRedirectPath,
+  isHostedProductionRuntime,
   isLocalPinConfigured,
   isLocalSessionValid,
 } from "@/lib/security-utils";
@@ -20,8 +21,9 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const nextPath = getSafeRedirectPath(params?.next);
   const pinConfigured = await isLocalPinConfigured();
+  const requiresPinSetup = !pinConfigured && isHostedProductionRuntime();
 
-  if (!pinConfigured) {
+  if (!pinConfigured && !requiresPinSetup) {
     redirect(nextPath);
   }
 
@@ -30,6 +32,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   }
 
   const hasInvalidError = params?.error === "invalid";
+  const hasPinRequiredError = params?.error === "pin-required" || requiresPinSetup;
   const isLoggedOut = params?.loggedOut === "1";
 
   return (
@@ -75,6 +78,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </div>
           ) : null}
 
+          {hasPinRequiredError ? (
+            <div className="mt-5 rounded-md border border-[#f0c7c0] bg-[#fff6f4] px-4 py-3 text-sm font-medium text-[#9f2f21]">
+              Hosted uretim ortami icin once guvenli PIN veya web kimlik dogrulamasi yapilandirilmalidir.
+            </div>
+          ) : null}
+
           {isLoggedOut ? (
             <div className="mt-5 rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-4 py-3 text-sm text-[#46534b]">
               Oturum kapatıldı. Yeniden giriş yapabilirsiniz.
@@ -92,15 +101,17 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
                 name="pin"
                 type="password"
                 autoComplete="current-password"
-                autoFocus
+                autoFocus={!requiresPinSetup}
                 className="mt-2 h-11 w-full rounded-md border border-[#cfd8cf] bg-white px-3 text-sm text-[#16201b] outline-none transition focus:border-[#1f6f54] focus:ring-2 focus:ring-[#d8eadf]"
+                disabled={requiresPinSetup}
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="inline-flex h-11 w-full items-center justify-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#185741]"
+              className="inline-flex h-11 w-full items-center justify-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#185741] disabled:cursor-not-allowed disabled:bg-[#9aa79f]"
+              disabled={requiresPinSetup}
             >
               Giriş Yap
             </button>

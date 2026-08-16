@@ -1,4 +1,5 @@
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { isPostgresRuntime } from "@/lib/app-paths";
 import { maxBackupZipSize, restoreFromBackupZip } from "@/lib/backup-utils";
 import { requireRequestOnboardingCompleted } from "@/lib/onboarding-utils";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +18,16 @@ export async function POST(request: Request) {
 
   if (onboardingResponse) {
     return onboardingResponse;
+  }
+
+  if (isPostgresRuntime()) {
+    return Response.json(
+      {
+        message:
+          "PostgreSQL üretim ortamında ZIP restore desteklenmez. Geri yükleme hosting/veritabanı sağlayıcısı üzerinden yapılmalıdır.",
+      },
+      { status: 410 },
+    );
   }
 
   let formData: FormData;

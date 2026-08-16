@@ -3,6 +3,7 @@ import { readdir, readFile, stat } from "node:fs/promises";
 import { join, relative, sep } from "node:path";
 import JSZip from "jszip";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { isPostgresRuntime } from "@/lib/app-paths";
 import { updateLastFullBackupDate } from "@/lib/backup-reminder-utils";
 import {
   createBackupMetadata,
@@ -100,6 +101,15 @@ export async function GET(request: Request) {
 
   const database = getDatabaseBackupInfo();
   const uploads = getUploadsBackupInfo();
+
+  if (isPostgresRuntime()) {
+    return new Response("PostgreSQL üretim ortamında tam ZIP yedeği veritabanını içermez. Altyapı yedeklerini kullanın.", {
+      status: 410,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    });
+  }
 
   if (!database.databasePath || !database.exists) {
     return new Response("Veritabanı dosyası bulunamadı. Tam yedek oluşturulamadı.", {

@@ -11,6 +11,7 @@ import JSZip from "jszip";
 import { appInfo } from "@/lib/app-info";
 import {
   getDatabasePath,
+  isPostgresRuntime,
   getProjectRoot,
   getRestoreBackupsDir,
   getUploadsDir,
@@ -50,6 +51,17 @@ export type RestoreBackupResult = {
 };
 
 export function getDatabaseBackupInfo() {
+  if (isPostgresRuntime()) {
+    return {
+      databasePath: "",
+      exists: false,
+      size: null,
+      fileName: "PostgreSQL",
+      unavailableReason:
+        "PostgreSQL üretim veritabanı dosya olarak indirilemez. Yedekleme altyapı/hosting sağlayıcısı üzerinden yönetilmelidir.",
+    };
+  }
+
   const databasePath = getDatabasePath();
 
   if (!existsSync(databasePath)) {

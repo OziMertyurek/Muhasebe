@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { getDatabaseBackupInfo, formatBackupFileName } from "@/lib/backup-utils";
+import { isPostgresRuntime } from "@/lib/app-paths";
 import { requireRequestOnboardingCompleted } from "@/lib/onboarding-utils";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
 
@@ -20,6 +21,15 @@ export async function GET(request: Request) {
   }
 
   const database = getDatabaseBackupInfo();
+
+  if (isPostgresRuntime()) {
+    return new Response("PostgreSQL yedekleri hosting/veritabanı sağlayıcısı üzerinden yönetilmelidir.", {
+      status: 410,
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+      },
+    });
+  }
 
   if (!database.databasePath || !database.exists) {
     return new Response("Veritabanı dosyası bulunamadı.", {
