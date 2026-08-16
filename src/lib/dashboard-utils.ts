@@ -100,6 +100,18 @@ function getTimelineTitle(log: {
     if (log.action === "RESTORE") return "Para Hareketi Geri Yüklendi";
   }
 
+  if (log.entityType === "PRODUCT") {
+    if (log.action === "CREATE") return "Urun Olusturuldu";
+    if (log.action === "UPDATE") return "Urun Guncellendi";
+    if (log.action === "SOFT_DELETE") return "Urun Arsivlendi";
+    if (log.action === "RESTORE") return "Urun Geri Yuklendi";
+  }
+
+  if (log.entityType === "STOCK_MOVEMENT") {
+    if (log.action === "CREATE") return "Stok Hareketi Eklendi";
+    return "Stok Hareketi";
+  }
+
   if (log.entityType === "EXPENSE") {
     if (log.action === "CREATE") return "Gider Kaydedildi";
     if (log.action === "UPDATE") return "Gider Güncellendi";

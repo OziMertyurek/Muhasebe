@@ -37,6 +37,38 @@ enum PaymentMethod {
   OTHER
 }
 
+enum ProductUnit {
+  ADET
+  KUTU
+  PAKET
+  KOLI
+  KG
+  GR
+  LT
+  ML
+  METRE
+  M2
+}
+
+enum StockMovementType {
+  PURCHASE_IN
+  SALE_OUT
+  RETURN_IN
+  RETURN_OUT
+  ADJUSTMENT_IN
+  ADJUSTMENT_OUT
+  OPENING_BALANCE
+}
+
+enum StockReferenceType {
+  MANUAL
+  INVOICE
+  PURCHASE
+  SALE
+  RETURN
+  OTHER
+}
+
 enum FinancialAccountType {
   CASH
   BANK
@@ -164,8 +196,11 @@ model InvoiceItem {
   id             String   @id @default(cuid())
   invoiceId      String
   invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  productId      String?
+  product        Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
   description    String
   quantity       Decimal
+  unit           ProductUnit @default(ADET)
   unitPrice      Decimal
   vatRate        Decimal
   discountAmount Decimal  @default(0)
@@ -175,7 +210,52 @@ model InvoiceItem {
   updatedAt      DateTime @updatedAt
 
   @@index([invoiceId])
+  @@index([productId])
   @@index([invoiceId, sortOrder])
+}
+
+model Product {
+  id                   String          @id @default(cuid())
+  name                 String
+  sku                  String
+  barcode              String?
+  description          String?
+  unit                 ProductUnit     @default(ADET)
+  defaultVatRate       Decimal         @default(20)
+  defaultPurchasePrice Decimal         @default(0)
+  defaultSalesPrice    Decimal         @default(0)
+  currency             String          @default("TRY")
+  minimumStockLevel    Decimal         @default(0)
+  isActive             Boolean         @default(true)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  deletedAt            DateTime?
+  invoiceItems         InvoiceItem[]
+  stockMovements       StockMovement[]
+
+  @@index([name])
+  @@index([sku])
+  @@index([barcode])
+  @@index([isActive])
+  @@index([deletedAt])
+}
+
+model StockMovement {
+  id            String             @id @default(cuid())
+  productId     String
+  product       Product            @relation(fields: [productId], references: [id], onDelete: Restrict)
+  type          StockMovementType
+  quantity      Decimal
+  movementDate  DateTime
+  referenceType StockReferenceType @default(MANUAL)
+  referenceId   String?
+  note          String?
+  createdAt     DateTime           @default(now())
+
+  @@index([productId])
+  @@index([productId, movementDate])
+  @@index([referenceType, referenceId])
+  @@index([type])
 }
 
 model Payment {

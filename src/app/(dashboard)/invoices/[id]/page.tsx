@@ -10,6 +10,7 @@ import { getInvoicePaidTotal } from "@/lib/accounting-core";
 import { formatDate, formatPlainValue } from "@/lib/company-utils";
 import { formatMoney, invoiceStatusLabels, invoiceTypeLabels } from "@/lib/invoice-utils";
 import { paymentMethodLabels, paymentTypeLabels } from "@/lib/payment-utils";
+import { productUnitLabels } from "@/lib/product-utils";
 import { prisma } from "@/lib/prisma";
 
 type InvoiceDetailPageProps = {
@@ -203,7 +204,9 @@ export default async function InvoiceDetailPage({
                 {invoice.items.map((item) => (
                   <tr key={item.id} className="border-t border-[#e5e9e5] transition hover:bg-[#fbfcfa]">
                     <td className="px-4 py-3 font-semibold text-[#16201b]">{item.description}</td>
-                    <td className="px-4 py-3 text-[#46534b]">{item.quantity.toString()}</td>
+                    <td className="px-4 py-3 text-[#46534b]">
+                      {item.quantity.toString()} {productUnitLabels[item.unit]}
+                    </td>
                     <td className="px-4 py-3 text-[#46534b]">
                       {formatMoney(item.unitPrice, invoice.currency)}
                     </td>

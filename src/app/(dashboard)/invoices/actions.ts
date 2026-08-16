@@ -1,6 +1,6 @@
 "use server";
 
-import { InvoiceStatus, InvoiceType } from "@prisma/client";
+import { InvoiceStatus, InvoiceType, ProductUnit } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
@@ -140,6 +140,7 @@ async function parseInvoiceHeaderForm(formData: FormData): Promise<{
 function parseInvoiceLineItems(formData: FormData): {
   lines?: InvoiceLineCalculationInput[];
   calculatedLines?: InvoiceLineCalculationResult[];
+  units?: ProductUnit[];
   errors: InvoiceFormErrors;
 } {
   const errors: InvoiceFormErrors = {};
@@ -177,6 +178,14 @@ function parseInvoiceLineItems(formData: FormData): {
       discountAmount: toDecimalInput(record.discountAmount || "0"),
     };
   });
+  const units = parsed.map((item): ProductUnit => {
+    const record = item && typeof item === "object" && !Array.isArray(item)
+      ? item as Record<string, unknown>
+      : {};
+    const unit = typeof record.unit === "string" ? record.unit : "ADET";
+
+    return Object.values(ProductUnit).includes(unit as ProductUnit) ? unit as ProductUnit : "ADET";
+  });
   const validationErrors = validateInvoiceLines(lines);
 
   if (validationErrors.length > 0) {
@@ -184,12 +193,12 @@ function parseInvoiceLineItems(formData: FormData): {
       .map((error) => error.message)
       .filter((message, index, messages) => messages.indexOf(message) === index)
       .join(" ");
-    return { lines, errors };
+    return { lines, units, errors };
   }
 
   const calculatedLines = lines.map(calculateInvoiceLine);
 
-  return { lines, calculatedLines, errors };
+  return { lines, calculatedLines, units, errors };
 }
 
 function toDecimalInput(value: unknown) {
@@ -264,6 +273,7 @@ export async function createInvoiceAction(
             create: calculatedLines.map((line, index) => ({
               description: line.description,
               quantity: line.quantity,
+              unit: parsedLineItems.units?.[index] ?? "ADET",
               unitPrice: line.unitPrice,
               vatRate: line.vatRate,
               discountAmount: line.discountAmount,
@@ -390,6 +400,7 @@ export async function updateInvoiceAction(
             create: calculatedLines.map((line, index) => ({
               description: line.description,
               quantity: line.quantity,
+              unit: parsedLineItems.units?.[index] ?? "ADET",
               unitPrice: line.unitPrice,
               vatRate: line.vatRate,
               discountAmount: line.discountAmount,

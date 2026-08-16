@@ -8,6 +8,7 @@ import {
   HelpCircle,
   Home,
   Landmark,
+  Package,
   Receipt,
   RefreshCw,
   ScanText,
@@ -40,6 +41,11 @@ export const navigationItems = [
     label: "Giderler",
     href: "/expenses",
     icon: Receipt,
+  },
+  {
+    label: "Urunler / Stok",
+    href: "/products",
+    icon: Package,
   },
   {
     label: "Sabit Giderler",

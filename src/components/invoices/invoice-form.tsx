@@ -1,10 +1,11 @@
 "use client";
 
-import type { Company, InvoiceStatus, InvoiceType } from "@prisma/client";
+import type { Company, InvoiceStatus, InvoiceType, ProductUnit } from "@prisma/client";
 import { useActionState, useMemo, useState } from "react";
 import { Plus, Save, Trash2 } from "lucide-react";
 import type { InvoiceFormState } from "@/app/(dashboard)/invoices/actions";
 import { invoiceStatusOptions, invoiceTypeOptions } from "@/lib/invoice-utils";
+import { productUnitOptions } from "@/lib/product-utils";
 
 type InvoiceCompanyOption = Pick<Company, "id" | "name">;
 
@@ -27,6 +28,7 @@ type InvoiceLineFormValue = {
   id: string;
   description: string;
   quantity: string;
+  unit: ProductUnit;
   unitPrice: string;
   vatRate: string;
   discountAmount: string;
@@ -48,6 +50,7 @@ function createEmptyLine(id = "line-1"): InvoiceLineFormValue {
     id,
     description: "",
     quantity: "",
+    unit: "ADET",
     unitPrice: "",
     vatRate: "20",
     discountAmount: "0",
@@ -138,6 +141,7 @@ export function InvoiceForm({
         lines.map((line, index) => ({
           description: line.description,
           quantity: line.quantity,
+          unit: line.unit,
           unitPrice: line.unitPrice,
           vatRate: line.vatRate,
           discountAmount: line.discountAmount,
@@ -397,7 +401,7 @@ export function InvoiceForm({
                   key={line.id}
                   className="rounded-md border border-[#e5e9e5] bg-[#fbfcfa] p-3"
                 >
-                  <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_96px_120px_96px_120px_104px_auto]">
+                  <div className="grid gap-3 lg:grid-cols-[minmax(220px,1fr)_96px_104px_120px_96px_120px_104px_auto]">
                     <label className="block min-w-0 text-sm font-semibold text-[#46534b]">
                       Açıklama
                       <input
@@ -419,6 +423,24 @@ export function InvoiceForm({
                         className={fieldClass()}
                         required
                       />
+                    </label>
+
+                    <label className="block text-sm font-semibold text-[#46534b]">
+                      Birim
+                      <select
+                        value={line.unit}
+                        onChange={(event) =>
+                          updateLine(line.id, "unit", event.target.value as ProductUnit)
+                        }
+                        className={fieldClass()}
+                        required
+                      >
+                        {productUnitOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
                     </label>
 
                     <label className="block text-sm font-semibold text-[#46534b]">

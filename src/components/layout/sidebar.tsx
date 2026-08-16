@@ -16,6 +16,7 @@ const navigationGroups = [
     title: "Operasyon",
     hrefs: [
       "/recurring-expenses",
+      "/products",
       "/accounts",
       "/accounts?type=CREDIT_CARD",
       "/important-dates",

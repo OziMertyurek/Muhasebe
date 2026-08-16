@@ -5,6 +5,8 @@ export type AuditEntityType =
   | "COMPANY"
   | "INVOICE"
   | "PAYMENT"
+  | "PRODUCT"
+  | "STOCK_MOVEMENT"
   | "FINANCIAL_ACCOUNT"
   | "EXPENSE"
   | "RECURRING_EXPENSE"
@@ -50,6 +52,8 @@ export const auditEntityTypeLabels: Record<AuditEntityType, string> = {
   COMPANY: "Cari",
   INVOICE: "Fatura",
   PAYMENT: "Tahsilat / Ödeme",
+  PRODUCT: "Urun",
+  STOCK_MOVEMENT: "Stok Hareketi",
   FINANCIAL_ACCOUNT: "Finansal Hesap",
   EXPENSE: "Gider",
   RECURRING_EXPENSE: "Sabit Gider",
@@ -163,6 +167,10 @@ export function getAuditEntityHref(log: Pick<AuditLog, "entityType" | "entityId"
       return `/invoices/${log.entityId}`;
     case "PAYMENT":
       return `/payments/${log.entityId}`;
+    case "PRODUCT":
+      return `/products/${log.entityId}`;
+    case "STOCK_MOVEMENT":
+      return null;
     case "FINANCIAL_ACCOUNT":
       return `/accounts/${log.entityId}`;
     case "EXPENSE":
