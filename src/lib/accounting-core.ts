@@ -18,6 +18,63 @@ export class AccountingValidationError extends Error {
   }
 }
 
+export function assertInvoiceIdentityEditableWithPayments(
+  current: {
+    companyId: string;
+    type: InvoiceType;
+    currency: string;
+    status?: InvoiceStatus;
+  },
+  next: {
+    companyId: string;
+    type: InvoiceType;
+    currency: string;
+    status?: InvoiceStatus;
+  },
+  activePaymentCount: number,
+) {
+  if (activePaymentCount === 0) {
+    return;
+  }
+
+  if (next.status === "CANCELLED") {
+    throw new AccountingValidationError(
+      "status",
+      "Bagli tahsilat / odeme varken fatura iptal edilemez. Once para hareketlerini silin.",
+    );
+  }
+
+  if (current.companyId !== next.companyId) {
+    throw new AccountingValidationError(
+      "companyId",
+      "Bagli tahsilat / odeme varken fatura carisi degistirilemez.",
+    );
+  }
+
+  if (current.type !== next.type) {
+    throw new AccountingValidationError(
+      "type",
+      "Bagli tahsilat / odeme varken fatura tipi degistirilemez.",
+    );
+  }
+
+  if (current.currency !== next.currency) {
+    throw new AccountingValidationError(
+      "currency",
+      "Bagli tahsilat / odeme varken fatura para birimi degistirilemez.",
+    );
+  }
+}
+
+export function assertInvoiceCanBeDeleted(activePaymentCount: number) {
+  if (activePaymentCount > 0) {
+    throw new AccountingValidationError(
+      "invoiceNumber",
+      "Bagli tahsilat / odeme varken fatura silinemez. Once para hareketlerini silin.",
+    );
+  }
+}
+
 export function getExpectedPaymentType(invoiceType: InvoiceType) {
   return invoiceType === "SALES" ? "COLLECTION" : "PAYMENT";
 }

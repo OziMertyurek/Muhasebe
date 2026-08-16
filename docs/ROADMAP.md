@@ -2,9 +2,9 @@
 
 Bu dosya, Muhasebe Takip Sistemi icin planlanan islevsel gelistirme basliklarini icerir. Sıralama kesin oncelik anlamina gelmez.
 
-Onaylanan ana teknik yon hosted web gecisidir. Fazlara ayrilmis teknik migration plani icin `docs/HOSTED_WEB_MIGRATION_ROADMAP.md`, mimari kararlar icin `docs/architecture/decisions/` kaynak alinmalidir.
+Onaylanan ana teknik yon hosted web + PostgreSQL calisma tabanidir. Fazlara ayrilmis teknik migration plani icin `docs/HOSTED_WEB_MIGRATION_ROADMAP.md`, mimari kararlar icin `docs/architecture/decisions/` kaynak alinmalidir.
 
-Stok V1, hosted temel stabil hale geldikten sonra baslayacak ilk buyuk is moduludur. PostgreSQL, web authentication, persistent file storage ve core accounting parity tamamlanmadan stok gelistirmesine baslanmamalidir.
+V1.0 release candidate kapsaminda muhasebe, cari, fatura kalemleri, tahsilat/odeme, gider, urun/stok, AI inceleme ve PostgreSQL hosted temel tamamlanmistir. Asagidaki maddeler V1.1+ iyilestirme ve operasyon basliklaridir.
 
 ## AI/OCR Gerçek Entegrasyon
 
@@ -56,13 +56,12 @@ Hosted hedef:
 - Cloudflare R2 tercih edilen yondur.
 - Local filesystem kalici hosted storage olarak kullanilmaz.
 
-## Stok Takibi
+## Stok Takibi Iyilestirmeleri
 
-- Hosted web foundation tamamlanmadan baslamaz.
-- Ürün/hizmet kartları.
-- Stok giriş/çıkış hareketleri.
-- Fatura kalemleri ile stok bağlantısı.
-- Kritik stok uyarıları.
+- Depo/lokasyon destegi.
+- Gelismis stok raporlari.
+- Sayim sayfasi ve toplu duzeltme akislari.
+- Kritik stok bildirimleri.
 
 ## Teklif / Proforma Modülü
 

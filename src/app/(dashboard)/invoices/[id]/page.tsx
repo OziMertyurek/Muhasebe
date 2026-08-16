@@ -67,7 +67,6 @@ export default async function InvoiceDetailPage({
   const paidTotal = getInvoicePaidTotal(invoice, invoice.payments);
   const remainingTotal = invoice.totalAmount.minus(paidTotal);
   const remainingDisplay = remainingTotal.lessThan(0) ? new Prisma.Decimal(0) : remainingTotal;
-  const placeholders = ["AI fatura okuma sonucu"];
 
   return (
     <div className="space-y-6">
@@ -118,6 +117,12 @@ export default async function InvoiceDetailPage({
       {query?.error === "delete" ? (
         <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
           Fatura silinirken bir hata oluştu.
+        </div>
+      ) : null}
+
+      {query?.error === "delete-linked" ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          Bu faturaya bagli tahsilat veya odeme varken fatura silinemez. Once para hareketlerini silin.
         </div>
       ) : null}
 
@@ -304,14 +309,6 @@ export default async function InvoiceDetailPage({
         addHref={`/files/new?relatedType=INVOICE&invoiceId=${invoice.id}`}
       />
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {placeholders.map((title) => (
-          <div key={title} className="rounded-lg border border-dashed border-[#cfd8cf] bg-white p-5">
-            <h3 className="text-sm font-semibold text-[#223028]">{title}</h3>
-            <p className="mt-2 text-sm text-[#647067]">Bu alan sonraki aşamada bağlanacak.</p>
-          </div>
-        ))}
-      </section>
     </div>
   );
 }

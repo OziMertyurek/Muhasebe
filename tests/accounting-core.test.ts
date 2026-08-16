@@ -3,6 +3,8 @@ import test from "node:test";
 import { InvoiceType, PaymentType, Prisma } from "@prisma/client";
 import {
   AccountingValidationError,
+  assertInvoiceCanBeDeleted,
+  assertInvoiceIdentityEditableWithPayments,
   assertPaymentMatchesInvoice,
   deriveInvoiceStatus,
   getExpectedPaymentType,
@@ -157,4 +159,55 @@ test("editing or deleting financial records recalculates derived status from rem
   assert.equal(deriveInvoiceStatus(salesInvoice, fullPayments), "PAID");
   assert.equal(deriveInvoiceStatus(salesInvoice, afterDelete), "PARTIAL");
   assert.equal(getInvoiceRemainingAmount(salesInvoice, afterEdit).toString(), "100");
+});
+
+test("paid invoice identity fields cannot be changed while payments exist", () => {
+  const current = {
+    companyId: "company-1",
+    type: "SALES" as InvoiceType,
+    currency: "TRY",
+    status: "PARTIAL" as const,
+  };
+
+  assert.throws(
+    () =>
+      assertInvoiceIdentityEditableWithPayments(
+        current,
+        { ...current, companyId: "company-2" },
+        1,
+      ),
+    AccountingValidationError,
+  );
+  assert.throws(
+    () =>
+      assertInvoiceIdentityEditableWithPayments(
+        current,
+        { ...current, type: "PURCHASE" },
+        1,
+      ),
+    AccountingValidationError,
+  );
+  assert.throws(
+    () =>
+      assertInvoiceIdentityEditableWithPayments(
+        current,
+        { ...current, currency: "USD" },
+        1,
+      ),
+    AccountingValidationError,
+  );
+  assert.throws(
+    () =>
+      assertInvoiceIdentityEditableWithPayments(
+        current,
+        { ...current, status: "CANCELLED" },
+        1,
+      ),
+    AccountingValidationError,
+  );
+});
+
+test("invoice with active payments cannot be deleted", () => {
+  assert.doesNotThrow(() => assertInvoiceCanBeDeleted(0));
+  assert.throws(() => assertInvoiceCanBeDeleted(1), AccountingValidationError);
 });

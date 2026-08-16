@@ -1,8 +1,8 @@
 # Muhasebe Takip Sistemi
 
-Bu proje muhasebe, cari hesap, fatura, odeme, gider, dosya arsivi, raporlama ve yakinda stok temelini tasiyan bir is uygulamasidir.
+Bu proje muhasebe, cari hesap, fatura, odeme, gider, urun/stok, belge arsivi, AI fatura inceleme ve raporlama modullerini tasiyan bir is uygulamasidir.
 
-Onaylanan urun yonu hosted web uygulamasidir: uygulama bir domain uzerinden acilacak, Cloudflare Free edge katmani kullanilacak, merkezi managed PostgreSQL hedeflenecek ve dosya ekleri icin Cloudflare R2 yonu izlenecektir. Bu hedef henuz uygulanmamistir; mevcut kod tabani halen Next.js + Prisma + SQLite + Electron/local runtime gecis durumundadir.
+V1.0 release candidate yonu hosted web uygulamasidir: Next.js Node runtime, Prisma ve PostgreSQL canonical calisma tabanidir. Electron/local desktop kodlari gecis uyumlulugu icin korunur, ancak hosted web paketinin icine alinmaz.
 
 Electron gecicidir, ancak hosted web paritesi kanitlanana kadar korunur. Eski desktop release belgeleri tarihsel baglam olarak kalabilir; yeni mimari kararlar icin `docs/architecture/decisions/` ve `docs/HOSTED_WEB_MIGRATION_ROADMAP.md` kaynak alinmalidir.
 
@@ -65,11 +65,14 @@ macOS build denemeleri GitHub Actions uzerinden manuel workflow ile yapilir. Ger
 - Tahsilat / ödeme takibi
 - Kasa & banka / kredi kartı hesapları
 - Gider yönetimi
+- Urunler / stok kartlari
+- Fatura kalemlerinden stok giris/cikis
+- Manuel stok hareketleri ve minimum stok uyarilari
 - Sabit giderler
 - Önemli tarihler / hatırlatmalar
 - Cari ekstre
 - Dosya arşivi
-- AI/OCR fatura okuma hazırlık ekranı
+- AI fatura okuma, inceleme, eslestirme ve onayli fatura kaydi
 - Raporlar
 - CSV dışa aktarma
 - PDF dışa aktarma
@@ -81,9 +84,8 @@ macOS build denemeleri GitHub Actions uzerinden manuel workflow ile yapilir. Ger
 - TypeScript
 - Tailwind CSS
 - Prisma
-- SQLite currently
-- Managed PostgreSQL target
-- Electron currently transitional
+- PostgreSQL hosted runtime
+- Electron transitional desktop compatibility
 - Cloudflare Free target edge layer
 - Cloudflare R2 preferred object-storage direction
 
@@ -101,10 +103,10 @@ Prisma client üretin:
 npm run prisma:generate
 ```
 
-Local SQLite veritabanı için migration çalıştırın:
+Local PostgreSQL veritabani icin migration calistirin:
 
 ```bash
-npx prisma migrate dev
+npx prisma migrate deploy
 ```
 
 Geliştirme sunucusunu başlatın:
@@ -123,7 +125,7 @@ npm.cmd run dev
 
 ## MarkItDown Metin Çıkarma Kurulumu
 
-AI Fatura Okuma hazırlık ekranındaki `MarkItDown ile Metin Çıkar` özelliği için bilgisayarda Python kurulu olmalıdır.
+AI Fatura Okuma ekranındaki local `MarkItDown ile Metin Cikar` ozelligi icin bilgisayarda Python kurulu olmalidir.
 
 Python worker bağımlılığını kurmak için:
 
@@ -146,7 +148,7 @@ Windows'ta hızlı kullanım:
 
 `setup.bat` bağımlılıkları kurar, Prisma client üretir, migration çalıştırır ve Python varsa MarkItDown worker bağımlılıklarını yükler. `start-dev.bat` günlük local kullanım için geliştirme server'ını açar. `start-prod.bat` önce build alır, sonra `npm run start` ile production modda uygulamayı başlatır.
 
-Kayıtlar `prisma/dev.db` dosyasında saklanır. Upload dosyaları `storage/uploads/` içinde tutulur. Bu dosyalar GitHub'a gitmez; düzenli olarak `Ayarlar > Yedekleme > Tam Yedek İndir` ile tam yedek alınmalıdır.
+Hosted V1 runtime kayitlari PostgreSQL'de saklar. Local/desktop gecis modunda eski `prisma/dev.db` ve `storage/uploads/` davranisi korunur; bu dosyalar GitHub'a gitmez.
 
 Windows desktop paketleri de hazırdır: Electron portable exe ve Windows setup installer build komutları aşağıdaki bölümde yer alır. Desktop paketli modda veriler AppData altında saklanır; yine de düzenli tam yedek alınmalıdır.
 
@@ -243,9 +245,9 @@ Gecmis SQLite migrationlari denetim ve desktop gecis referansi olarak
 
 ## Dosya Yüklemeleri
 
-Mevcut gecis durumunda yuklenen dosyalar `storage/uploads/` klasorunde tutulur.
+V1 hosted-safe gecis durumunda yuklenen dosyalar `storage/uploads/` veya `DOCUMENT_UPLOAD_DIR` ile verilen klasorde tutulur.
 
-Hedef hosted mimaride persistent object storage kullanilacaktir. Cloudflare R2 tercih edilen yondur, ancak henuz uygulanmamistir.
+Persistent object storage V1.1 sonrasi icin planlidir. Cloudflare R2 tercih edilen yondur, ancak V1.0 release candidate kapsaminda henuz uygulanmamistir.
 
 - `storage/uploads/` GitHub'a gönderilmez.
 - Fatura PDF'leri, görseller ve ek dosyalar bu klasörde saklanır.
@@ -253,36 +255,19 @@ Hedef hosted mimaride persistent object storage kullanilacaktir. Cloudflare R2 t
 
 ## Yedekleme
 
-GitHub sadece kodu saklar. Mevcut local SQLite veritabani ve upload dosyalari GitHub'a gitmez.
+GitHub sadece kodu saklar. PostgreSQL veritabani, `.env` ve upload dosyalari GitHub'a gitmez.
 
 Hosted mimaride kullaniciya acik is verisi exportlari ile altyapi backup/disaster recovery ayridir. CSV/PDF exportlar kullaniciya acik kalabilir; managed PostgreSQL backup/PITR ve object-storage backup/versioning altyapi sorumlulugudur. Normal kullanicilar production veritabanini restore ederek degistirememelidir.
 
-`Ayarlar > Yedekleme` sayfasından iki tür yedek alınabilir:
+PostgreSQL runtime altinda kullaniciya acik SQLite DB indirme ve ZIP restore kapatilir. Production veritabani backup/restore islemleri hosting veya veritabani saglayicisi uzerinden yonetilmelidir.
 
-1. `Sadece Veritabanı Yedeği`: Yalnızca `prisma/dev.db` dosyasını indirir. Upload dosyalarını içermez.
-2. `Tam Yedek`: `database/dev.db`, `uploads/` ve `backup-info.json` dosyalarını tek ZIP içinde indirir.
-
-Önerilen yedekleme yöntemi `Tam Yedek İndir` butonudur. Bu dosya hem kayıtları hem de yüklenen dosyaları birlikte saklar.
-
-Restore işleminden önce sistem mevcut verileri otomatik olarak `storage/restore-backups/` içine güvenlik yedeği olarak alır. Yine de önemli işlemlerden önce ayrıca manuel tam yedek almak önerilir.
+Desktop/local gecis modunda eski SQLite ZIP yedekleme ekrani korunur; bu davranis hosted production backup stratejisi yerine gecmez.
 
 ## Geri Yükleme / İçeri Aktarma
 
-Eski bilgisayardaki verileri yeni bilgisayara taşımak için:
+Hosted PostgreSQL production ortaminda uygulama icinden ZIP restore yapilmaz. Geri yukleme islemleri sadece hosting/veritabani saglayicisinin backup/restore araci veya onayli operasyon proseduru ile yapilmalidir.
 
-1. Eski bilgisayarda `Ayarlar > Yedekleme > Tam Yedek İndir` ile ZIP yedeği alın.
-2. Yeni bilgisayarda projeyi GitHub'dan çekin.
-3. `npm install` çalıştırın.
-4. `npm run prisma:generate` çalıştırın.
-5. `npm run dev` ile projeyi açın.
-6. `Ayarlar > Yedekleme` sayfasına gidin.
-7. Yedek ZIP dosyasını seçin.
-8. `Yedeği Kontrol Et` ile dosyayı doğrulayın.
-9. Onay kutusunu işaretleyin.
-10. `Geri Yükle` butonuna basın.
-11. Restore tamamlandıktan sonra server'ı Ctrl+C ile durdurup `npm run dev` ile yeniden başlatın.
-
-Geri yükleme sırasında yalnızca beklenen yedek içeriği kullanılır: `database/dev.db`, `uploads/` ve `backup-info.json`. `.env`, `.env.local`, `.next`, `node_modules` ve Git dosyaları restore edilmez.
+Desktop/local gecis dokumanlarinda anlatilan SQLite ZIP restore akisi tarihsel/yerel uyumluluk icindir; hosted V1 production veritabanini degistirmek icin kullanilmaz.
 
 ## Kullanım Akışı
 
@@ -301,35 +286,35 @@ Daha detaylı kullanım rehberi için [docs/USAGE.md](docs/USAGE.md) dosyasına 
 
 ## AI/OCR Notu
 
-Gerçek AI/OCR entegrasyonu henüz bağlı değildir.
+AI fatura akisi V1'de guvenli inceleme taslagi uretir; kullanici onayi olmadan muhasebe veya stok kaydi olusturmaz.
 
 Hazır olan altyapı:
 
 - `AiExtractionJob` modeli
-- AI Fatura Okuma hazırlık ekranı
+- AI Fatura Okuma, inceleme ve onay ekrani
 - Dosya Arşivi entegrasyonu
 - Dosya seçerek analiz kaydı oluşturma
 - MarkItDown ile local dosyadan ham metin çıkarma
-- Ham metin, JSON, güven skoru ve hata mesajı alanları
+- Cari/urun eslestirme, dogrulama uyarilari ve onayli fatura kaydi
 
-MarkItDown entegrasyonu sadece dosyadan metin cikarir. OpenAI, LLM veya otomatik fatura olusturma entegrasyonu henuz yoktur. Hosted hedefte MarkItDown/Python akisi server-side worker/job modeline tasinacaktir; bundled desktop Python web paritesi kanitlanana kadar korunur.
+Hosted production icin `DOCUMENT_PROCESSOR_MODE=HOSTED_SAFE` kullanilabilir; bu mod AI saglayicisi yokken kullaniciya tekrar denenebilir, guvenli bir hata durumu gosterir. Harici AI saglayici ayarlari ortam degiskenleriyle verilir ve gercek secret'lar repository'ye yazilmaz.
 
 
 ## Güvenlik Notları
 
-- Mevcut gecis durumunda veriler yerel bilgisayarda saklanir; GitHub'a otomatik gonderilmez.
-- Local PIN mevcut desktop/local model icin gecici korumadir. Hosted web hedefinde gercek kullanici hesaplari, guvenli oturum cookie'leri, logout, rate limiting ve parola sifirlama yetenegi gereklidir.
+- Hosted runtime PostgreSQL kullanir; `.env`, gercek `DATABASE_URL`, veritabani yedekleri ve upload dosyalari GitHub'a gonderilmez.
+- Local PIN mevcut desktop/local model icin gecici korumadir. Hosted production PIN/auth seed yoksa kapali baslar; kalici cok kullanicili web authentication V1.1 guvenlik maddesidir.
 - Desktop server paketli modda `127.0.0.1` ile sinirlandirilir ve local Host/Origin kontrolleri uygulanir. Bu hosted web authentication yerine gecmez.
 - Cok sayida hatali PIN denemesinde gecici kilit uygulanir.
-- Duzenli olarak `Ayarlar > Yedekleme > Tam Yedek Indir` ile tam yedek alinmalidir.
+- Hosted PostgreSQL backup/restore hosting veya veritabani saglayicisi uzerinden yonetilmelidir.
 - Hata raporu hassas verileri icermeyecek sekilde tasarlanmistir; `.env`, gercek `DATABASE_URL`, tam local path ve kullanici dosyalari rapora eklenmez.
 - Windows build henuz code signed degildir; SmartScreen uyarisi gorulebilir.
 - macOS build henuz Apple Developer ID ile signed/notarized degildir; Gatekeeper uyarisi gorulebilir.
 
-- Mevcut calisma sekli local/desktop gecis durumudur; uzun vadeli hedef hosted web uygulamasidir.
+- V1.0 release candidate calisma tabani hosted web + PostgreSQL'dir; desktop kodlari gecis uyumlulugu icin korunur.
 - `.env`, `prisma/dev.db`, `storage/uploads/` GitHub'a gönderilmez.
 - Upload dosyaları ve DB yedekleri dikkatli saklanmalıdır.
-- DB yedeği indirilebilir; bu dosyayı güvenli bir yerde tutmak kullanıcının sorumluluğundadır.
+- Desktop/local gecis modunda indirilen DB yedegi guvenli saklanmalidir; hosted production PostgreSQL yedegi saglayici/operasyon sorumlulugudur.
 - Yüklenen dosyaların orijinal adları doğrudan dosya yolu olarak kullanılmaz.
 
 ## Dokümanlar

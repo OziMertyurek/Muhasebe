@@ -146,6 +146,12 @@ export default async function CompanyDetailPage({
         </div>
       ) : null}
 
+      {query?.error === "delete-linked" ? (
+        <div className="rounded-md border border-[#e8c4bf] bg-[#fff7f5] px-4 py-3 text-sm font-medium text-[#8b2f28]">
+          Bu cariye bagli aktif fatura, para hareketi, gider veya dosya varken cari silinemez.
+        </div>
+      ) : null}
+
       <section className="grid gap-5 lg:grid-cols-2">
         <div className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm ring-1 ring-black/0">
           <h2 className="text-base font-semibold text-[#16201b]">Firma bilgileri</h2>

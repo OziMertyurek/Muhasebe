@@ -20,6 +20,7 @@ import {
   getUploadsBackupInfo,
 } from "@/lib/backup-utils";
 import { RestoreValidationForm } from "@/components/settings/restore-validation-form";
+import { isPostgresRuntime } from "@/lib/app-paths";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ const checklist = [
 export default async function BackupSettingsPage({ searchParams }: BackupSettingsPageProps) {
   const database = getDatabaseBackupInfo();
   const uploads = getUploadsBackupInfo();
+  const postgresRuntime = isPostgresRuntime();
   const [backupReminder, params] = await Promise.all([
     getBackupReminderStatus(),
     searchParams,
@@ -46,6 +48,63 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
   const selectedReminderValue = backupReminder.enabled
     ? String(backupReminder.intervalDays)
     : "off";
+
+  if (postgresRuntime) {
+    return (
+      <div className="space-y-6">
+        <section className="border-b border-[#dce2dc] pb-6">
+          <Link
+            href="/settings"
+            className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-[#1f6f54] hover:text-[#195d47]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Ayarlara don
+          </Link>
+          <p className="mt-4 text-sm font-medium text-[#607167]">Ayarlar</p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-normal text-[#16201b]">
+            Yedekleme
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
+            Hosted PostgreSQL yedekleri uygulama icinden ZIP olarak alinmaz;
+            hosting veya veritabani saglayicisi uzerinden yonetilir.
+          </p>
+        </section>
+
+        <section className="rounded-lg border border-[#bfd8cc] bg-[#fbfffc] p-5 shadow-sm ring-1 ring-[#e2f1e7]">
+          <div className="flex items-start gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#e8f2ed] text-[#14543f]">
+              <DatabaseBackup className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold text-[#16201b]">PostgreSQL yedekleme politikasi</h2>
+              <p className="mt-2 text-sm leading-6 text-[#46534b]">
+                V1 hosted production ortaminda veritabani yedekleme, geri yukleme
+                ve disaster recovery islemleri sadece hosting/veritabani saglayicisi
+                veya onayli operasyon proseduru ile yapilir. Uygulama icinden
+                SQLite DB indirme ve ZIP restore kapali durumdadir.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="rounded-lg border border-[#e0c4bf] bg-[#fff7f5] p-5 shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#fdecea] text-[#8b2f28]">
+              <ShieldAlert className="h-5 w-5" />
+            </span>
+            <div>
+              <h2 className="text-lg font-semibold text-[#8b2f28]">Operasyon notu</h2>
+              <p className="mt-2 text-sm leading-6 text-[#6f4a45]">
+                Production restore islemi uygulama kullanicisinin yapabilecegi bir
+                islem degildir. Canli veritabani geri yukleme karari Product Owner
+                ve hosting/veritabani operasyon sureciyle verilmelidir.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -62,8 +121,9 @@ export default async function BackupSettingsPage({ searchParams }: BackupSetting
           Yedekleme
         </h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-          Local SQLite veritabanı ve yüklenen dosyalar GitHub&apos;a gitmez. Bu yüzden düzenli
-          olarak tam yedek alınmalıdır.
+          {postgresRuntime
+            ? "Hosted PostgreSQL yedekleri uygulama icinden ZIP olarak alinmaz; hosting veya veritabani saglayicisi uzerinden yonetilir."
+            : "Local SQLite veritabani ve yuklenen dosyalar GitHub'a gitmez. Bu yuzden duzenli olarak tam yedek alinmalidir."}
         </p>
       </section>
 

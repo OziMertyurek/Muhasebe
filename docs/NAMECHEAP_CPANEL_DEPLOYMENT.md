@@ -103,9 +103,9 @@ The temporary PostgreSQL connectivity diagnostic endpoint is:
 /api/diagnostics/postgres-select-1
 ```
 
-This endpoint is for the Phase 2A cPanel runtime test only. It is not a
-permanent application health check. It does not use Prisma, does not run
-migrations, and does not change the application's current SQLite baseline.
+This endpoint is for guarded cPanel PostgreSQL connectivity testing only. It is
+not a permanent application health check. It does not use Prisma, does not run
+migrations, and does not change the application database.
 
 ## Artifact Contents
 

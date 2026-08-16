@@ -203,6 +203,17 @@ export async function updateCompanyAction(
 }
 
 export async function deleteCompanyAction(companyId: string) {
+  const linkedCounts = await prisma.$transaction([
+    prisma.invoice.count({ where: { companyId, deletedAt: null } }),
+    prisma.payment.count({ where: { companyId, deletedAt: null } }),
+    prisma.expense.count({ where: { companyId, deletedAt: null } }),
+    prisma.fileAttachment.count({ where: { companyId, deletedAt: null } }),
+  ]);
+
+  if (linkedCounts.some((count) => count > 0)) {
+    redirect(`/companies/${companyId}?error=delete-linked`);
+  }
+
   try {
     const company = await prisma.company.update({
       where: { id: companyId, deletedAt: null },

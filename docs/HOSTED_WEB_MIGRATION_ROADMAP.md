@@ -2,7 +2,7 @@
 
 This roadmap records the approved hosted web transition direction. It is migration guidance, not proof that the target architecture has already been implemented.
 
-Current branch context: `feature/invoice-line-items` contains the current Invoice Line Item Phase 1/2 work. That work remains valid and reusable under the hosted web architecture.
+V1.0 RC note: the current `feature/invoice-line-items` branch has moved beyond the early migration phases described below. Hosted web, PostgreSQL baseline, product/stock, AI review, packaging, and release-candidate stabilization work are implemented in the branch. The phase sections remain migration history and reference; use `docs/V1_RELEASE_CHECKLIST.md` for the current release procedure.
 
 ## Target Direction
 

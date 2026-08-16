@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   AccountingValidationError,
+  assertInvoiceCanBeDeleted,
+  assertInvoiceIdentityEditableWithPayments,
   deriveInvoiceStatus,
   getInvoicePaidTotal,
 } from "@/lib/accounting-core";
@@ -282,6 +284,23 @@ export async function createInvoiceAction(
         });
       }
 
+      const duplicate = await tx.invoice.findFirst({
+        where: {
+          companyId: header.companyId,
+          type: header.type,
+          invoiceNumber: header.invoiceNumber,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (duplicate) {
+        throw new InvoiceCreateValidationError({
+          errors: { invoiceNumber: "Ayni cari, fatura no ve tipte aktif fatura var." },
+          message: "Lutfen formdaki hatalari duzeltin.",
+        });
+      }
+
       const invoice = await tx.invoice.create({
         data: {
           ...header,
@@ -419,6 +438,30 @@ export async function updateInvoiceAction(
       if (!existingInvoice) {
         throw new AccountingValidationError("invoiceNumber", "Duzenlenecek fatura bulunamadi.");
       }
+
+      const duplicate = await tx.invoice.findFirst({
+        where: {
+          id: { not: invoiceId },
+          companyId: header.companyId,
+          type: header.type,
+          invoiceNumber: header.invoiceNumber,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (duplicate) {
+        throw new AccountingValidationError(
+          "invoiceNumber",
+          "Ayni cari, fatura no ve tipte aktif fatura var.",
+        );
+      }
+
+      assertInvoiceIdentityEditableWithPayments(
+        existingInvoice,
+        header,
+        existingInvoice.payments.length,
+      );
 
       const paidTotal = getInvoicePaidTotal(
         { type: header.type, currency: header.currency },
@@ -559,12 +602,15 @@ export async function deleteInvoiceAction(invoiceId: string) {
         where: { id: invoiceId, deletedAt: null },
         include: {
           items: { select: { id: true } },
+          payments: { where: { deletedAt: null }, select: { id: true } },
         },
       });
 
       if (!existingInvoice) {
         throw new Error("Invoice not found.");
       }
+
+      assertInvoiceCanBeDeleted(existingInvoice.payments.length);
 
       const itemIds = existingInvoice.items.map((item) => item.id);
 
@@ -603,7 +649,11 @@ export async function deleteInvoiceAction(invoiceId: string) {
       description: "Kayit cop kutusuna tasindi.",
       before: invoice,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof AccountingValidationError) {
+      redirect(`/invoices/${invoiceId}?error=delete-linked`);
+    }
+
     redirect(`/invoices/${invoiceId}?error=delete`);
   }
 

@@ -76,7 +76,7 @@ export const navigationItems = [
     label: "AI Fatura Okuma",
     href: "/ai-extraction",
     icon: ScanText,
-    badge: "Hazırlık",
+    badge: "V1",
   },
   {
     label: "Raporlar",
