@@ -12,6 +12,7 @@ import {
 } from "@/lib/ai-extraction-utils";
 import { formatDate } from "@/lib/company-utils";
 import { fileRelatedTypeLabels, formatFileSize, getFileKind } from "@/lib/file-utils";
+import { calculateCurrentStock } from "@/lib/inventory-core";
 import { productUnitOptions } from "@/lib/product-utils";
 import { prisma } from "@/lib/prisma";
 
@@ -24,6 +25,7 @@ type AiExtractionDetailPageProps = {
     companyMatched?: string;
     productsMatched?: string;
     reviewed?: string;
+    posted?: string;
   }>;
 };
 
@@ -130,8 +132,25 @@ function messageForQuery(query?: Awaited<AiExtractionDetailPageProps["searchPara
   if (query?.companyMatched === "1") return { tone: "ok" as const, text: "Cari eslestirme tamamlandi." };
   if (query?.productsMatched === "1") return { tone: "ok" as const, text: "Urun eslestirme tamamlandi." };
   if (query?.reviewed === "1") return { tone: "ok" as const, text: "Taslak incelendi olarak kaydedildi. Muhasebe veya stok kaydi olusturulmadi." };
+  if (query?.posted === "1") return { tone: "ok" as const, text: "AI taslagi faturaya kaydedildi." };
   if (query?.error) return { tone: "error" as const, text: "Islem tamamlanamadi. Taslak ve kaynak dosya korunuyor." };
   return null;
+}
+
+function getPostingReadiness(
+  job: { postedInvoiceId: string | null },
+  draft: CanonicalExtractedInvoiceDraft | null,
+  selectedCompanyId: string,
+  invoiceType: string,
+) {
+  if (job.postedInvoiceId) return "KAYDEDILDI";
+  if (!draft) return "TASLAK YOK";
+  if (!selectedCompanyId || !invoiceType || !draft.document.invoiceNumber || !draft.document.invoiceDate) {
+    return "EKSIK BILGI";
+  }
+  if (draft.validation.status !== "OK") return "KONTROL GEREKLI";
+  if (draft.lineItems.length === 0) return "KALEM YOK";
+  return "KAYDA HAZIR";
 }
 
 export default async function AiExtractionDetailPage({
@@ -168,7 +187,17 @@ export default async function AiExtractionDetailPage({
     prisma.product.findMany({
       where: { deletedAt: null, isActive: true },
       orderBy: [{ name: "asc" }, { sku: "asc" }],
-      select: { id: true, name: true, sku: true },
+      select: {
+        id: true,
+        name: true,
+        sku: true,
+        stockMovements: {
+          select: {
+            type: true,
+            quantity: true,
+          },
+        },
+      },
     }),
   ]);
 
@@ -184,6 +213,7 @@ export default async function AiExtractionDetailPage({
   const invoiceType = draft?.review.invoiceType === "SALES" || draft?.review.invoiceType === "PURCHASE"
     ? draft.review.invoiceType
     : "";
+  const postingReadiness = getPostingReadiness(job, draft, selectedCompanyId, invoiceType);
 
   return (
     <div className="space-y-6">
@@ -198,7 +228,7 @@ export default async function AiExtractionDetailPage({
             {job.fileAttachment.originalFileName}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-[#647067]">
-            Bu ekran inceleme taslagidir. Fatura, tahsilat/odeme veya stok hareketi olusturmaz.
+            Bu ekran son inceleme adimidir. Onaydan sonra gercek fatura olusur; stok etkisi sadece urune bagli kalemlerde uygulanir.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -256,10 +286,18 @@ export default async function AiExtractionDetailPage({
           <h2 className="text-lg font-semibold text-[#16201b]">Analiz durumu</h2>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
             <InfoItem label="Durum" value={aiExtractionStatusLabels[job.status]} />
+            <InfoItem label="Kayit hazirligi" value={postingReadiness} />
             <InfoItem label="Guven skoru" value={formatConfidence(job.confidence ?? draft?.confidence.score)} />
             <InfoItem label="Olusturulma" value={formatDate(job.createdAt)} />
             <InfoItem label="Guncellenme" value={formatDate(job.updatedAt)} />
+            <InfoItem label="Olusan fatura" value={job.postedInvoiceId ?? "-"} />
           </div>
+          {job.postedInvoiceId ? (
+            <Link href={`/invoices/${job.postedInvoiceId}`} className="mt-5 inline-flex h-10 w-fit items-center gap-2 rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]">
+              Faturayi ac
+              <ExternalLink className="h-4 w-4" />
+            </Link>
+          ) : null}
         </div>
       </section>
 
@@ -268,17 +306,18 @@ export default async function AiExtractionDetailPage({
           <div>
             <h2 className="text-lg font-semibold text-[#16201b]">Inceleme taslagi</h2>
             <p className="mt-2 text-sm leading-6 text-[#647067]">
-              Alanlari duzeltip taslagi kaydedebilirsiniz. Bu adim muhasebe ve stok kaydi olusturmaz.
+              Alanlari duzeltip onayladiginizda bu taslaktan gercek fatura olusturulur. Tahsilat/odeme olusmaz.
             </p>
           </div>
           <span className="inline-flex w-fit rounded-md border border-[#cfd8cf] bg-[#fbfcfa] px-3 py-1 text-xs font-semibold text-[#46534b]">
-            {draft?.validation.status ?? "UNKNOWN"}
+            {postingReadiness}
           </span>
         </div>
 
         <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
           <SelectField label="Cari secimi" name="companyId" defaultValue={selectedCompanyId}>
             <option value="">Secilmedi</option>
+            <option value="__NEW__">Yeni cari olustur</option>
             {companies.map((company) => (
               <option key={company.id} value={company.id}>
                 {company.name}{company.taxNumber ? ` - ${company.taxNumber}` : ""}
@@ -317,6 +356,8 @@ export default async function AiExtractionDetailPage({
               <tr>
                 <th className="px-3 py-3">Urun</th>
                 <th className="px-3 py-3">Aciklama</th>
+                <th className="px-3 py-3">SKU</th>
+                <th className="px-3 py-3">Barkod</th>
                 <th className="px-3 py-3">Miktar</th>
                 <th className="px-3 py-3">Birim</th>
                 <th className="px-3 py-3">Birim fiyat</th>
@@ -336,12 +377,17 @@ export default async function AiExtractionDetailPage({
                     <td className="px-3 py-3">
                       <select name={`line-${index}-productId`} defaultValue={selectedProductId} className="h-10 w-44 rounded-md border border-[#cfd8cf] bg-white px-2 text-sm">
                         <option value="">Serbest satir</option>
+                        <option value="__NEW__">Yeni urun olustur</option>
                         {products.map((product) => (
-                          <option key={product.id} value={product.id}>{product.sku} - {product.name}</option>
+                          <option key={product.id} value={product.id}>
+                            {product.sku} - {product.name} - Stok: {calculateCurrentStock(product.stockMovements).toString()}
+                          </option>
                         ))}
                       </select>
                     </td>
                     <td className="px-3 py-3"><input name={`line-${index}-description`} defaultValue={line.description ?? ""} className="h-10 w-56 rounded-md border border-[#cfd8cf] px-2" /></td>
+                    <td className="px-3 py-3"><input name={`line-${index}-sku`} defaultValue={line.sku ?? ""} className="h-10 w-32 rounded-md border border-[#cfd8cf] px-2" /></td>
+                    <td className="px-3 py-3"><input name={`line-${index}-barcode`} defaultValue={line.barcode ?? ""} className="h-10 w-36 rounded-md border border-[#cfd8cf] px-2" /></td>
                     <td className="px-3 py-3"><input name={`line-${index}-quantity`} defaultValue={line.quantity ?? ""} className="h-10 w-24 rounded-md border border-[#cfd8cf] px-2" /></td>
                     <td className="px-3 py-3">
                       <select name={`line-${index}-unit`} defaultValue={line.unit ?? "ADET"} className="h-10 w-28 rounded-md border border-[#cfd8cf] bg-white px-2">
@@ -366,13 +412,13 @@ export default async function AiExtractionDetailPage({
         </div>
 
         <label className="mt-5 flex items-start gap-3 rounded-md border border-[#dce2dc] bg-[#fbfcfa] p-4 text-sm text-[#46534b]">
-          <input type="checkbox" name="confirmCreateInvoice" value="yes" required className="mt-1 h-4 w-4 rounded border-[#cfd8cf]" />
-          <span>Taslagi kontrol ettim. Incelemeyi tamamla; muhasebe/stok kaydi olusturma.</span>
+          <input type="checkbox" name="confirmCreateInvoice" value="yes" required disabled={Boolean(job.postedInvoiceId)} className="mt-1 h-4 w-4 rounded border-[#cfd8cf]" />
+          <span>Incelemeyi tamamladim. Bu taslaktan fatura ve urune bagli stok hareketleri olusturulsun; tahsilat/odeme olusturulmasin.</span>
         </label>
 
         <div className="mt-5 flex justify-end">
-          <button className="inline-flex h-10 w-fit items-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47]">
-            Taslagi Kaydet / Incelemeyi Tamamla
+          <button disabled={Boolean(job.postedInvoiceId)} className="inline-flex h-10 w-fit items-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#195d47] disabled:cursor-not-allowed disabled:bg-[#9aa89f]">
+            Onayla ve Faturayi Kaydet
           </button>
         </div>
       </form>

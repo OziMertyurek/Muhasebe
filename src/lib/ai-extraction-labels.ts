@@ -6,6 +6,7 @@ export const aiExtractionStatusLabels: Record<AiExtractionStatus, string> = {
   COMPLETED: "Tamamlandı",
   FAILED: "Hata",
   REVIEWED: "İncelendi",
+  POSTED: "Faturaya Kaydedildi",
 };
 
 export const aiExtractionStatusOptions = Object.entries(aiExtractionStatusLabels).map(

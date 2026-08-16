@@ -1,28 +1,49 @@
-import { InvoiceType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import {
-  normalizeCurrencyCode,
-  normalizeDateText,
-  normalizeDecimalText,
-  normalizeInvoiceNumber,
-  normalizeProductUnit,
-  normalizeTaxIdentity,
-  parseCanonicalDraftJson,
-  validateExtractedInvoiceTotals,
-} from "@/lib/ai-invoice-extraction-core";
+  normalizeDraftFromForm,
+  prepareAiDraftForPosting,
+  readFormText,
+  readProductSelections,
+  AiPostingValidationError,
+  type AiPostingPreparedDraft,
+} from "@/lib/ai-posting-utils";
+import { parseCanonicalDraftJson } from "@/lib/ai-invoice-extraction-core";
+import { normalizeMappingSource } from "@/lib/ai-confirmed-mapping-utils";
 import { createAuditLog } from "@/lib/audit-log-utils";
+import { syncInvoiceDueReminder } from "@/lib/auto-reminder-utils";
+import {
+  reconcileInvoiceStockMovements,
+  type InvoiceStockLineInput,
+} from "@/lib/invoice-stock-utils";
 import { prisma } from "@/lib/prisma";
 import { requireRequestLocalAuth } from "@/lib/security-utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-type ReviewRouteContext = {
+type PostRouteContext = {
   params: Promise<{ id: string }>;
 };
 
-export async function POST(request: Request, { params }: ReviewRouteContext) {
+type PostedInvoiceForReminder = Parameters<typeof syncInvoiceDueReminder>[0];
+
+type PostingResult =
+  | { invoiceId: string; alreadyPosted: true }
+  | { invoiceId: string; alreadyPosted: false; invoice: PostedInvoiceForReminder };
+
+class AiPostingConflictError extends Error {
+  readonly queryError: string;
+
+  constructor(queryError: string, message: string) {
+    super(message);
+    this.name = "AiPostingConflictError";
+    this.queryError = queryError;
+  }
+}
+
+export async function POST(request: Request, { params }: PostRouteContext) {
   const authResponse = await requireRequestLocalAuth(request);
 
   if (authResponse) {
@@ -30,194 +51,525 @@ export async function POST(request: Request, { params }: ReviewRouteContext) {
   }
 
   const { id } = await params;
-  const detailUrl = new URL(`/ai-extraction/${id}`, request.url);
   const formData = await request.formData();
-  const companyId = readFormText(formData, "companyId");
-  const invoiceType = readFormText(formData, "invoiceType");
-  const confirmed = formData.get("confirmCreateInvoice") === "yes";
+  const detailUrl = new URL(`/ai-extraction/${id}`, request.url);
 
-  const job = await prisma.aiExtractionJob.findFirst({
-    where: {
-      id,
-      deletedAt: null,
-      fileAttachment: { deletedAt: null },
-    },
-    select: {
-      id: true,
-      status: true,
-      extractedJson: true,
-      fileAttachment: {
-        select: {
-          originalFileName: true,
-        },
-      },
-    },
-  });
-
-  if (!job) {
-    return NextResponse.redirect(new URL("/ai-extraction?error=not-found", request.url));
-  }
-
-  if (!confirmed) {
-    detailUrl.searchParams.set("error", "review-confirm");
+  if (formData.get("confirmCreateInvoice") !== "yes") {
+    detailUrl.searchParams.set("error", "post-confirm");
     return NextResponse.redirect(detailUrl);
   }
 
-  if (!Object.values(InvoiceType).includes(invoiceType as InvoiceType)) {
-    detailUrl.searchParams.set("error", "review-type");
-    return NextResponse.redirect(detailUrl);
-  }
-
-  if (!job.extractedJson?.trim()) {
-    detailUrl.searchParams.set("error", "review-json");
-    return NextResponse.redirect(detailUrl);
-  }
-
-  let draft;
+  let postedInvoiceId: string;
 
   try {
-    draft = parseCanonicalDraftJson(job.extractedJson);
-  } catch {
-    detailUrl.searchParams.set("error", "review-json");
+    const posted = await prisma.$transaction(async (tx): Promise<PostingResult> => {
+      const job = await tx.aiExtractionJob.findFirst({
+        where: {
+          id,
+          deletedAt: null,
+          fileAttachment: { deletedAt: null },
+        },
+        select: {
+          id: true,
+          status: true,
+          extractedJson: true,
+          fileAttachmentId: true,
+          postedInvoiceId: true,
+          fileAttachment: {
+            select: {
+              id: true,
+              originalFileName: true,
+              invoiceId: true,
+              relatedType: true,
+            },
+          },
+        },
+      });
+
+      if (!job) {
+        throw new AiPostingConflictError("post-not-found", "AI taslagi bulunamadi.");
+      }
+
+      if (job.postedInvoiceId) {
+        return { invoiceId: job.postedInvoiceId, alreadyPosted: true };
+      }
+
+      if (!job.extractedJson?.trim()) {
+        throw new AiPostingConflictError("post-json", "AI taslak JSON bulunamadi.");
+      }
+
+      const currentDraft = parseCanonicalDraftJson(job.extractedJson);
+      const draft = normalizeDraftFromForm(currentDraft, formData);
+      const prepared = prepareAiDraftForPosting({
+        draft,
+        companyId: readFormText(formData, "companyId"),
+        invoiceType: readFormText(formData, "invoiceType"),
+        productSelections: readProductSelections(formData),
+      });
+
+      const companyId = await resolveCompany(tx, prepared);
+      const productIds = await resolveProducts(tx, prepared, companyId);
+      const duplicate = await tx.invoice.findFirst({
+        where: {
+          companyId,
+          invoiceNumber: prepared.draft.document.invoiceNumber!,
+          type: prepared.invoiceType,
+          deletedAt: null,
+        },
+        select: { id: true },
+      });
+
+      if (duplicate) {
+        throw new AiPostingConflictError("post-duplicate", "Ayni cari, fatura no ve tipte aktif fatura var.");
+      }
+
+      const invoice = await tx.invoice.create({
+        data: {
+          companyId,
+          type: prepared.invoiceType,
+          invoiceNumber: prepared.draft.document.invoiceNumber!,
+          invoiceDate: prepared.invoiceDate,
+          dueDate: prepared.dueDate,
+          currency: prepared.draft.document.currency || "TRY",
+          status: "UNPAID",
+          subtotal: prepared.totals.subtotal,
+          vatAmount: prepared.totals.vatAmount,
+          discountAmount: prepared.totals.discountAmount,
+          totalAmount: prepared.totals.totalAmount,
+          notes: `AI analiz taslagindan kaydedildi. Analiz ID: ${job.id}`,
+        },
+        select: {
+          id: true,
+          invoiceNumber: true,
+          type: true,
+          dueDate: true,
+          status: true,
+          companyId: true,
+          deletedAt: true,
+          currency: true,
+          totalAmount: true,
+        },
+      });
+
+      const stockLines: InvoiceStockLineInput[] = [];
+
+      for (const [index, line] of prepared.calculatedLines.entries()) {
+        const item = await tx.invoiceItem.create({
+          data: {
+            invoiceId: invoice.id,
+            productId: productIds[index] ?? null,
+            description: line.description,
+            quantity: line.quantity,
+            unit: prepared.units[index] ?? "ADET",
+            unitPrice: line.unitPrice,
+            vatRate: line.vatRate,
+            discountAmount: line.discountAmount,
+            lineTotal: line.lineTotal,
+            sortOrder: index,
+          },
+          select: {
+            id: true,
+            productId: true,
+            quantity: true,
+            unit: true,
+            description: true,
+          },
+        });
+
+        stockLines.push({
+          invoiceItemId: item.id,
+          productId: item.productId,
+          quantity: item.quantity,
+          unit: item.unit,
+          description: item.description,
+        });
+      }
+
+      await reconcileInvoiceStockMovements(tx, {
+        invoiceId: invoice.id,
+        invoiceNumber: invoice.invoiceNumber,
+        invoiceType: invoice.type,
+        invoiceDate: prepared.invoiceDate,
+        lines: stockLines,
+      });
+
+      const postedDraft = {
+        ...prepared.draft,
+        review: {
+          ...prepared.draft.review,
+          status: "REVIEWED" as const,
+          selectedCompanyId: companyId,
+          invoiceType: prepared.invoiceType,
+          reviewedAt: new Date().toISOString(),
+        },
+        postedInvoiceId: invoice.id,
+      };
+
+      await tx.fileAttachment.update({
+        where: { id: job.fileAttachmentId },
+        data: {
+          invoiceId: invoice.id,
+          relatedType: "INVOICE",
+        },
+        select: { id: true },
+      });
+
+      await saveConfirmedMappings(tx, prepared, companyId, productIds);
+
+      const postedUpdate = await tx.aiExtractionJob.updateMany({
+        where: { id: job.id, postedInvoiceId: null },
+        data: {
+          status: "POSTED",
+          postedInvoiceId: invoice.id,
+          extractedJson: JSON.stringify(postedDraft, null, 2),
+          errorMessage: null,
+        },
+      });
+
+      if (postedUpdate.count !== 1) {
+        throw new AiPostingConflictError("post-already-posted", "AI taslagi daha once faturaya kaydedildi.");
+      }
+
+      await createAuditLog(
+        {
+          entityType: "INVOICE",
+          entityId: invoice.id,
+          action: "CREATE",
+          title: `AI taslagindan fatura kaydedildi: ${invoice.invoiceNumber}`,
+          description: `${job.fileAttachment.originalFileName} kaynagindan fatura olusturuldu.`,
+          after: {
+            aiExtractionJobId: job.id,
+            fileAttachmentId: job.fileAttachmentId,
+            companyId,
+            invoiceType: invoice.type,
+            totalAmount: invoice.totalAmount,
+            itemCount: prepared.calculatedLines.length,
+          },
+        },
+        tx,
+      );
+
+      await createAuditLog(
+        {
+          entityType: "AI_EXTRACTION",
+          entityId: job.id,
+          action: "STATUS_CHANGE",
+          title: "AI taslagi faturaya kaydedildi",
+          description: `Taslak POSTED yapildi ve ${invoice.invoiceNumber} faturasina baglandi.`,
+          before: {
+            status: job.status,
+            postedInvoiceId: job.postedInvoiceId,
+            fileAttachmentInvoiceId: job.fileAttachment.invoiceId,
+            fileAttachmentRelatedType: job.fileAttachment.relatedType,
+          },
+          after: {
+            status: "POSTED",
+            postedInvoiceId: invoice.id,
+          },
+        },
+        tx,
+      );
+
+      return { invoiceId: invoice.id, invoice, alreadyPosted: false };
+    });
+
+    postedInvoiceId = posted.invoiceId;
+
+    if (!posted.alreadyPosted) {
+      await syncInvoiceDueReminder(posted.invoice);
+    }
+  } catch (error) {
+    const queryError = mapPostingError(error);
+    detailUrl.searchParams.set("error", queryError);
     return NextResponse.redirect(detailUrl);
   }
 
-  if (companyId) {
-    const company = await prisma.company.findFirst({
-      where: { id: companyId, deletedAt: null },
+  revalidatePath("/ai-extraction");
+  revalidatePath(`/ai-extraction/${id}`);
+  revalidatePath("/invoices");
+  revalidatePath(`/invoices/${postedInvoiceId}`);
+  revalidatePath("/important-dates");
+  return NextResponse.redirect(new URL(`/invoices/${postedInvoiceId}`, request.url));
+}
+
+async function resolveCompany(tx: Prisma.TransactionClient, prepared: AiPostingPreparedDraft) {
+  if (!prepared.createNewCompany) {
+    if (!prepared.companyId) {
+      throw new AiPostingConflictError("post-company", "Cari secilmeli.");
+    }
+
+    const company = await tx.company.findFirst({
+      where: { id: prepared.companyId, deletedAt: null },
       select: { id: true },
     });
 
     if (!company) {
-      detailUrl.searchParams.set("error", "review-company");
-      return NextResponse.redirect(detailUrl);
+      throw new AiPostingConflictError("post-company", "Secilen cari aktif degil.");
     }
+
+    return company.id;
   }
 
-  const reviewedDraft = {
-    ...draft,
-    document: {
-      companyName: optionalFormText(formData, "companyName"),
-      taxNumber: normalizeTaxIdentity(readFormText(formData, "taxNumber")),
-      taxOffice: optionalFormText(formData, "taxOffice"),
-      invoiceNumber: normalizeInvoiceNumber(readFormText(formData, "invoiceNumber")),
-      invoiceDate: normalizeDateText(readFormText(formData, "invoiceDate")),
-      dueDate: normalizeDateText(readFormText(formData, "dueDate")),
-      currency: normalizeCurrencyCode(readFormText(formData, "currency")) ?? "TRY",
-      subtotal: normalizeDecimalText(readFormText(formData, "subtotal")),
-      vatAmount: normalizeDecimalText(readFormText(formData, "vatAmount")),
-      discountAmount: normalizeDecimalText(readFormText(formData, "discountAmount")) ?? "0",
-      totalAmount: normalizeDecimalText(readFormText(formData, "totalAmount")),
-      notes: draft.document.notes,
-    },
-    lineItems: readLineItems(formData),
-    review: {
-      ...draft.review,
-      status: "REVIEWED" as const,
-      selectedCompanyId: companyId || null,
-      invoiceType: invoiceType as InvoiceType,
-      reviewedAt: new Date().toISOString(),
-    },
-  };
-  const validatedDraft = {
-    ...reviewedDraft,
-    validation: validateExtractedInvoiceTotals({
-      document: reviewedDraft.document,
-      lineItems: reviewedDraft.lineItems,
-    }),
-    matches: {
-      ...reviewedDraft.matches,
-      products: mergeSelectedProducts(reviewedDraft.matches.products, formData),
-    },
-  };
+  const name = prepared.draft.document.companyName;
+  if (!name) {
+    throw new AiPostingConflictError("post-new-company", "Yeni cari icin firma adi zorunlu.");
+  }
 
-  await prisma.aiExtractionJob.update({
-    where: { id: job.id },
-    data: {
-      status: "REVIEWED",
-      extractedJson: JSON.stringify(validatedDraft, null, 2),
-      errorMessage: null,
+  const conflict = await tx.company.findFirst({
+    where: {
+      deletedAt: null,
+      OR: [
+        ...(prepared.draft.document.taxNumber ? [{ taxNumber: prepared.draft.document.taxNumber }] : []),
+        { name },
+      ],
     },
     select: { id: true },
   });
 
-  await createAuditLog({
-    entityType: "AI_EXTRACTION",
-    entityId: job.id,
-    action: "UPDATE",
-    title: "AI analiz taslagi incelendi",
-    description: `${job.fileAttachment.originalFileName} icin taslak inceleme tamamlandi. Fatura kaydi olusturulmadi.`,
-    before: {
-      status: job.status,
-      extractedJson: job.extractedJson,
-    },
-    after: {
-      status: "REVIEWED",
-      selectedCompanyId: companyId || null,
-      invoiceType,
-    },
-  });
-
-  revalidatePath("/ai-extraction");
-  revalidatePath(`/ai-extraction/${job.id}`);
-  detailUrl.searchParams.set("reviewed", "1");
-  return NextResponse.redirect(detailUrl);
-}
-
-function readFormText(formData: FormData, key: string) {
-  const value = formData.get(key);
-  return typeof value === "string" ? value.trim() : "";
-}
-
-function optionalFormText(formData: FormData, key: string) {
-  const value = readFormText(formData, key);
-  return value || null;
-}
-
-function readLineItems(formData: FormData) {
-  const lineCount = Number(readFormText(formData, "lineCount"));
-
-  if (!Number.isInteger(lineCount) || lineCount < 0) {
-    return [];
+  if (conflict) {
+    throw new AiPostingConflictError("post-company-conflict", "Ayni vergi no veya ad ile aktif cari var.");
   }
 
-  return Array.from({ length: lineCount }, (_, index) => ({
-    description: optionalFormText(formData, `line-${index}-description`),
-    sku: null,
-    barcode: null,
-    quantity: normalizeDecimalText(readFormText(formData, `line-${index}-quantity`)),
-    unit: normalizeProductUnit(readFormText(formData, `line-${index}-unit`)),
-    unitPrice: normalizeDecimalText(readFormText(formData, `line-${index}-unitPrice`)),
-    discountAmount: normalizeDecimalText(readFormText(formData, `line-${index}-discountAmount`)) ?? "0",
-    vatRate: normalizeDecimalText(readFormText(formData, `line-${index}-vatRate`)),
-    lineTotal: normalizeDecimalText(readFormText(formData, `line-${index}-lineTotal`)),
-    warnings: [],
-  }));
+  const company = await tx.company.create({
+    data: {
+      name,
+      type: prepared.invoiceType === "PURCHASE" ? "SUPPLIER" : "CUSTOMER",
+      taxNumber: prepared.draft.document.taxNumber,
+      taxOffice: prepared.draft.document.taxOffice,
+      defaultCurrency: prepared.draft.document.currency || "TRY",
+    },
+    select: { id: true },
+  });
+
+  await createAuditLog(
+    {
+      entityType: "COMPANY",
+      entityId: company.id,
+      action: "CREATE",
+      title: `AI taslagindan cari olusturuldu: ${name}`,
+      description: "Kullanici onayi ile AI taslagi icin yeni cari olusturuldu.",
+      after: {
+        name,
+        taxNumber: prepared.draft.document.taxNumber,
+      },
+    },
+    tx,
+  );
+
+  return company.id;
 }
 
-function mergeSelectedProducts(existingMatches: unknown[], formData: FormData) {
-  const lineCount = Number(readFormText(formData, "lineCount"));
+async function resolveProducts(
+  tx: Prisma.TransactionClient,
+  prepared: AiPostingPreparedDraft,
+  supplierCompanyId: string,
+) {
+  const productIds: Array<string | null> = [];
 
-  if (!Number.isInteger(lineCount) || lineCount < 0) {
-    return existingMatches;
+  for (const [index, selection] of prepared.productSelections.entries()) {
+    const line = prepared.draft.lineItems[index];
+
+    if (selection.createNew) {
+      productIds.push(await createProductFromLine(tx, prepared, index, supplierCompanyId));
+      continue;
+    }
+
+    if (!selection.productId) {
+      productIds.push(null);
+      continue;
+    }
+
+    const product = await tx.product.findFirst({
+      where: { id: selection.productId, deletedAt: null, isActive: true },
+      select: { id: true, unit: true },
+    });
+
+    if (!product) {
+      throw new AiPostingConflictError("post-product", "Secilen urun aktif degil.");
+    }
+
+    if (line.unit && product.unit !== line.unit) {
+      throw new AiPostingConflictError("post-product-unit", "Secilen urun ile satir birimi uyumlu degil.");
+    }
+
+    productIds.push(product.id);
   }
 
-  return Array.from({ length: lineCount }, (_, index) => {
-    const productId = readFormText(formData, `line-${index}-productId`);
-    const existing = existingMatches.find((match) =>
-      typeof match === "object" &&
-      match !== null &&
-      "lineIndex" in match &&
-      (match as { lineIndex?: unknown }).lineIndex === index,
-    );
+  return productIds;
+}
 
-    return {
-      ...(typeof existing === "object" && existing !== null ? existing : {}),
-      lineIndex: index,
-      matchedId: productId || null,
-      status: productId ? "EXACT" : "NOT_FOUND",
-      reason: productId ? "USER_SELECTED_PRODUCT" : "USER_LEFT_FREE_TEXT",
-      confidence: productId ? 1 : 0,
-    };
+async function createProductFromLine(
+  tx: Prisma.TransactionClient,
+  prepared: AiPostingPreparedDraft,
+  index: number,
+  supplierCompanyId: string,
+) {
+  const line = prepared.draft.lineItems[index];
+  const name = line.description;
+  const sku = prepared.productSelections[index]?.sku || line.sku;
+
+  if (!name || !sku) {
+    throw new AiPostingConflictError("post-new-product", "Yeni urun icin aciklama ve SKU zorunlu.");
+  }
+
+  const barcode = prepared.productSelections[index]?.barcode || line.barcode;
+  const conflict = await tx.product.findFirst({
+    where: {
+      deletedAt: null,
+      OR: [
+        { sku },
+        ...(barcode ? [{ barcode }] : []),
+      ],
+    },
+    select: { id: true },
   });
+
+  if (conflict) {
+    throw new AiPostingConflictError("post-product-conflict", "Ayni SKU veya barkod ile aktif urun var.");
+  }
+
+  const unit = line.unit ?? "ADET";
+  const unitPrice = line.unitPrice ? new Prisma.Decimal(line.unitPrice) : new Prisma.Decimal(0);
+  const vatRate = line.vatRate ? new Prisma.Decimal(line.vatRate) : new Prisma.Decimal(0);
+  const product = await tx.product.create({
+    data: {
+      name,
+      sku,
+      barcode,
+      unit,
+      currency: prepared.draft.document.currency || "TRY",
+      defaultVatRate: vatRate,
+      defaultPurchasePrice: prepared.invoiceType === "PURCHASE" ? unitPrice : new Prisma.Decimal(0),
+      defaultSalesPrice: prepared.invoiceType === "SALES" ? unitPrice : new Prisma.Decimal(0),
+    },
+    select: { id: true },
+  });
+
+  await createAuditLog(
+    {
+      entityType: "PRODUCT",
+      entityId: product.id,
+      action: "CREATE",
+      title: `AI taslagindan urun olusturuldu: ${name}`,
+      description: "Kullanici onayi ile AI taslagi satirindan yeni urun olusturuldu.",
+      after: {
+        name,
+        sku,
+        barcode,
+        unit,
+        supplierCompanyId,
+      },
+    },
+    tx,
+  );
+
+  return product.id;
+}
+
+async function saveConfirmedMappings(
+  tx: Prisma.TransactionClient,
+  prepared: AiPostingPreparedDraft,
+  companyId: string,
+  productIds: Array<string | null>,
+) {
+  if (prepared.draft.document.taxNumber) {
+    await upsertMapping(tx, {
+      type: "COMPANY",
+      sourceKey: "TAX_NUMBER",
+      sourceValue: prepared.draft.document.taxNumber,
+      companyId,
+    });
+  }
+
+  if (prepared.draft.document.companyName) {
+    await upsertMapping(tx, {
+      type: "COMPANY",
+      sourceKey: "COMPANY_NAME",
+      sourceValue: prepared.draft.document.companyName,
+      companyId,
+    });
+  }
+
+  for (const [index, productId] of productIds.entries()) {
+    if (!productId) continue;
+    const line = prepared.draft.lineItems[index];
+    const source = line.sku
+      ? { sourceKey: "SKU", sourceValue: line.sku }
+      : line.barcode
+        ? { sourceKey: "BARCODE", sourceValue: line.barcode }
+        : line.description
+          ? { sourceKey: "DESCRIPTION", sourceValue: line.description }
+          : null;
+
+    if (!source) continue;
+
+    await upsertMapping(tx, {
+      type: "PRODUCT",
+      sourceKey: source.sourceKey,
+      sourceValue: source.sourceValue,
+      productId,
+      supplierCompanyId: companyId,
+    });
+  }
+}
+
+async function upsertMapping(
+  tx: Prisma.TransactionClient,
+  input: {
+    type: "COMPANY" | "PRODUCT";
+    sourceKey: string;
+    sourceValue: string;
+    companyId?: string;
+    productId?: string;
+    supplierCompanyId?: string;
+  },
+) {
+  const normalized = normalizeMappingSource(input);
+  const existing = await tx.aiConfirmedMapping.findFirst({
+    where: {
+      type: input.type,
+      sourceKey: normalized.sourceKey,
+      sourceValue: normalized.sourceValue,
+      supplierCompanyId: input.supplierCompanyId ?? null,
+      deletedAt: null,
+    },
+    select: { id: true },
+  });
+
+  const data = {
+    sourceKey: normalized.sourceKey,
+    sourceValue: normalized.sourceValue,
+    companyId: input.companyId ?? null,
+    productId: input.productId ?? null,
+    supplierCompanyId: input.supplierCompanyId ?? null,
+  };
+
+  if (existing) {
+    await tx.aiConfirmedMapping.update({
+      where: { id: existing.id },
+      data,
+      select: { id: true },
+    });
+    return;
+  }
+
+  await tx.aiConfirmedMapping.create({
+    data: {
+      type: input.type,
+      ...data,
+    },
+    select: { id: true },
+  });
+}
+
+function mapPostingError(error: unknown) {
+  if (error instanceof AiPostingConflictError) {
+    return error.queryError;
+  }
+
+  if (error instanceof AiPostingValidationError) {
+    return `post-${error.code}`;
+  }
+
+  return "post-failed";
 }

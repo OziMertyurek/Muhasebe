@@ -130,6 +130,7 @@ enum AiExtractionStatus {
   COMPLETED
   FAILED
   REVIEWED
+  POSTED
 }
 
 enum AiConfirmedMappingType {
@@ -190,6 +191,7 @@ model Invoice {
   payments       Payment[]
   files          FileAttachment[]
   importantDates ImportantDate[]
+  aiExtractionJob AiExtractionJob?
 
   @@index([companyId])
   @@index([invoiceDate])
@@ -453,6 +455,8 @@ model AiExtractionJob {
   id                String             @id @default(cuid())
   fileAttachmentId  String
   fileAttachment    FileAttachment     @relation(fields: [fileAttachmentId], references: [id], onDelete: Cascade)
+  postedInvoiceId   String?            @unique
+  postedInvoice     Invoice?           @relation(fields: [postedInvoiceId], references: [id], onDelete: SetNull)
   status            AiExtractionStatus @default(PENDING)
   rawExtractedText  String?
   extractedJson     String?
@@ -463,6 +467,7 @@ model AiExtractionJob {
   deletedAt         DateTime?
 
   @@index([fileAttachmentId])
+  @@index([postedInvoiceId])
   @@index([status])
   @@index([deletedAt])
 }
