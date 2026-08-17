@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import type { ComponentType, ReactNode } from "react";
 import {
   AlertTriangle,
@@ -10,6 +11,7 @@ import {
   Settings2,
 } from "lucide-react";
 import { getCompanySettings } from "@/lib/settings-utils";
+import { getOnboardingRouteDecision } from "@/lib/hosted-auth-flow";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
 import { isLocalPinConfigured, isLocalSessionValid } from "@/lib/security-utils";
 
@@ -30,22 +32,31 @@ const errorMessages: Record<string, string> = {
 };
 
 export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
-  const [completed, pinConfigured, sessionValid, settings, params] = await Promise.all([
+  const [completed, pinConfigured, sessionValid, params] = await Promise.all([
     isOnboardingCompleted(),
     isLocalPinConfigured(),
     isLocalSessionValid(),
-    getCompanySettings(),
     searchParams,
   ]);
 
-  if (completed) {
-    redirect("/");
+  const decision = getOnboardingRouteDecision({
+    onboardingCompleted: completed,
+    sessionValid,
+  });
+
+  if (decision === "dashboard") {
+    redirect("/dashboard");
+  }
+
+  if (decision === "setup-completed") {
+    return <SetupCompletedNotice />;
   }
 
   if (pinConfigured && !sessionValid) {
     redirect("/login?next=/onboarding");
   }
 
+  const settings = await getCompanySettings();
   const errorMessage = params?.error ? errorMessages[params.error] : null;
 
   return (
@@ -54,10 +65,10 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
         <section className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-[#607167]">İlk kurulum</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-normal">
-            Muhasebe Takip Sistemi’ne hoş geldiniz
+            İlk şirket kurulumunu başlatın
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-[#647067]">
-            Başlamadan önce şirket bilgilerinizi, varsayılan ayarlarınızı ve güvenli
+            Başlamadan önce şirket bilgilerinizi, varsayılan ayarlarınızı ve ilk güvenli
             giriş PIN’inizi birlikte hazırlayalım.
           </p>
         </section>
@@ -249,6 +260,37 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
           </p>
         </div>
       </div>
+    </main>
+  );
+}
+
+function SetupCompletedNotice() {
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[#f4f6f3] px-4 py-8 text-[#16201b]">
+      <section className="w-full max-w-xl rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm">
+        <p className="text-sm font-medium text-[#607167]">İlk kurulum tamamlandı</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-normal">
+          Bu şirket hesabı zaten hazır
+        </h1>
+        <p className="mt-3 text-sm leading-6 text-[#647067]">
+          Mevcut şirket verilerine erişmek için giriş yapın. Yeni cihazlarda kurulum
+          tekrarlanmaz; doğru PIN ile aynı Hosted Web hesabına bağlanırsınız.
+        </p>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/login?next=/dashboard"
+            className="inline-flex h-11 items-center justify-center rounded-md bg-[#1f6f54] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#185741]"
+          >
+            Giriş Yap
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex h-11 items-center justify-center rounded-md border border-[#cfd8cf] bg-white px-4 text-sm font-semibold text-[#46534b] transition hover:border-[#8ea99b]"
+          >
+            Başlangıca Dön
+          </Link>
+        </div>
+      </section>
     </main>
   );
 }

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { createAuditLog } from "@/lib/audit-log-utils";
 import { initializeDefaultBackupReminderSettings } from "@/lib/backup-reminder-utils";
+import { getOnboardingSubmitDecision } from "@/lib/hosted-auth-flow";
 import {
+  isOnboardingCompleted,
   readOnboardingCompanySettings,
   saveOnboardingSettings,
   validateOnboardingCompanySettings,
@@ -24,6 +26,14 @@ export async function POST(request: Request) {
 
   if (localOriginResponse) {
     return localOriginResponse;
+  }
+
+  if (
+    getOnboardingSubmitDecision({
+      onboardingCompleted: await isOnboardingCompleted(),
+    }) === "reject-duplicate"
+  ) {
+    return NextResponse.redirect(new URL("/onboarding", request.url), 303);
   }
 
   const existingPinHash = await getLocalPinHash();
@@ -82,7 +92,7 @@ export async function POST(request: Request) {
     return redirectToOnboarding(request, "save");
   }
 
-  const response = NextResponse.redirect(new URL("/", request.url), 303);
+  const response = NextResponse.redirect(new URL("/dashboard", request.url), 303);
 
   if (pinHash) {
     response.cookies.set(authCookieName, createLocalSessionToken(pinHash), getAuthCookieOptions());

@@ -14,7 +14,7 @@ export default async function DashboardLayout({
     redirect("/onboarding");
   }
 
-  await requireLocalAuth();
+  await requireLocalAuth("/dashboard");
 
   return <AppShell>{children}</AppShell>;
 }

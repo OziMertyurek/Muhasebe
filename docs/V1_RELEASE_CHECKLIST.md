@@ -34,6 +34,12 @@ web application. Do not put real secrets in this file.
 
 - Open `/api/health` and expect `{"status":"healthy"}`.
 - Verify login/PIN behavior and logout.
+- Multi-device hosted login smoke:
+  - Device A: complete first setup, log in, and create one test Cari.
+  - Device B, private browser, or phone: open the production domain, choose
+    `Giriş Yap`, authenticate, and verify the same test Cari appears.
+  - Confirm Device B does not repeat onboarding.
+  - Log out and confirm reauthentication is required.
 - Create or inspect a Cari.
 - Create or inspect an Urun / Stok card.
 - Create a purchase invoice and verify stock increase/payable.

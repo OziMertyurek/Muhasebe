@@ -47,12 +47,12 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
               Muhasebe Takip
             </h1>
             <p className="mt-3 max-w-sm text-sm leading-6 text-[#647067]">
-              Yerel çalışan muhasebe paneliniz. Verileriniz bu bilgisayarda saklanır,
-              giriş için uygulama PIN’i gerekir.
+              Hosted Muhasebe Takip hesabınıza güvenli PIN ile erişin. Verileriniz
+              ortak PostgreSQL veritabanında saklanır.
             </p>
           </div>
           <div className="rounded-lg border border-[#d1ddd3] bg-white/70 p-4 text-sm leading-6 text-[#46534b]">
-            Düzenli tam yedek alarak veritabanı ve dosya arşivinizi güvence altında tutun.
+            Aynı şirket verilerine bilgisayar, telefon veya tabletten yeniden giriş yaparak ulaşabilirsiniz.
           </div>
         </div>
 
@@ -64,10 +64,10 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <div>
               <p className="text-sm font-medium text-[#607167]">Güvenli giriş</p>
               <h2 className="mt-1 text-2xl font-semibold tracking-normal">
-                Local Muhasebe Takip Sistemi
+                Muhasebe Takip hesabına giriş
               </h2>
               <p className="mt-2 text-sm leading-6 text-[#647067]">
-                Devam etmek için uygulama PIN’inizi girin.
+                Devam etmek için şirket hesabınızın güvenli PIN’ini girin.
               </p>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
           {hasPinRequiredError ? (
             <div className="mt-5 rounded-md border border-[#f0c7c0] bg-[#fff6f4] px-4 py-3 text-sm font-medium text-[#9f2f21]">
-              Hosted uretim ortami icin once guvenli PIN veya web kimlik dogrulamasi yapilandirilmalidir.
+              Önce yeni şirket kurulumu tamamlanmalı ve güvenli giriş PIN’i oluşturulmalıdır.
             </div>
           ) : null}
 
@@ -118,8 +118,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           </form>
 
           <p className="mt-6 border-t border-[#edf1ed] pt-4 text-xs leading-5 text-[#647067]">
-            Bu giriş ekranı yalnızca yerel erişimi sınırlar; düzenli yedek almak veri güvenliği için
-            yine gereklidir.
+            Bu PIN, mevcut Hosted Web hesabına erişimi korur. Yeni cihazlarda aynı şirket verilerine
+            ulaşmak için tekrar giriş yapılması gerekir.
           </p>
         </div>
       </section>

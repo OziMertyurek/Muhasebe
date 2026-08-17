@@ -10,7 +10,7 @@ import packageJson from "../../../package.json";
 const navigationGroups = [
   {
     title: "Genel",
-    hrefs: ["/", "/companies", "/invoices", "/payments", "/expenses"],
+    hrefs: ["/dashboard", "/companies", "/invoices", "/payments", "/expenses"],
   },
   {
     title: "Operasyon",
@@ -37,8 +37,8 @@ export function Sidebar() {
   function isItemActive(href: string) {
     const [path, queryString] = href.split("?");
 
-    if (path === "/") {
-      return pathname === "/";
+    if (path === "/dashboard") {
+      return pathname === "/dashboard";
     }
 
     const pathMatches = pathname === path || pathname.startsWith(`${path}/`);
@@ -78,7 +78,7 @@ export function Sidebar() {
           </div>
           <div>
             <p className="text-sm font-semibold text-[#16201b]">Muhasebe Takip</p>
-            <p className="text-xs text-[#647067]">Yerel şirket paneli</p>
+            <p className="text-xs text-[#647067]">Hosted şirket paneli</p>
           </div>
         </div>
 

@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Muhasebe Takip",
-  description: "Yerel şirket içi muhasebe, cari hesap ve fatura takip sistemi.",
+  description: "Hosted muhasebe, cari hesap ve fatura takip sistemi.",
 };
 
 export default function RootLayout({
