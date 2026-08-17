@@ -1,14 +1,15 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ArrowRight, Building2, LogIn, ShieldCheck } from "lucide-react";
 import { getRootRouteDecision } from "@/lib/hosted-auth-flow";
-import { isLocalSessionValid } from "@/lib/security-utils";
+import { authCookieName, isLocalSessionValid } from "@/lib/security-utils";
 
 export const dynamic = "force-dynamic";
 
 export default async function PublicEntryPage() {
   const decision = getRootRouteDecision({
-    sessionValid: await isLocalSessionValid(),
+    sessionValid: await getSafeSessionValid(),
   });
 
   if (decision === "dashboard") {
@@ -72,4 +73,19 @@ export default async function PublicEntryPage() {
       </section>
     </main>
   );
+}
+
+async function getSafeSessionValid() {
+  const cookieStore = await cookies();
+
+  if (!cookieStore.has(authCookieName)) {
+    return false;
+  }
+
+  try {
+    return await isLocalSessionValid();
+  } catch (error) {
+    console.error("Hosted public entry session check failed.", error);
+    return false;
+  }
 }

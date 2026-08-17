@@ -10,7 +10,8 @@ import {
   LockKeyhole,
   Settings2,
 } from "lucide-react";
-import { getCompanySettings } from "@/lib/settings-utils";
+import { HostedDatabaseUnavailableNotice } from "@/components/hosted-database-unavailable-notice";
+import { getCompanySettings, type CompanySettings } from "@/lib/settings-utils";
 import { getOnboardingRouteDecision } from "@/lib/hosted-auth-flow";
 import { isOnboardingCompleted } from "@/lib/onboarding-utils";
 import { isLocalPinConfigured, isLocalSessionValid } from "@/lib/security-utils";
@@ -32,12 +33,21 @@ const errorMessages: Record<string, string> = {
 };
 
 export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
-  const [completed, pinConfigured, sessionValid, params] = await Promise.all([
-    isOnboardingCompleted(),
-    isLocalPinConfigured(),
-    isLocalSessionValid(),
-    searchParams,
-  ]);
+  const params = await searchParams;
+  let completed: boolean;
+  let pinConfigured: boolean;
+  let sessionValid: boolean;
+
+  try {
+    [completed, pinConfigured, sessionValid] = await Promise.all([
+      isOnboardingCompleted(),
+      isLocalPinConfigured(),
+      isLocalSessionValid(),
+    ]);
+  } catch (error) {
+    console.error("Hosted onboarding prerequisite check failed.", error);
+    return <HostedDatabaseUnavailableNotice />;
+  }
 
   const decision = getOnboardingRouteDecision({
     onboardingCompleted: completed,
@@ -56,7 +66,15 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
     redirect("/login?next=/onboarding");
   }
 
-  const settings = await getCompanySettings();
+  let settings: CompanySettings;
+
+  try {
+    settings = await getCompanySettings();
+  } catch (error) {
+    console.error("Hosted onboarding settings load failed.", error);
+    return <HostedDatabaseUnavailableNotice />;
+  }
+
   const errorMessage = params?.error ? errorMessages[params.error] : null;
 
   return (

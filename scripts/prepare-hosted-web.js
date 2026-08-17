@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require("node:fs");
 const path = require("node:path");
+const JSZip = require("jszip");
 
 const projectRoot = process.cwd();
 const standaloneDir = path.join(projectRoot, ".next", "standalone");
@@ -8,8 +9,17 @@ const staticSourceDir = path.join(projectRoot, ".next", "static");
 const publicSourceDir = path.join(projectRoot, "public");
 const startupSourcePath = path.join(projectRoot, "deployment", "hosted-web", "app.js");
 const artifactDir = path.join(projectRoot, "dist", "hosted-web");
+const artifactZipPath = path.join(projectRoot, "dist", "avorayazilim-v1-rc-hosted.zip");
 const standaloneNextNodeModulesDir = path.join(standaloneDir, ".next", "node_modules");
 const expectedNextVersion = "16.2.9";
+const requiredPackagedRouteManifestKeys = [
+  "/api/health/route",
+  "/page",
+  "/login/page",
+  "/onboarding/page",
+  "/(dashboard)/dashboard/page",
+  "/(dashboard)/products/page",
+];
 const forbiddenArtifactEntries = [
   ".env",
   ".env.local",
@@ -334,6 +344,80 @@ function assertPinnedNextVersion() {
   }
 }
 
+function assertPackagedRouteOutputs() {
+  const appPathsManifestPath = path.join(artifactDir, ".next", "server", "app-paths-manifest.json");
+
+  assertExists(appPathsManifestPath, "Required hosted runtime entry is missing: .next/server/app-paths-manifest.json");
+
+  const appPathsManifest = JSON.parse(fs.readFileSync(appPathsManifestPath, "utf8"));
+
+  for (const routeKey of requiredPackagedRouteManifestKeys) {
+    const manifestOutput = appPathsManifest[routeKey];
+
+    if (!manifestOutput) {
+      throw new Error(`Required hosted route is missing from app paths manifest: ${routeKey}`);
+    }
+
+    const relativePath = path.join(".next", "server", manifestOutput);
+
+    assertExists(
+      path.join(artifactDir, relativePath),
+      `Required hosted route output is missing from artifact: ${routeKey} -> ${relativePath}`,
+    );
+  }
+
+  for (const relativePath of [
+    path.join(".next", "BUILD_ID"),
+    path.join(".next", "static"),
+    "app.js",
+  ]) {
+    assertExists(
+      path.join(artifactDir, relativePath),
+      `Required hosted runtime entry is missing from artifact: ${relativePath}`,
+    );
+  }
+}
+
+function addDirectoryToZip(zipFolder, sourceDir) {
+  const entries = fs.readdirSync(sourceDir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const fullPath = path.join(sourceDir, entry.name);
+
+    if (entry.isDirectory()) {
+      addDirectoryToZip(zipFolder.folder(entry.name), fullPath);
+      continue;
+    }
+
+    if (entry.isFile()) {
+      const stat = fs.statSync(fullPath);
+
+      zipFolder.file(entry.name, fs.readFileSync(fullPath), {
+        date: stat.mtime,
+      });
+    }
+  }
+}
+
+async function writeArtifactZip() {
+  const zip = new JSZip();
+
+  fs.rmSync(artifactZipPath, { force: true });
+  addDirectoryToZip(zip, artifactDir);
+
+  const zipContent = await zip.generateAsync({
+    type: "nodebuffer",
+    compression: "DEFLATE",
+    compressionOptions: {
+      level: 9,
+    },
+    platform: "UNIX",
+  });
+
+  fs.writeFileSync(artifactZipPath, zipContent);
+}
+
+async function main() {
 assertExists(standaloneDir, "Next standalone output is missing. Run npm run web:build first.");
 assertExists(path.join(standaloneDir, "server.js"), "Next standalone server.js is missing.");
 assertExists(startupSourcePath, "Hosted web startup file template is missing.");
@@ -362,6 +446,15 @@ removeForbiddenEntries();
 pruneSourceExceptGeneratedPrismaClient();
 writeArtifactMetadata();
 failIfForbiddenFilesRemain();
+assertPackagedRouteOutputs();
+await writeArtifactZip();
 
 console.log(`Hosted web deployment artifact prepared: ${path.relative(projectRoot, artifactDir)}`);
+console.log(`Hosted web deployment ZIP prepared: ${path.relative(projectRoot, artifactZipPath)}`);
 console.log("cPanel Application startup file: app.js");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

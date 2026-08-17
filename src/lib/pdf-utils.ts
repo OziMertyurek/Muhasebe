@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import path from "node:path";
 import PDFDocument from "pdfkit";
 
 type PdfValue = string | number | null | undefined;
@@ -19,25 +20,27 @@ const textColor = "#223028";
 const mutedColor = "#647067";
 const lineColor = "#dce2dc";
 const headerFill = "#f1f4f1";
-const regularFontPath = "C:\\Windows\\Fonts\\arial.ttf";
-const boldFontPath = "C:\\Windows\\Fonts\\arialbd.ttf";
+const windowsFontsDir =
+  process.platform === "win32" && process.env.WINDIR ? path.join(process.env.WINDIR, "Fonts") : null;
+const regularFontPath = windowsFontsDir ? path.join(windowsFontsDir, "arial.ttf") : null;
+const boldFontPath = windowsFontsDir ? path.join(windowsFontsDir, "arialbd.ttf") : null;
 
 function registerFonts(doc: PDFKit.PDFDocument) {
-  if (existsSync(regularFontPath)) {
+  if (regularFontPath && existsSync(regularFontPath)) {
     doc.registerFont("AppRegular", regularFontPath);
   }
 
-  if (existsSync(boldFontPath)) {
+  if (boldFontPath && existsSync(boldFontPath)) {
     doc.registerFont("AppBold", boldFontPath);
   }
 }
 
 function fontName(kind: "regular" | "bold") {
-  if (kind === "bold" && existsSync(boldFontPath)) {
+  if (kind === "bold" && boldFontPath && existsSync(boldFontPath)) {
     return "AppBold";
   }
 
-  if (existsSync(regularFontPath)) {
+  if (regularFontPath && existsSync(regularFontPath)) {
     return "AppRegular";
   }
 
@@ -120,7 +123,7 @@ export async function createPdfDocument(
     size: "A4",
     margin: 36,
     bufferPages: true,
-    font: existsSync(regularFontPath) ? regularFontPath : undefined,
+    font: regularFontPath && existsSync(regularFontPath) ? regularFontPath : undefined,
     info: {
       Title: title,
       Author: "Local Muhasebe Takip Sistemi",

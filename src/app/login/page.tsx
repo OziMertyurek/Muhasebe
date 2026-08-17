@@ -1,5 +1,6 @@
 import { LockKeyhole, ShieldCheck } from "lucide-react";
 import { redirect } from "next/navigation";
+import { HostedDatabaseUnavailableNotice } from "@/components/hosted-database-unavailable-notice";
 import {
   getSafeRedirectPath,
   isHostedProductionRuntime,
@@ -20,14 +21,26 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const nextPath = getSafeRedirectPath(params?.next);
-  const pinConfigured = await isLocalPinConfigured();
+  let pinConfigured: boolean;
+  let sessionValid: boolean;
+
+  try {
+    [pinConfigured, sessionValid] = await Promise.all([
+      isLocalPinConfigured(),
+      isLocalSessionValid(),
+    ]);
+  } catch (error) {
+    console.error("Hosted login prerequisite check failed.", error);
+    return <HostedDatabaseUnavailableNotice />;
+  }
+
   const requiresPinSetup = !pinConfigured && isHostedProductionRuntime();
 
   if (!pinConfigured && !requiresPinSetup) {
     redirect(nextPath);
   }
 
-  if (await isLocalSessionValid()) {
+  if (sessionValid) {
     redirect(nextPath);
   }
 
