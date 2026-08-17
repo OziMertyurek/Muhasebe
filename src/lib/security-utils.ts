@@ -11,6 +11,7 @@ import {
 } from "node:crypto";
 import { promisify } from "node:util";
 import { getAppSettingValue, upsertAppSetting } from "@/lib/settings-utils";
+import { getEffectiveRequestOrigin, validateSameOriginRequest } from "@/lib/origin-validation-utils";
 
 export const pinHashSettingKey = "security.localPinHash";
 export const authCookieName = "local-auth-session";
@@ -239,7 +240,8 @@ export async function clearLocalAuthCookie() {
 
 export function requireLocalRequestOrigin(request: Request) {
   const requestUrl = new URL(request.url);
-  const hostHeader = request.headers.get("host") || requestUrl.host;
+  const effectiveOrigin = getEffectiveRequestOrigin(request);
+  const hostHeader = effectiveOrigin ? new URL(effectiveOrigin).host : request.headers.get("host") || requestUrl.host;
   const hostedRuntime = isHostedProductionRuntime();
 
   if (!hostedRuntime && !isLocalHostValue(hostHeader)) {
@@ -253,36 +255,13 @@ export function requireLocalRequestOrigin(request: Request) {
     return null;
   }
 
-  const originHeader = request.headers.get("origin");
-  const refererHeader = request.headers.get("referer");
-  const sourceHeader = originHeader || refererHeader;
+  const validation = validateSameOriginRequest(request);
 
-  if (!sourceHeader) {
-    if (hostedRuntime) {
-      return new Response(hostedRequestBlockedMessage, {
-        status: 403,
-        headers: { "content-type": "text/plain; charset=utf-8" },
-      });
+  if (!validation.ok) {
+    if (!hostedRuntime && validation.reason === "missing-origin") {
+      return null;
     }
 
-    return null;
-  }
-
-  let sourceUrl: URL;
-
-  try {
-    sourceUrl = new URL(sourceHeader);
-  } catch {
-    return new Response(hostedRuntime ? hostedRequestBlockedMessage : localRequestBlockedMessage, {
-      status: 403,
-      headers: { "content-type": "text/plain; charset=utf-8" },
-    });
-  }
-
-  const sourceMatchesRequest = sourceUrl.host === requestUrl.host;
-  const sourceAllowed = hostedRuntime ? sourceMatchesRequest : isLocalHostValue(sourceUrl.host);
-
-  if (!sourceAllowed || !sourceMatchesRequest) {
     return new Response(hostedRuntime ? hostedRequestBlockedMessage : localRequestBlockedMessage, {
       status: 403,
       headers: { "content-type": "text/plain; charset=utf-8" },

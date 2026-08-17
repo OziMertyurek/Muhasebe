@@ -54,10 +54,10 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
         <section className="rounded-lg border border-[#dce2dc] bg-white p-6 shadow-sm">
           <p className="text-sm font-medium text-[#607167]">İlk kurulum</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-normal">
-            Local Muhasebe Takip Sistemi’ne hoş geldiniz
+            Muhasebe Takip Sistemi’ne hoş geldiniz
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-6 text-[#647067]">
-            Başlamadan önce şirket bilgilerinizi, varsayılan ayarlarınızı ve local
+            Başlamadan önce şirket bilgilerinizi, varsayılan ayarlarınızı ve güvenli
             giriş PIN’inizi birlikte hazırlayalım.
           </p>
         </section>
@@ -167,7 +167,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
             title={pinConfigured ? "PIN durumu" : "PIN oluştur"}
             description={
               pinConfigured
-                ? "Local PIN zaten tanımlı. İsterseniz bu adımda yeni PIN belirleyebilirsiniz."
+                ? "Giriş PIN’i zaten tanımlı. İsterseniz bu adımda yeni PIN belirleyebilirsiniz."
                 : "Uygulamayı açan başka kişilerin verilerinizi görmesini engellemek için PIN belirleyin."
             }
           >
@@ -200,12 +200,12 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
             number="4"
             icon={DatabaseBackup}
             title="Yedekleme uyarısı"
-            description="Verileriniz local bilgisayarınızda saklanır. Düzenli tam yedek almak önemlidir."
+            description="Hosted Web ortamında altyapı yedekleri operasyondan, kullanıcı dışa aktarımları uygulama içinden yönetilir."
           >
             <div className="rounded-md border border-[#ead7a8] bg-[#fffaf0] p-4 text-sm leading-6 text-[#745214]">
               <p>GitHub sadece kodu saklar.</p>
-              <p>SQLite veritabanı ve upload dosyaları local bilgisayarınızda durur.</p>
-              <p>Düzenli olarak Ayarlar &gt; Yedekleme üzerinden “Tam Yedek” alınmalıdır.</p>
+              <p>Canlı veritabanı ve dosyalar hosted ortamın kalıcı altyapısında tutulur.</p>
+              <p>Düzenli olarak Ayarlar &gt; Yedekleme üzerinden iş verisi dışa aktarımı alınabilir.</p>
             </div>
             <label className="mt-4 flex items-start gap-3 text-sm text-[#46534b]">
               <input
@@ -226,7 +226,7 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
                 <div>
                   <h2 className="text-lg font-semibold">Kurulumu tamamla</h2>
                   <p className="mt-1 text-sm text-[#647067]">
-                    Bilgiler AppSetting içinde saklanacak ve dashboard açılacak.
+                    Bilgiler güvenli ayarlara kaydedilecek ve dashboard açılacak.
                   </p>
                 </div>
               </div>

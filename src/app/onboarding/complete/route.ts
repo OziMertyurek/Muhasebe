@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       entityType: "SETTINGS",
       action: "UPDATE",
       title: "İlk kurulum tamamlandı",
-      description: "Şirket bilgileri, varsayılan ayarlar ve local güvenlik ayarları kaydedildi.",
+      description: "Şirket bilgileri, varsayılan ayarlar ve güvenlik ayarları kaydedildi.",
       after: {
         company,
         onboardingCompleted: true,

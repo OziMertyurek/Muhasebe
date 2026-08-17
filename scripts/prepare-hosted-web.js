@@ -9,6 +9,7 @@ const publicSourceDir = path.join(projectRoot, "public");
 const startupSourcePath = path.join(projectRoot, "deployment", "hosted-web", "app.js");
 const artifactDir = path.join(projectRoot, "dist", "hosted-web");
 const standaloneNextNodeModulesDir = path.join(standaloneDir, ".next", "node_modules");
+const expectedNextVersion = "16.2.9";
 const forbiddenArtifactEntries = [
   ".env",
   ".env.local",
@@ -315,9 +316,28 @@ function writeArtifactMetadata() {
   );
 }
 
+function assertPinnedNextVersion() {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, "package.json"), "utf8"));
+  const packageLock = JSON.parse(fs.readFileSync(path.join(projectRoot, "package-lock.json"), "utf8"));
+  const packageNextVersion = packageJson.dependencies?.next;
+  const lockRootNextVersion = packageLock.packages?.[""]?.dependencies?.next;
+  const lockedNextVersion = packageLock.packages?.["node_modules/next"]?.version;
+
+  if (
+    packageNextVersion !== expectedNextVersion
+    || lockRootNextVersion !== expectedNextVersion
+    || lockedNextVersion !== expectedNextVersion
+  ) {
+    throw new Error(
+      `Next version skew detected. Expected package and lockfile Next ${expectedNextVersion}.`,
+    );
+  }
+}
+
 assertExists(standaloneDir, "Next standalone output is missing. Run npm run web:build first.");
 assertExists(path.join(standaloneDir, "server.js"), "Next standalone server.js is missing.");
 assertExists(startupSourcePath, "Hosted web startup file template is missing.");
+assertPinnedNextVersion();
 
 const standalonePackageAliases = getStandalonePackageAliases();
 
